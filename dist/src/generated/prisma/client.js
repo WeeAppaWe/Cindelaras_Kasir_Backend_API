@@ -48,8 +48,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Prisma = exports.PrismaClient = exports.$Enums = void 0;
 const path = __importStar(require("node:path"));
-const node_url_1 = require("node:url");
-globalThis['__dirname'] = path.dirname((0, node_url_1.fileURLToPath)(import.meta.url));
+globalThis['__dirname'] = __dirname;
 const $Class = __importStar(require("./internal/class.js"));
 const Prisma = __importStar(require("./internal/prismaNamespace.js"));
 exports.Prisma = Prisma;

@@ -8,7 +8,7 @@
     "dev": "tsx bin/www.ts",
     "dev:js": "nodemon bin/www",
     "start": "node dist/bin/www.js",
-    "build": "prisma generate --config config/prisma.config.ts && tsc",
+    "build": "prisma generate --config config/prisma.config.ts && tsc && node scripts/patch-prisma-cjs.js",
     "build:watch": "tsc --watch",
     "db:migrate": "sequelize-cli db:migrate --config config/sequelize.config.js",
     "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all --config config/sequelize.config.js",
