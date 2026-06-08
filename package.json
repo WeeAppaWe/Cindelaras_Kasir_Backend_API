@@ -2,7 +2,7 @@
   "name": "core-services",
   "version": "0.0.1",
   "main": "server.js",
-  "packageManager": "pnpm@10.22.0",
+  "packageManager": "pnpm@11.5.2",
   "private": true,
   "scripts": {
     "dev": "tsx bin/www.ts",
