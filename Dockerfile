@@ -39,7 +39,6 @@ COPY utility ./utility
 # The real DATABASE_URL must be injected at runtime.
 ARG PRISMA_GENERATE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/sistem_kasir?schema=public
 ENV DATABASE_URL=${PRISMA_GENERATE_DATABASE_URL}
-RUN pnpm prisma:generate
 RUN pnpm run build
 
 FROM node:${NODE_VERSION} AS runner

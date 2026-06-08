@@ -151,7 +151,7 @@ Swagger JSON:
 
 ## Build
 
-Build TypeScript ke folder `dist`:
+Build TypeScript ke folder `dist`. Script ini akan menjalankan Prisma generate terlebih dahulu:
 
 ```bash
 pnpm run build
@@ -193,7 +193,6 @@ Build dari lokal:
 
 ```bash
 pnpm install
-pnpm prisma:generate
 pnpm run build
 ```
 
