@@ -2,10 +2,10 @@ import { z } from 'zod';
 export declare const reportExportValueFormatSchema: z.ZodEnum<{
     number: "number";
     boolean: "boolean";
-    text: "text";
     date: "date";
     currency: "currency";
     percent: "percent";
+    text: "text";
     datetime: "datetime";
 }>;
 export declare const reportExportColumnAlignSchema: z.ZodEnum<{
@@ -23,10 +23,10 @@ export declare const reportExportMetricSchema: z.ZodObject<{
     format: z.ZodOptional<z.ZodEnum<{
         number: "number";
         boolean: "boolean";
-        text: "text";
         date: "date";
         currency: "currency";
         percent: "percent";
+        text: "text";
         datetime: "datetime";
     }>>;
 }, z.core.$strip>;
@@ -42,10 +42,10 @@ export declare const reportExportColumnSchema: z.ZodObject<{
     format: z.ZodOptional<z.ZodEnum<{
         number: "number";
         boolean: "boolean";
-        text: "text";
         date: "date";
         currency: "currency";
         percent: "percent";
+        text: "text";
         datetime: "datetime";
     }>>;
 }, z.core.$strip>;
@@ -64,10 +64,10 @@ export declare const reportExportTableSchema: z.ZodObject<{
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>>;
@@ -82,10 +82,10 @@ export declare const reportExportSectionSchema: z.ZodObject<{
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>>>;
@@ -103,10 +103,10 @@ export declare const reportExportSectionSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>;
@@ -129,10 +129,10 @@ export declare const reportExportDataSchema: z.ZodObject<{
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>>>;
@@ -142,10 +142,10 @@ export declare const reportExportDataSchema: z.ZodObject<{
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>>>;
@@ -157,10 +157,10 @@ export declare const reportExportDataSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -178,10 +178,10 @@ export declare const reportExportDataSchema: z.ZodObject<{
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>;
@@ -204,10 +204,10 @@ export declare const reportExportDataSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>;
@@ -247,10 +247,10 @@ export declare const exportReportPdfSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -260,10 +260,10 @@ export declare const exportReportPdfSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -275,10 +275,10 @@ export declare const exportReportPdfSchema: z.ZodObject<{
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -296,10 +296,10 @@ export declare const exportReportPdfSchema: z.ZodObject<{
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>;
@@ -322,10 +322,10 @@ export declare const exportReportPdfSchema: z.ZodObject<{
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>;
@@ -361,10 +361,10 @@ export declare const exportReportExcelSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -374,10 +374,10 @@ export declare const exportReportExcelSchema: z.ZodObject<{
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -389,10 +389,10 @@ export declare const exportReportExcelSchema: z.ZodObject<{
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -410,10 +410,10 @@ export declare const exportReportExcelSchema: z.ZodObject<{
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>;
@@ -436,10 +436,10 @@ export declare const exportReportExcelSchema: z.ZodObject<{
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>;
@@ -459,10 +459,10 @@ export declare const reportExportSchemas: {
     valueFormat: z.ZodEnum<{
         number: "number";
         boolean: "boolean";
-        text: "text";
         date: "date";
         currency: "currency";
         percent: "percent";
+        text: "text";
         datetime: "datetime";
     }>;
     columnAlign: z.ZodEnum<{
@@ -480,10 +480,10 @@ export declare const reportExportSchemas: {
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>;
@@ -499,10 +499,10 @@ export declare const reportExportSchemas: {
         format: z.ZodOptional<z.ZodEnum<{
             number: "number";
             boolean: "boolean";
-            text: "text";
             date: "date";
             currency: "currency";
             percent: "percent";
+            text: "text";
             datetime: "datetime";
         }>>;
     }, z.core.$strip>;
@@ -521,10 +521,10 @@ export declare const reportExportSchemas: {
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>;
@@ -539,10 +539,10 @@ export declare const reportExportSchemas: {
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -560,10 +560,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>;
@@ -586,10 +586,10 @@ export declare const reportExportSchemas: {
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -599,10 +599,10 @@ export declare const reportExportSchemas: {
             format: z.ZodOptional<z.ZodEnum<{
                 number: "number";
                 boolean: "boolean";
-                text: "text";
                 date: "date";
                 currency: "currency";
                 percent: "percent";
+                text: "text";
                 datetime: "datetime";
             }>>;
         }, z.core.$strip>>>;
@@ -614,10 +614,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -635,10 +635,10 @@ export declare const reportExportSchemas: {
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>;
@@ -661,10 +661,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>;
@@ -704,10 +704,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -717,10 +717,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -732,10 +732,10 @@ export declare const reportExportSchemas: {
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>>;
@@ -753,10 +753,10 @@ export declare const reportExportSchemas: {
                         format: z.ZodOptional<z.ZodEnum<{
                             number: "number";
                             boolean: "boolean";
-                            text: "text";
                             date: "date";
                             currency: "currency";
                             percent: "percent";
+                            text: "text";
                             datetime: "datetime";
                         }>>;
                     }, z.core.$strip>>;
@@ -779,10 +779,10 @@ export declare const reportExportSchemas: {
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>;
@@ -818,10 +818,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -831,10 +831,10 @@ export declare const reportExportSchemas: {
                 format: z.ZodOptional<z.ZodEnum<{
                     number: "number";
                     boolean: "boolean";
-                    text: "text";
                     date: "date";
                     currency: "currency";
                     percent: "percent";
+                    text: "text";
                     datetime: "datetime";
                 }>>;
             }, z.core.$strip>>>;
@@ -846,10 +846,10 @@ export declare const reportExportSchemas: {
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>>;
@@ -867,10 +867,10 @@ export declare const reportExportSchemas: {
                         format: z.ZodOptional<z.ZodEnum<{
                             number: "number";
                             boolean: "boolean";
-                            text: "text";
                             date: "date";
                             currency: "currency";
                             percent: "percent";
+                            text: "text";
                             datetime: "datetime";
                         }>>;
                     }, z.core.$strip>>;
@@ -893,10 +893,10 @@ export declare const reportExportSchemas: {
                     format: z.ZodOptional<z.ZodEnum<{
                         number: "number";
                         boolean: "boolean";
-                        text: "text";
                         date: "date";
                         currency: "currency";
                         percent: "percent";
+                        text: "text";
                         datetime: "datetime";
                     }>>;
                 }, z.core.$strip>>;
