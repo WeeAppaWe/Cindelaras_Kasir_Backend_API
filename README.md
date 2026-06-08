@@ -207,6 +207,7 @@ git push
 Di hPanel:
 
 - Set startup file ke `dist/bin/www.js`
+- Jika hPanel tetap meminta `server.js`, gunakan `server.js` di root project. File ini meneruskan proses ke `dist/bin/www.js`.
 - Set environment variables sesuai `.env-sample`
 - Pastikan `DATABASE_URL` mengarah ke database production
 - Jalankan production dependencies jika hPanel menyediakan terminal:
