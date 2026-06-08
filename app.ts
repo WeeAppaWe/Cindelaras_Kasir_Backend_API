@@ -28,6 +28,14 @@ const corsOptions: cors.CorsOptions = {
 app.use(cors(corsOptions));
 app.use(logger('dev'));
 
+app.get('/health', (_req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        service: 'sistem-kasir-backend-api',
+        uptime: process.uptime(),
+    });
+});
+
 // setting max size payload (set max 10mb)
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));

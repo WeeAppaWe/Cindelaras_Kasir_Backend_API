@@ -27,6 +27,13 @@ const corsOptions = {
 };
 app.use((0, cors_1.default)(corsOptions));
 app.use((0, morgan_1.default)('dev'));
+app.get('/health', (_req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        service: 'sistem-kasir-backend-api',
+        uptime: process.uptime(),
+    });
+});
 // setting max size payload (set max 10mb)
 app.use(body_parser_1.default.json({ limit: '10mb' }));
 app.use(body_parser_1.default.urlencoded({ extended: true, limit: '10mb' }));
