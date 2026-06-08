@@ -1,0 +1,1 @@
+{"version":3,"file":"stock-type.types.d.ts","sourceRoot":"","sources":["../../../../src/modules/stock-type/stock-type.types.ts"],"names":[],"mappings":"AAMA,MAAM,WAAW,aAAa;IAC1B,aAAa,EAAE,MAAM,CAAC;IACtB,IAAI,EAAE,MAAM,CAAC;IACb,UAAU,CAAC,EAAE,IAAI,CAAC;IAClB,UAAU,CAAC,EAAE,IAAI,GAAG,IAAI,CAAC;CAC5B;AAMD,MAAM,MAAM,qBAAqB,GAAG,aAAa,EAAE,CAAC"}

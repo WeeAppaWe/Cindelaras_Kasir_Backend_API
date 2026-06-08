@@ -1,0 +1,1 @@
+{"version":3,"file":"header-datetime-utc.middleware.d.ts","sourceRoot":"","sources":["../../middleware/header-datetime-utc.middleware.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,QAAQ,EAAE,YAAY,EAAE,MAAM,SAAS,CAAC;AAGjD,OAAO,EAAE,oBAAoB,EAAE,MAAM,UAAU,CAAC;AAIhD,QAAA,MAAM,2BAA2B,GAAI,KAAK,oBAAoB,EAAE,KAAK,QAAQ,EAAE,MAAM,YAAY,KAAG,IASnG,CAAC;AAEF,eAAe,2BAA2B,CAAC"}

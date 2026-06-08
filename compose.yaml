@@ -1,0 +1,121 @@
+name: sistem-kasir-backend
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-app-env: &app-env
+  NODE_ENV: production
+  PORT: "${CONTAINER_PORT:-3000}"
+  DATABASE_URL: "${DOCKER_DATABASE_URL:-postgresql://${POSTGRES_USER:-sistem_kasir}:${POSTGRES_PASSWORD:-sistem_kasir_password}@postgres:5432/${POSTGRES_DB:-sistem_kasir}?schema=public}"
+  REDIS_HOST: "${DOCKER_REDIS_HOST:-redis}"
+  REDIS_PORT: "${DOCKER_REDIS_PORT:-6379}"
+  REDIS_PASS: "${REDIS_PASS:-redis_pass}"
+
+services:
+  api:
+    image: "${APP_IMAGE:-sistem-kasir-backend-api:latest}"
+    build:
+      context: .
+      target: runner
+    init: true
+    restart: unless-stopped
+    env_file:
+      - "${APP_ENV_FILE:-.env}"
+    environment:
+      <<: *app-env
+    ports:
+      - "${APP_PORT:-4000}:${CONTAINER_PORT:-3000}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs:
+      - /tmp
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging: *default-logging
+
+  migrate:
+    image: "${APP_IMAGE:-sistem-kasir-backend-api:latest}-migrate"
+    build:
+      context: .
+      target: build
+    restart: "no"
+    env_file:
+      - "${APP_ENV_FILE:-.env}"
+    environment:
+      <<: *app-env
+    command:
+      - pnpm
+      - exec
+      - prisma
+      - migrate
+      - deploy
+      - --config
+      - config/prisma.config.ts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    logging: *default-logging
+
+  postgres:
+    image: postgres:17-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:-sistem_kasir}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-sistem_kasir_password}"
+      POSTGRES_DB: "${POSTGRES_DB:-sistem_kasir}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+    logging: *default-logging
+
+  redis:
+    image: redis:7-bookworm
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --requirepass
+      - "${REDIS_PASS:-redis_pass}"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASS:-redis_pass}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+    logging: *default-logging
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  uploads:

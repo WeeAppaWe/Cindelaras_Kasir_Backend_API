@@ -1,0 +1,1 @@
+{"version":3,"file":"fonnte.config.js","sourceRoot":"","sources":["../../config/fonnte.config.ts"],"names":[],"mappings":";AAAA,oCAAoC;;;AAEvB,QAAA,YAAY,GAAG;IACxB,KAAK,EAAE,OAAO,CAAC,GAAG,CAAC,YAAY,IAAI,EAAE;IACrC,OAAO,EAAE,wBAAwB;IACjC,SAAS,EAAE;QACP,IAAI,EAAE,OAAO;QACb,QAAQ,EAAE,OAAO;KACpB;CACJ,CAAC;AAEF,kBAAe,oBAAY,CAAC"}

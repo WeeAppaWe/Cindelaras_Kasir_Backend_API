@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+out/
+*.tgz
+*.tsbuildinfo
+
+# Generated files
+/generated/prisma/
+/src/generated/prisma/
+
+# Coverage and test output
+coverage/
+*.lcov
+
+# Runtime files
+uploads/
+logs/
+*.log
+report.*.json
+
+# Environment variables and secrets
+.env
+.env.*
+!.env-sample
+!.env.example
+!.env.docker.example
+
+# Caches
+.cache/
+.eslintcache
+
+# IDE and editor files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local scripts or scratch files
+src/scripts/

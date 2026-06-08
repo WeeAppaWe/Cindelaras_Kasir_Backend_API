@@ -1,0 +1,1 @@
+{"version":3,"file":"error-limit.exception.js","sourceRoot":"","sources":["../../exception/error-limit.exception.ts"],"names":[],"mappings":";;;AAAA,MAAa,mBAAoB,SAAQ,KAAK;IAC1C,YAAY,OAAe;QACvB,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,IAAI,GAAG,qBAAqB,CAAC;QAClC,IAAI,CAAC,OAAO,GAAG,OAAO,CAAC;IAC3B,CAAC;CACJ;AAND,kDAMC"}

@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  user_id         String          @id @default(uuid(7)) @db.Uuid
+  username        String          @unique @db.VarChar(50)
+  password        String          @db.VarChar(255)
+  name            String          @db.VarChar(100)
+  phone_number    String?         @unique @db.VarChar(20)
+  role_id         String          @db.Uuid
+  user_status_id  String          @db.Uuid
+  last_login      DateTime?       @db.Time(6)
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?       @updatedAt @db.Timestamp(6)
+  deleted_at      DateTime?       @db.Timestamp(6)
+  orders          Order[]
+  shifts          Shift[]
+  stock_movements StockMovement[]
+  stock_opnames   StockOpname[]
+  role            Role            @relation(fields: [role_id], references: [role_id])
+  user_status     UserStatus      @relation(fields: [user_status_id], references: [user_status_id])
+
+  @@map("users")
+}
+
+model Supplier {
+  supplier_id     String          @id @default(uuid(7)) @db.Uuid
+  name            String          @db.VarChar(100)
+  phone           String?         @db.VarChar(20)
+  address         String?
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?       @updatedAt @db.Timestamp(6)
+  deleted_at      DateTime?       @db.Timestamp(6)
+  stock_movements StockMovement[]
+
+  @@map("suppliers")
+}
+
+model Ingredient {
+  ingredient_id       String                  @id @default(uuid(7)) @db.Uuid
+  unit_id             String                  @db.Uuid
+  name                String                  @db.VarChar(100)
+  type                String                  @db.VarChar(20)
+  stock_qty           Decimal                 @db.Decimal(10, 2)
+  min_stock           Decimal                 @db.Decimal(10, 2)
+  avg_cost            Decimal                 @db.Decimal(15, 2)
+  created_at          DateTime                @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?               @updatedAt @db.Timestamp(6)
+  deleted_at          DateTime?               @db.Timestamp(6)
+  child_compositions  IngredientComposition[] @relation("CompositionInput")
+  parent_compositions IngredientComposition[] @relation("CompositionOutput")
+  unit                UnitMeasure             @relation(fields: [unit_id], references: [unit_measure_id])
+  menu_recipes        MenuRecipe[]
+  stock_movements     StockMovement[]
+  stock_opname_items  StockOpnameItem[]
+
+  @@map("ingredients")
+}
+
+model IngredientComposition {
+  ingredient_composition_id String     @id @default(uuid(7)) @db.Uuid
+  parent_id                 String     @db.Uuid
+  child_id                  String     @db.Uuid
+  qty_needed                Decimal    @db.Decimal(10, 2)
+  created_at                DateTime   @default(now()) @db.Timestamp(6)
+  updated_at                DateTime?  @updatedAt @db.Timestamp(6)
+  deleted_at                DateTime?  @db.Timestamp(6)
+  child_ingredient          Ingredient @relation("CompositionInput", fields: [child_id], references: [ingredient_id])
+  parent_ingredient         Ingredient @relation("CompositionOutput", fields: [parent_id], references: [ingredient_id])
+
+  @@unique([parent_id, child_id])
+  @@map("ingredient_compositions")
+}
+
+model Menu {
+  menu_id      String       @id @default(uuid(7)) @db.Uuid
+  category_id  String       @db.Uuid
+  name         String       @db.VarChar(100)
+  price        Decimal      @db.Decimal(15, 2)
+  cost         Decimal      @db.Decimal(15, 2)
+  description  String?
+  image_url    String?      @db.VarChar(255)
+  is_available Boolean
+  created_at   DateTime     @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?    @updatedAt @db.Timestamp(6)
+  deleted_at   DateTime?    @db.Timestamp(6)
+  recipes      MenuRecipe[]
+  category     Category     @relation(fields: [category_id], references: [category_id])
+  order_items  OrderItem[]
+
+  @@map("menus")
+}
+
+model MenuRecipe {
+  menu_recipe_id String     @id @default(uuid(7)) @db.Uuid
+  menu_id        String     @db.Uuid
+  ingredient_id  String     @db.Uuid
+  qty_needed     Decimal    @db.Decimal(10, 2)
+  created_at     DateTime   @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?  @updatedAt @db.Timestamp(6)
+  deleted_at     DateTime?  @db.Timestamp(6)
+  ingredient     Ingredient @relation(fields: [ingredient_id], references: [ingredient_id])
+  menu           Menu       @relation(fields: [menu_id], references: [menu_id])
+
+  @@unique([menu_id, ingredient_id])
+  @@map("menu_recipes")
+}
+
+model UnitMeasure {
+  unit_measure_id String       @id @default(uuid(7)) @db.Uuid
+  name            String       @db.VarChar(50)
+  created_at      DateTime     @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?    @updatedAt @db.Timestamp(6)
+  deleted_at      DateTime?    @db.Timestamp(6)
+  ingredients     Ingredient[]
+
+  @@map("unit_measures")
+}
+
+model Category {
+  category_id String    @id @default(uuid(7)) @db.Uuid
+  name        String    @db.VarChar(50)
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_at  DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at  DateTime? @db.Timestamp(6)
+  menus       Menu[]
+
+  @@map("categories")
+}
+
+model StoreSetting {
+  store_setting_id String    @id @default(uuid(7)) @db.Uuid
+  setting_key      String    @db.VarChar(50)
+  setting_value    String
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at       DateTime? @db.Timestamp(6)
+
+  @@map("store_settings")
+}
+
+model StockType {
+  stock_type_id   String          @id @default(uuid(7)) @db.Uuid
+  name            String          @db.VarChar(50)
+  created_at      DateTime        @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?       @updatedAt @db.Timestamp(6)
+  deleted_at      DateTime?       @db.Timestamp(6)
+  stock_movements StockMovement[]
+
+  @@map("stock_types")
+}
+
+model UserStatus {
+  user_status_id String    @id @default(uuid(7)) @db.Uuid
+  name           String    @db.VarChar(50)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at     DateTime? @db.Timestamp(6)
+  users          User[]
+
+  @@map("user_statuses")
+}
+
+model Role {
+  role_id    String    @id @default(uuid(7)) @db.Uuid
+  name       String    @db.VarChar(50)
+  created_at DateTime  @default(now()) @db.Timestamp(6)
+  updated_at DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at DateTime? @db.Timestamp(6)
+  users      User[]
+
+  @@map("roles")
+}
+
+model StockMovement {
+  stock_movement_id String     @id @default(uuid(7)) @db.Uuid
+  supplier_id       String?    @db.Uuid
+  ingredient_id     String     @db.Uuid
+  user_id           String     @db.Uuid
+  stock_type_id     String     @db.Uuid
+  qty               Decimal    @db.Decimal(10, 2)
+  unit_cost         Decimal?   @db.Decimal(15, 2)
+  current_stock     Decimal    @db.Decimal(10, 2)
+  notes             String?
+  created_at        DateTime   @default(now()) @db.Timestamp(6)
+  updated_at        DateTime?  @updatedAt @db.Timestamp(6)
+  deleted_at        DateTime?  @db.Timestamp(6)
+  ingredient        Ingredient @relation(fields: [ingredient_id], references: [ingredient_id])
+  stock_type        StockType  @relation(fields: [stock_type_id], references: [stock_type_id])
+  supplier          Supplier?  @relation(fields: [supplier_id], references: [supplier_id])
+  user              User       @relation(fields: [user_id], references: [user_id])
+
+  @@map("stock_movements")
+}
+
+model StockOpname {
+  stock_opname_id String            @id @default(uuid(7)) @db.Uuid
+  user_id         String            @db.Uuid
+  opname_date     DateTime          @db.Date
+  status          String            @db.VarChar(20)
+  notes           String?
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?         @updatedAt @db.Timestamp(6)
+  deleted_at      DateTime?         @db.Timestamp(6)
+  items           StockOpnameItem[]
+  user            User              @relation(fields: [user_id], references: [user_id])
+
+  @@map("stock_opnames")
+}
+
+model StockOpnameItem {
+  stock_opname_item_id String      @id @default(uuid(7)) @db.Uuid
+  stock_opname_id      String      @db.Uuid
+  ingredient_id        String      @db.Uuid
+  system_qty           Decimal     @db.Decimal(10, 2)
+  physical_qty         Decimal     @db.Decimal(10, 2)
+  difference           Decimal     @db.Decimal(10, 2)
+  created_at           DateTime    @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?   @updatedAt @db.Timestamp(6)
+  deleted_at           DateTime?   @db.Timestamp(6)
+  ingredient           Ingredient  @relation(fields: [ingredient_id], references: [ingredient_id])
+  stock_opname         StockOpname @relation(fields: [stock_opname_id], references: [stock_opname_id])
+
+  @@unique([stock_opname_id, ingredient_id])
+  @@map("stock_opname_items")
+}
+
+model Shift {
+  shift_id       String         @id @default(uuid(7)) @db.Uuid
+  user_id        String         @db.Uuid
+  start_cash     Decimal        @db.Decimal(15, 2)
+  end_cash       Decimal?       @db.Decimal(15, 2)
+  sold_total     Decimal?       @db.Decimal(15, 2)
+  start_time     DateTime       @db.Timestamp(6)
+  end_time       DateTime?      @db.Timestamp(6)
+  created_at     DateTime       @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?      @updatedAt @db.Timestamp(6)
+  deleted_at     DateTime?      @db.Timestamp(6)
+  cash_movements CashMovement[]
+  orders         Order[]
+  user           User           @relation(fields: [user_id], references: [user_id])
+
+  @@map("shifts")
+}
+
+model CashMovement {
+  cash_movement_id String    @id @default(uuid(7)) @db.Uuid
+  shift_id         String    @db.Uuid
+  type             String    @db.VarChar(10)
+  amount           Decimal   @db.Decimal(15, 2)
+  note             String?   @db.VarChar(255)
+  created_at       DateTime  @default(now()) @db.Timestamp(6)
+  updated_at       DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at       DateTime? @db.Timestamp(6)
+  shift            Shift     @relation(fields: [shift_id], references: [shift_id])
+
+  @@map("cash_movements")
+}
+
+model Order {
+  order_id       String      @id @default(uuid(7)) @db.Uuid
+  shift_id       String      @db.Uuid
+  user_id        String      @db.Uuid
+  customer_name  String?     @db.VarChar(50)
+  customer_phone String?     @db.VarChar(20)
+  receipt        String?     @unique @db.VarChar(50)
+  total_amount   Decimal     @db.Decimal(15, 2)
+  paid_amount    Decimal     @db.Decimal(15, 2)
+  change_amount  Decimal     @db.Decimal(15, 2)
+  payment_type   String      @db.VarChar(20)
+  status         String      @db.VarChar(20)
+  created_at     DateTime    @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?   @updatedAt @db.Timestamp(6)
+  deleted_at     DateTime?   @db.Timestamp(6)
+  order_items    OrderItem[]
+  shift          Shift       @relation(fields: [shift_id], references: [shift_id])
+  user           User        @relation(fields: [user_id], references: [user_id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  order_item_id String    @id @default(uuid(7)) @db.Uuid
+  order_id      String    @db.Uuid
+  menu_id       String    @db.Uuid
+  qty           Int
+  price         Decimal   @db.Decimal(15, 2)
+  subtotal      Decimal   @db.Decimal(15, 2)
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  updated_at    DateTime? @updatedAt @db.Timestamp(6)
+  deleted_at    DateTime? @db.Timestamp(6)
+  menu          Menu      @relation(fields: [menu_id], references: [menu_id])
+  order         Order     @relation(fields: [order_id], references: [order_id])
+
+  @@map("order_items")
+}

@@ -1,0 +1,93 @@
+#!/usr/bin/env node
+"use strict";
+/**
+ * Module dependencies.
+ */
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.server = void 0;
+const app_1 = __importDefault(require("../app"));
+const debug_1 = __importDefault(require("debug"));
+const http_1 = __importDefault(require("http"));
+const debug = (0, debug_1.default)('node-struktur:server');
+// Note: Socket.IO imports - these may still be in JavaScript in config/utility folders
+// If you have socket functionality, uncomment and adjust these imports
+// import { initializeSocketServer } from '../config/socket.config';
+// import { setSocketIO as setSocketHandler } from '../utility/socket.handler';
+// import { setSocketIO as setQueueEmitter } from '../utility/queue.emitter';
+/**
+ * Get port from environment and store in Express.
+ */
+const port = normalizePort(process.env.PORT || '3000');
+app_1.default.set('port', port);
+console.log(`App running on port ${port}`);
+/**
+ * Create HTTP server.
+ */
+const server = http_1.default.createServer(app_1.default);
+exports.server = server;
+/**
+ * Initialize Socket.IO server (uncomment if using WebSockets)
+ */
+// const io = initializeSocketServer(server);
+// setSocketHandler(io);
+// setQueueEmitter(io);
+// console.log('✅ WebSocket server initialized on port', port);
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+/**
+ * Normalize a port into a number, string, or false.
+ */
+function normalizePort(val) {
+    const portNumber = parseInt(val, 10);
+    if (isNaN(portNumber)) {
+        // named pipe
+        return val;
+    }
+    if (portNumber >= 0) {
+        // port number
+        return portNumber;
+    }
+    return false;
+}
+/**
+ * Event listener for HTTP server "error" event.
+ */
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+    const bind = typeof port === 'string'
+        ? 'Pipe ' + port
+        : 'Port ' + port;
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+        case 'EACCES':
+            console.error(bind + ' requires elevated privileges');
+            process.exit(1);
+            break;
+        case 'EADDRINUSE':
+            console.error(bind + ' is already in use');
+            process.exit(1);
+            break;
+        default:
+            throw error;
+    }
+}
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+function onListening() {
+    const addr = server.address();
+    const bind = typeof addr === 'string'
+        ? 'pipe ' + addr
+        : 'port ' + addr?.port;
+    debug('Listening on ' + bind);
+}
+//# sourceMappingURL=www.js.map
