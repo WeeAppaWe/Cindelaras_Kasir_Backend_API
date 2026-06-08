@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 
 // Extended Request interface for authenticated users
 export interface AuthenticatedRequest extends Request {
+    file?: Express.Multer.File;
+    files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
     user?: {
         user_id: string;
         username: string;

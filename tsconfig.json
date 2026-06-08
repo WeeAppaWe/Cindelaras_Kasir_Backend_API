@@ -22,7 +22,9 @@
         "strictNullChecks": false,
         "strictPropertyInitialization": false,
         "types": [
-            "node"
+            "node",
+            "express",
+            "multer"
         ],
         "typeRoots": [
             "./node_modules/@types",

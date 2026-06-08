@@ -1,4 +1,5 @@
 import path from 'path';
+import type {} from 'multer';
 import { ErrorNotFoundException } from '../exception/error-not-found.exception';
 import {
   getSupabaseClient,

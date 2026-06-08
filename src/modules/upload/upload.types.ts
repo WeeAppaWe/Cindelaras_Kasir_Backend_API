@@ -1,5 +1,6 @@
 // Upload module types
 
+import type {} from 'multer';
 import { SupabaseStorageFolderTarget } from '../../../types/supabase-storage.types';
 
 /**
