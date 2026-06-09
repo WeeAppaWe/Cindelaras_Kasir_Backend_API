@@ -12,6 +12,7 @@ const pathGroup = 'category';
 
 // All routes require authentication and ADMIN role
 const adminMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN])];
+const adminAndCashierMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN, RoleName.CASHIER])];
 
 // ============================================
 // CRUD Routes
@@ -20,7 +21,7 @@ const adminMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN])];
 // GET /api/category - Get all categories
 router.get(
     `/${pathGroup}`,
-    ...adminMiddleware,
+    ...adminAndCashierMiddleware,
     zodValidation(categoryListQuerySchema, 'query'),
     categoryController.showAll
 );
