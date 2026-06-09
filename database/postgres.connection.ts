@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 // Import dari folder generated (TANPA /client)
@@ -5,11 +7,26 @@ import { PrismaClient } from '../src/generated/prisma/client';
 
 let prisma: InstanceType<typeof PrismaClient>;
 
+const getDatabaseSslConfig = () => {
+    const caPath = process.env.DATABASE_SSL_CA_PATH || 'certs/prod-ca-2021.crt';
+    const resolvedCaPath = path.isAbsolute(caPath) ? caPath : path.resolve(process.cwd(), caPath);
+
+    if (!fs.existsSync(resolvedCaPath)) {
+        return undefined;
+    }
+
+    return {
+        ca: fs.readFileSync(resolvedCaPath, 'utf8'),
+        rejectUnauthorized: true,
+    };
+};
+
 export const getPrismaClient = (): InstanceType<typeof PrismaClient> => {
     if (!prisma) {
         // 1. Buat Connection Pool menggunakan driver native 'pg'
         const pool = new Pool({
-            connectionString: process.env.DATABASE_URL
+            connectionString: process.env.DATABASE_URL,
+            ssl: getDatabaseSslConfig(),
         });
 
         // 2. Buat Adapter Prisma untuk Postgres
