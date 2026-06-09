@@ -53,14 +53,25 @@ export const forgotPasswordRequestOtpSchema = z.object({
 });
 
 /**
- * Forgot password - reset password schema
+ * Forgot password - verify OTP schema
  */
-export const resetPasswordSchema = z.object({
+export const verifyForgotPasswordOtpSchema = z.object({
     phone_number: phoneNumberSchema,
     otp: z
         .string()
         .length(6, 'OTP harus 6 digit')
         .regex(/^\d+$/, 'OTP hanya boleh berisi angka'),
+});
+
+/**
+ * Forgot password - reset password schema
+ */
+export const resetPasswordSchema = z.object({
+    phone_number: phoneNumberSchema,
+    reset_token: z
+        .string()
+        .min(32, 'Token reset password tidak valid')
+        .max(255, 'Token reset password tidak valid'),
     password: z
         .string()
         .min(6, 'Password minimal 6 karakter')
@@ -77,11 +88,13 @@ export const resetPasswordSchema = z.object({
 // Infer types from schema
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordRequestOtpInput = z.infer<typeof forgotPasswordRequestOtpSchema>;
+export type VerifyForgotPasswordOtpInput = z.infer<typeof verifyForgotPasswordOtpSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 // Export schemas
 export const authSchemas = {
     login: loginSchema,
     forgotPasswordRequestOtp: forgotPasswordRequestOtpSchema,
+    verifyForgotPasswordOtp: verifyForgotPasswordOtpSchema,
     resetPassword: resetPasswordSchema,
 };

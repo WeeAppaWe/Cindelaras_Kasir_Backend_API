@@ -48,6 +48,20 @@ export const requestForgotPasswordOtp = async (req: AuthenticatedRequest, res: R
 };
 
 /**
+ * Verify Forgot Password OTP Controller
+ * POST /api/auth/forgot-password/verify-otp
+ */
+export const verifyForgotPasswordOtp = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await authService.verifyForgotPasswordOtp(req.body);
+
+        res.status(200).json(responseApi({ code: 200, message: 'OTP berhasil diverifikasi' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Reset Password Controller
  * POST /api/auth/forgot-password/reset-password
  */
@@ -65,6 +79,7 @@ export const authController = {
     login,
     logout,
     requestForgotPasswordOtp,
+    verifyForgotPasswordOtp,
     resetPassword,
 };
 

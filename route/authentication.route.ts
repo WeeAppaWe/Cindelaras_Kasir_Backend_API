@@ -5,6 +5,7 @@ import {
     forgotPasswordRequestOtpSchema,
     loginSchema,
     resetPasswordSchema,
+    verifyForgotPasswordOtpSchema,
 } from '../src/modules/auth/auth.schema';
 import authController from '../src/modules/auth/auth.controller';
 
@@ -18,6 +19,11 @@ router.post(
     `/${pathGroup}/forgot-password/request-otp`,
     zodValidation(forgotPasswordRequestOtpSchema),
     authController.requestForgotPasswordOtp
+);
+router.post(
+    `/${pathGroup}/forgot-password/verify-otp`,
+    zodValidation(verifyForgotPasswordOtpSchema),
+    authController.verifyForgotPasswordOtp
 );
 router.post(
     `/${pathGroup}/forgot-password/reset-password`,

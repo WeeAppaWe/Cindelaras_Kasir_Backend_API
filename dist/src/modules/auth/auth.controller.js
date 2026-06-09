@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authController = exports.resetPassword = exports.requestForgotPasswordOtp = exports.logout = exports.login = void 0;
+exports.authController = exports.resetPassword = exports.verifyForgotPasswordOtp = exports.requestForgotPasswordOtp = exports.logout = exports.login = void 0;
 const auth_service_1 = __importDefault(require("./auth.service"));
 const response_api_1 = __importDefault(require("../../../utility/response-api"));
 /**
@@ -51,6 +51,20 @@ const requestForgotPasswordOtp = async (req, res, next) => {
 };
 exports.requestForgotPasswordOtp = requestForgotPasswordOtp;
 /**
+ * Verify Forgot Password OTP Controller
+ * POST /api/auth/forgot-password/verify-otp
+ */
+const verifyForgotPasswordOtp = async (req, res, next) => {
+    try {
+        const data = await auth_service_1.default.verifyForgotPasswordOtp(req.body);
+        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'OTP berhasil diverifikasi' }, data));
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.verifyForgotPasswordOtp = verifyForgotPasswordOtp;
+/**
  * Reset Password Controller
  * POST /api/auth/forgot-password/reset-password
  */
@@ -68,6 +82,7 @@ exports.authController = {
     login: exports.login,
     logout: exports.logout,
     requestForgotPasswordOtp: exports.requestForgotPasswordOtp,
+    verifyForgotPasswordOtp: exports.verifyForgotPasswordOtp,
     resetPassword: exports.resetPassword,
 };
 exports.default = exports.authController;

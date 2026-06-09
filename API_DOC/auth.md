@@ -8,7 +8,7 @@ Base URL untuk semua rute di bawah ini adalah: `/api/auth`
 
 ## Tabel dan Penyimpanan Data yang Dipakai
 
-Modul auth memakai tabel database untuk data user, role, dan status user. Selain itu, modul ini memakai Redis untuk menyimpan session token login dan OTP reset password sementara.
+Modul auth memakai tabel database untuk data user, role, dan status user. Selain itu, modul ini memakai Redis untuk menyimpan session token login, OTP reset password sementara, dan reset token sementara setelah OTP berhasil diverifikasi.
 
 ### Ringkasan Penggunaan
 
@@ -16,7 +16,8 @@ Modul auth memakai tabel database untuk data user, role, dan status user. Selain
 | :--- | :--- | :--- |
 | `POST /login` | `users`, `roles`, `user_statuses`, Redis token session | Mencari user berdasarkan username, validasi password dan status, membuat token, menyimpan token di Redis, update `last_login`. |
 | `POST /forgot-password/request-otp` | `users`, `roles`, `user_statuses`, Redis OTP | Mencari user berdasarkan nomor WhatsApp, validasi status, membuat OTP hash, menyimpan OTP sementara di Redis. |
-| `POST /forgot-password/reset-password` | `users`, `roles`, `user_statuses`, Redis OTP | Validasi OTP dari Redis, update password user, hapus OTP dari Redis. |
+| `POST /forgot-password/verify-otp` | `users`, `roles`, `user_statuses`, Redis OTP, Redis reset token | Validasi OTP dari Redis, membuat `reset_token` sementara, lalu menghapus OTP. |
+| `POST /forgot-password/reset-password` | `users`, `roles`, `user_statuses`, Redis reset token | Validasi `reset_token` dari Redis, update password user, hapus reset token dari Redis. |
 | `POST /logout` | Redis token session | Menghapus token login dari Redis. |
 
 ### 1. Tabel `users`
@@ -43,6 +44,7 @@ Field yang dipakai auth:
 | :--- | :--- |
 | Login | `user_id`, `username`, `password`, `name`, `phone_number`, `role_id`, `user_status_id`, `last_login`, `deleted_at` |
 | Forgot password request OTP | `user_id`, `phone_number`, `user_status_id`, `deleted_at` |
+| Forgot password verify OTP | `user_id`, `phone_number`, `user_status_id`, `deleted_at` |
 | Reset password | `user_id`, `phone_number`, `password`, `user_status_id`, `deleted_at` |
 | Token validation middleware | `user_id`, `username`, `name`, `phone_number`, `role_id`, `user_status_id`, `deleted_at` |
 
@@ -84,6 +86,7 @@ Field yang dipakai auth:
 | :--- | :--- |
 | Login | `user_status_id`, `name` |
 | Forgot password request OTP | `user_status_id`, `name` |
+| Forgot password verify OTP | `user_status_id`, `name` |
 | Reset password | `user_status_id`, `name` |
 | Token validation middleware | `user_status_id`, `name` |
 
@@ -138,7 +141,26 @@ Payload OTP yang disimpan:
 | `expires_at` | number | Timestamp kedaluwarsa OTP. |
 | `locked_until` | number | Opsional. Timestamp sampai kapan OTP dikunci sementara. |
 
-Konfigurasi OTP memakai environment variable:
+### 6. Redis - Reset Token Password
+
+Setelah OTP berhasil diverifikasi, backend membuat `reset_token` sementara. Token ini dikembalikan ke frontend dan dipakai pada endpoint reset password.
+
+Reset token disimpan di Redis dengan key:
+
+```text
+auth:forgot-password:reset-token:{phone_number}
+```
+
+Payload reset token yang disimpan:
+
+| Field | Tipe | Keterangan |
+| :--- | :--- | :--- |
+| `user_id` | string UUID | ID user pemilik reset token. |
+| `phone_number` | string | Nomor WhatsApp yang sudah dinormalisasi. |
+| `token_hash` | string | Hash bcrypt dari reset token. Token asli tidak disimpan. |
+| `expires_at` | number | Timestamp kedaluwarsa reset token. |
+
+Konfigurasi forgot password memakai environment variable:
 
 | Env | Default | Keterangan |
 | :--- | :--- | :--- |
@@ -146,6 +168,7 @@ Konfigurasi OTP memakai environment variable:
 | `FORGOT_PASSWORD_OTP_MAX_ATTEMPTS` | `5` | Maksimal percobaan OTP salah sebelum OTP dihapus. |
 | `FORGOT_PASSWORD_OTP_LOCK_ATTEMPTS` | `3` | Setiap berapa percobaan salah OTP dikunci sementara. |
 | `FORGOT_PASSWORD_OTP_LOCK_SECONDS` | `60` | Durasi lock OTP sementara dalam detik. |
+| `FORGOT_PASSWORD_RESET_TOKEN_TTL_SECONDS` | `600` | Masa berlaku reset token setelah OTP berhasil diverifikasi. |
 
 ### Relasi Tabel
 
@@ -246,9 +269,52 @@ Endpoint ini digunakan untuk meminta kode OTP yang akan dikirimkan ke nomor What
 
 ---
 
-## 3. Reset Password
+## 3. Verify OTP Lupa Password
 
-Endpoint ini digunakan untuk memverifikasi OTP dan mengganti password lama dengan password baru. Jika pengguna salah memasukkan OTP berulang kali, akun (OTP) dapat terkunci sementara.
+Endpoint ini digunakan untuk memverifikasi OTP yang diterima dari WhatsApp. Jika OTP benar, backend mengembalikan `reset_token` sementara yang harus dipakai pada endpoint reset password.
+
+Jika pengguna salah memasukkan OTP berulang kali, OTP dapat terkunci sementara.
+
+- **Endpoint:** `POST /forgot-password/verify-otp`
+- **Akses:** Public
+
+### Request Body (JSON)
+
+| Field | Tipe | Validasi | Deskripsi |
+| :--- | :--- | :--- | :--- |
+| `phone_number` | String | Wajib, min 9, max 20 karakter | Nomor WhatsApp pengguna |
+| `otp` | String | Wajib, tepat 6 digit angka | Kode OTP yang diterima dari WhatsApp |
+
+**Contoh Request:**
+```json
+{
+  "phone_number": "081234567890",
+  "otp": "123456"
+}
+```
+
+### Response Berhasil (200 OK)
+
+```json
+{
+  "code": 200,
+  "message": "OTP berhasil diverifikasi",
+  "data": {
+    "success": true,
+    "message": "OTP berhasil diverifikasi",
+    "reset_token": "reset-token-sementara",
+    "expires_in": 600
+  }
+}
+```
+
+Catatan: `reset_token` harus disimpan sementara di state frontend dan dikirim saat reset password. Token ini tidak dikirim lewat WhatsApp.
+
+---
+
+## 4. Reset Password
+
+Endpoint ini digunakan untuk mengganti password lama dengan password baru setelah OTP berhasil diverifikasi.
 
 - **Endpoint:** `POST /forgot-password/reset-password`
 - **Akses:** Public
@@ -258,7 +324,7 @@ Endpoint ini digunakan untuk memverifikasi OTP dan mengganti password lama denga
 | Field | Tipe | Validasi | Deskripsi |
 | :--- | :--- | :--- | :--- |
 | `phone_number` | String | Wajib, min 9, max 20 karakter | Nomor WhatsApp pengguna |
-| `otp` | String | Wajib, tepat 6 digit angka | Kode OTP yang diterima dari WhatsApp |
+| `reset_token` | String | Wajib, token reset password valid | Token sementara dari endpoint verify OTP |
 | `password` | String | Wajib, min 6, max 255 karakter | Password baru yang diinginkan |
 | `confirm_password`| String | Wajib, harus sama dengan `password` | Konfirmasi password baru |
 
@@ -266,7 +332,7 @@ Endpoint ini digunakan untuk memverifikasi OTP dan mengganti password lama denga
 ```json
 {
   "phone_number": "081234567890",
-  "otp": "123456",
+  "reset_token": "reset-token-sementara",
   "password": "PasswordBaru123",
   "confirm_password": "PasswordBaru123"
 }
@@ -287,7 +353,7 @@ Endpoint ini digunakan untuk memverifikasi OTP dan mengganti password lama denga
 
 ---
 
-## 4. Logout
+## 5. Logout
 
 Endpoint ini digunakan untuk menghapus sesi pengguna di sistem (menghapus token dari Redis).
 

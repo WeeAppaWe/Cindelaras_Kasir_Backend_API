@@ -86,29 +86,39 @@ export const mockForgotPasswordRequest = {
     },
 };
 
-// Mock reset password request data
-export const mockResetPasswordRequest = {
+// Mock verify forgot password OTP request data
+export const mockVerifyForgotPasswordOtpRequest = {
     valid: {
         phone_number: '081234567890',
         otp: '123456',
-        password: 'newpassword123',
-        confirm_password: 'newpassword123',
     },
     invalidOtp: {
         phone_number: '081234567890',
         otp: '000000',
-        password: 'newpassword123',
-        confirm_password: 'newpassword123',
     },
     invalidOtpLength: {
         phone_number: '081234567890',
         otp: '123',
+    },
+};
+
+// Mock reset password request data
+export const mockResetPasswordRequest = {
+    valid: {
+        phone_number: '081234567890',
+        reset_token: 'a'.repeat(64),
+        password: 'newpassword123',
+        confirm_password: 'newpassword123',
+    },
+    invalidResetToken: {
+        phone_number: '081234567890',
+        reset_token: 'b'.repeat(64),
         password: 'newpassword123',
         confirm_password: 'newpassword123',
     },
     mismatchPassword: {
         phone_number: '081234567890',
-        otp: '123456',
+        reset_token: 'a'.repeat(64),
         password: 'newpassword123',
         confirm_password: 'differentpassword123',
     },
@@ -121,6 +131,15 @@ export const createMockPasswordResetOtpPayload = (overrides: Record<string, unkn
     otp_hash: 'hashed-otp',
     attempts: 0,
     expires_at: Date.now() + 300000,
+    ...overrides,
+});
+
+// Mock Redis verified password reset token payload
+export const createMockPasswordResetTokenPayload = (overrides: Record<string, unknown> = {}) => ({
+    user_id: mockActiveUser.user_id,
+    phone_number: '6281234567890',
+    token_hash: 'hashed-reset-token',
+    expires_at: Date.now() + 600000,
     ...overrides,
 });
 

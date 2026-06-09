@@ -19,7 +19,7 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **128 endpoint**.
+Total endpoint dari folder `route`: **129 endpoint**.
 
 ## Auth
 
@@ -29,7 +29,8 @@ Source: `route/authentication.route.ts`
 | --- | --- | --- | --- |
 | `POST` | `/api/auth/login` | Public | Login user. |
 | `POST` | `/api/auth/forgot-password/request-otp` | Public | Request OTP lupa password. |
-| `POST` | `/api/auth/forgot-password/reset-password` | Public | Reset password memakai OTP. |
+| `POST` | `/api/auth/forgot-password/verify-otp` | Public | Verifikasi OTP lupa password dan buat reset token. |
+| `POST` | `/api/auth/forgot-password/reset-password` | Public | Reset password memakai reset token. |
 | `POST` | `/api/auth/logout` | Authenticated | Logout dan hapus token aktif. |
 
 ## User
@@ -316,4 +317,3 @@ Source: `route/spk.route.ts`
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/api/spk/analysis` | ADMIN | Jalankan analisis SPK. |
-

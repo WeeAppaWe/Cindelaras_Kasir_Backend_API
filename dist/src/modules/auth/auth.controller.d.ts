@@ -17,6 +17,11 @@ export declare const logout: (req: AuthenticatedRequest, res: Response, next: Ne
  */
 export declare const requestForgotPasswordOtp: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 /**
+ * Verify Forgot Password OTP Controller
+ * POST /api/auth/forgot-password/verify-otp
+ */
+export declare const verifyForgotPasswordOtp: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
  * Reset Password Controller
  * POST /api/auth/forgot-password/reset-password
  */
@@ -25,6 +30,7 @@ export declare const authController: {
     login: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     logout: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     requestForgotPasswordOtp: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+    verifyForgotPasswordOtp: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     resetPassword: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 };
 export default authController;

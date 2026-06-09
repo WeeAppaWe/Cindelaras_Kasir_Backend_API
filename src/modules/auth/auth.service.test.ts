@@ -7,18 +7,35 @@ import { formatPhoneNumber, isFonnteConfigured, sendWhatsAppMessage } from '../.
 import { ErrorAuthenticationException } from '../../../exception/error-authentication.exception';
 import { ErrorValidationException } from '../../../exception/error-validation.exception';
 import {
+    createMockPasswordResetTokenPayload,
     createMockPasswordResetOtpPayload,
     mockActiveUser,
     mockForgotPasswordRequest,
     mockInactiveUser,
     mockLoginRequest,
     mockResetPasswordRequest,
+    mockVerifyForgotPasswordOtpRequest,
 } from '../../tests/mocks/auth.mock';
 
 const otpTtlSeconds = parseInt(process.env.FORGOT_PASSWORD_OTP_TTL_SECONDS || '300', 10);
+const resetTokenTtlSeconds = parseInt(process.env.FORGOT_PASSWORD_RESET_TOKEN_TTL_SECONDS || '600', 10);
 
 // Mock dependencies
-jest.mock('./auth.repository');
+jest.mock('./auth.repository', () => ({
+    __esModule: true,
+    default: {
+        findByUsername: jest.fn(),
+        findById: jest.fn(),
+        findByPhoneNumber: jest.fn(),
+        updatePassword: jest.fn(),
+        updateLastLogin: jest.fn(),
+    },
+    findByUsername: jest.fn(),
+    findById: jest.fn(),
+    findByPhoneNumber: jest.fn(),
+    updatePassword: jest.fn(),
+    updateLastLogin: jest.fn(),
+}));
 jest.mock('../token/token.service');
 jest.mock('../../../utility/encrypt-decrypt');
 jest.mock('../../../database/redis.connection', () => ({
@@ -283,26 +300,30 @@ describe('Auth Service', () => {
         });
     });
 
-    describe('resetPassword', () => {
-        it('should reset password when OTP is valid', async () => {
+    describe('verifyForgotPasswordOtp', () => {
+        it('should verify OTP, create reset token, and delete OTP payload', async () => {
             // Arrange
             const otpPayload = createMockPasswordResetOtpPayload();
             (redis.get as jest.Mock).mockResolvedValue(JSON.stringify(otpPayload));
             (EncryptDecryptClass.prototype.checkBcrypt as jest.Mock).mockResolvedValue(true);
-            (EncryptDecryptClass.prototype.encryptBcrypt as jest.Mock).mockReturnValue('hashed-new-password');
+            (EncryptDecryptClass.prototype.encryptBcrypt as jest.Mock).mockReturnValue('hashed-reset-token');
             (authRepository.findByPhoneNumber as jest.Mock).mockResolvedValue(mockActiveUser);
-            (authRepository.updatePassword as jest.Mock).mockResolvedValue(undefined);
+            (redis.set as jest.Mock).mockResolvedValue('OK');
             (redis.del as jest.Mock).mockResolvedValue(1);
 
             // Act
-            const result = await authService.resetPassword(mockResetPasswordRequest.valid);
+            const result = await authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.valid);
 
             // Assert
             expect(result.success).toBe(true);
+            expect(result.reset_token).toHaveLength(64);
+            expect(result.expires_in).toBe(resetTokenTtlSeconds);
             expect(authRepository.findByPhoneNumber).toHaveBeenCalledWith('6281234567890');
-            expect(authRepository.updatePassword).toHaveBeenCalledWith(
-                mockActiveUser.user_id,
-                'hashed-new-password'
+            expect(redis.set).toHaveBeenCalledWith(
+                'auth:forgot-password:reset-token:6281234567890',
+                expect.stringContaining('"token_hash":"hashed-reset-token"'),
+                'EX',
+                resetTokenTtlSeconds
             );
             expect(redis.del).toHaveBeenCalledWith('auth:forgot-password:otp:6281234567890');
         });
@@ -312,7 +333,7 @@ describe('Auth Service', () => {
             (redis.get as jest.Mock).mockResolvedValue(null);
 
             // Act & Assert
-            await expect(authService.resetPassword(mockResetPasswordRequest.valid))
+            await expect(authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.valid))
                 .rejects
                 .toThrow(ErrorValidationException);
             expect(authRepository.updatePassword).not.toHaveBeenCalled();
@@ -327,7 +348,7 @@ describe('Auth Service', () => {
             (redis.set as jest.Mock).mockResolvedValue('OK');
 
             // Act & Assert
-            await expect(authService.resetPassword(mockResetPasswordRequest.invalidOtp))
+            await expect(authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.invalidOtp))
                 .rejects
                 .toThrow(ErrorValidationException);
             expect(redis.set).toHaveBeenCalledWith(
@@ -350,7 +371,7 @@ describe('Auth Service', () => {
             (redis.set as jest.Mock).mockResolvedValue('OK');
 
             // Act & Assert
-            await expect(authService.resetPassword(mockResetPasswordRequest.invalidOtp))
+            await expect(authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.invalidOtp))
                 .rejects
                 .toThrow('OTP tidak valid. Coba lagi');
             expect(redis.set).toHaveBeenCalledWith(
@@ -377,7 +398,7 @@ describe('Auth Service', () => {
             (redis.get as jest.Mock).mockResolvedValue(JSON.stringify(otpPayload));
 
             // Act & Assert
-            await expect(authService.resetPassword(mockResetPasswordRequest.invalidOtp))
+            await expect(authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.invalidOtp))
                 .rejects
                 .toThrow('Terlalu banyak percobaan OTP salah');
             expect(EncryptDecryptClass.prototype.checkBcrypt).not.toHaveBeenCalled();
@@ -394,10 +415,78 @@ describe('Auth Service', () => {
             (redis.del as jest.Mock).mockResolvedValue(1);
 
             // Act & Assert
-            await expect(authService.resetPassword(mockResetPasswordRequest.invalidOtp))
+            await expect(authService.verifyForgotPasswordOtp(mockVerifyForgotPasswordOtpRequest.invalidOtp))
                 .rejects
                 .toThrow(ErrorValidationException);
             expect(redis.del).toHaveBeenCalledWith('auth:forgot-password:otp:6281234567890');
+            expect(authRepository.updatePassword).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('resetPassword', () => {
+        it('should reset password when reset token is valid', async () => {
+            // Arrange
+            const resetTokenPayload = createMockPasswordResetTokenPayload();
+            (redis.get as jest.Mock).mockResolvedValue(JSON.stringify(resetTokenPayload));
+            (EncryptDecryptClass.prototype.checkBcrypt as jest.Mock).mockResolvedValue(true);
+            (EncryptDecryptClass.prototype.encryptBcrypt as jest.Mock).mockReturnValue('hashed-new-password');
+            (authRepository.findByPhoneNumber as jest.Mock).mockResolvedValue(mockActiveUser);
+            (authRepository.updatePassword as jest.Mock).mockResolvedValue(undefined);
+            (redis.del as jest.Mock).mockResolvedValue(1);
+
+            // Act
+            const result = await authService.resetPassword(mockResetPasswordRequest.valid);
+
+            // Assert
+            expect(result.success).toBe(true);
+            expect(redis.get).toHaveBeenCalledWith('auth:forgot-password:reset-token:6281234567890');
+            expect(authRepository.findByPhoneNumber).toHaveBeenCalledWith('6281234567890');
+            expect(authRepository.updatePassword).toHaveBeenCalledWith(
+                mockActiveUser.user_id,
+                'hashed-new-password'
+            );
+            expect(redis.del).toHaveBeenCalledWith('auth:forgot-password:reset-token:6281234567890');
+        });
+
+        it('should throw validation error when reset token is missing or expired', async () => {
+            // Arrange
+            (redis.get as jest.Mock).mockResolvedValue(null);
+
+            // Act & Assert
+            await expect(authService.resetPassword(mockResetPasswordRequest.valid))
+                .rejects
+                .toThrow(ErrorValidationException);
+            expect(authRepository.updatePassword).not.toHaveBeenCalled();
+        });
+
+        it('should throw validation error when reset token is invalid', async () => {
+            // Arrange
+            const resetTokenPayload = createMockPasswordResetTokenPayload();
+            (redis.get as jest.Mock).mockResolvedValue(JSON.stringify(resetTokenPayload));
+            (EncryptDecryptClass.prototype.checkBcrypt as jest.Mock).mockResolvedValue(false);
+
+            // Act & Assert
+            await expect(authService.resetPassword(mockResetPasswordRequest.invalidResetToken))
+                .rejects
+                .toThrow(ErrorValidationException);
+            expect(authRepository.updatePassword).not.toHaveBeenCalled();
+        });
+
+        it('should delete reset token when user does not match token payload', async () => {
+            // Arrange
+            const resetTokenPayload = createMockPasswordResetTokenPayload({
+                user_id: 'different-user-id',
+            });
+            (redis.get as jest.Mock).mockResolvedValue(JSON.stringify(resetTokenPayload));
+            (EncryptDecryptClass.prototype.checkBcrypt as jest.Mock).mockResolvedValue(true);
+            (authRepository.findByPhoneNumber as jest.Mock).mockResolvedValue(mockActiveUser);
+            (redis.del as jest.Mock).mockResolvedValue(1);
+
+            // Act & Assert
+            await expect(authService.resetPassword(mockResetPasswordRequest.valid))
+                .rejects
+                .toThrow(ErrorValidationException);
+            expect(redis.del).toHaveBeenCalledWith('auth:forgot-password:reset-token:6281234567890');
             expect(authRepository.updatePassword).not.toHaveBeenCalled();
         });
     });

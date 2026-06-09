@@ -2,11 +2,13 @@ import {
     forgotPasswordRequestOtpSchema,
     loginSchema,
     resetPasswordSchema,
+    verifyForgotPasswordOtpSchema,
 } from './auth.schema';
 import {
     mockForgotPasswordRequest,
     mockLoginRequest,
     mockResetPasswordRequest,
+    mockVerifyForgotPasswordOtpRequest,
 } from '../../tests/mocks/auth.mock';
 
 describe('Auth Schema Validation', () => {
@@ -113,21 +115,19 @@ describe('Auth Schema Validation', () => {
         });
     });
 
-    describe('resetPasswordSchema', () => {
-        it('should pass validation with valid reset password payload', () => {
-            const result = resetPasswordSchema.safeParse(mockResetPasswordRequest.valid);
+    describe('verifyForgotPasswordOtpSchema', () => {
+        it('should pass validation with valid OTP payload', () => {
+            const result = verifyForgotPasswordOtpSchema.safeParse(mockVerifyForgotPasswordOtpRequest.valid);
 
             expect(result.success).toBe(true);
             if (result.success) {
                 expect(result.data.phone_number).toBe('081234567890');
-                expect(result.data.otp).toBe('123456');
-                expect(result.data.password).toBe(mockResetPasswordRequest.valid.password);
-                expect(result.data.confirm_password).toBe(mockResetPasswordRequest.valid.confirm_password);
+                expect(result.data.otp).toBe(mockVerifyForgotPasswordOtpRequest.valid.otp);
             }
         });
 
         it('should fail validation with invalid OTP length', () => {
-            const result = resetPasswordSchema.safeParse(mockResetPasswordRequest.invalidOtpLength);
+            const result = verifyForgotPasswordOtpSchema.safeParse(mockVerifyForgotPasswordOtpRequest.invalidOtpLength);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -136,6 +136,44 @@ describe('Auth Schema Validation', () => {
                 );
                 expect(otpError).toBeDefined();
                 expect(otpError?.message).toContain('6 digit');
+            }
+        });
+
+        it('should fail validation with missing required fields', () => {
+            const result = verifyForgotPasswordOtpSchema.safeParse({});
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error.issues.length).toBeGreaterThanOrEqual(2);
+            }
+        });
+    });
+
+    describe('resetPasswordSchema', () => {
+        it('should pass validation with valid reset password payload', () => {
+            const result = resetPasswordSchema.safeParse(mockResetPasswordRequest.valid);
+
+            expect(result.success).toBe(true);
+            if (result.success) {
+                expect(result.data.phone_number).toBe('081234567890');
+                expect(result.data.reset_token).toBe(mockResetPasswordRequest.valid.reset_token);
+                expect(result.data.password).toBe(mockResetPasswordRequest.valid.password);
+                expect(result.data.confirm_password).toBe(mockResetPasswordRequest.valid.confirm_password);
+            }
+        });
+
+        it('should fail validation with invalid reset token', () => {
+            const result = resetPasswordSchema.safeParse({
+                ...mockResetPasswordRequest.valid,
+                reset_token: 'short-token',
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const resetTokenError = result.error.issues.find(
+                    (issue) => issue.path.includes('reset_token')
+                );
+                expect(resetTokenError).toBeDefined();
             }
         });
 

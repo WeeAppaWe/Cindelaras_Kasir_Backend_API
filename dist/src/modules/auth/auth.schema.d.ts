@@ -28,16 +28,24 @@ export declare const forgotPasswordRequestOtpSchema: z.ZodObject<{
     phone_number: z.ZodString;
 }, z.core.$strip>;
 /**
+ * Forgot password - verify OTP schema
+ */
+export declare const verifyForgotPasswordOtpSchema: z.ZodObject<{
+    phone_number: z.ZodString;
+    otp: z.ZodString;
+}, z.core.$strip>;
+/**
  * Forgot password - reset password schema
  */
 export declare const resetPasswordSchema: z.ZodObject<{
     phone_number: z.ZodString;
-    otp: z.ZodString;
+    reset_token: z.ZodString;
     password: z.ZodString;
     confirm_password: z.ZodString;
 }, z.core.$strip>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type ForgotPasswordRequestOtpInput = z.infer<typeof forgotPasswordRequestOtpSchema>;
+export type VerifyForgotPasswordOtpInput = z.infer<typeof verifyForgotPasswordOtpSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export declare const authSchemas: {
     login: z.ZodObject<{
@@ -47,9 +55,13 @@ export declare const authSchemas: {
     forgotPasswordRequestOtp: z.ZodObject<{
         phone_number: z.ZodString;
     }, z.core.$strip>;
-    resetPassword: z.ZodObject<{
+    verifyForgotPasswordOtp: z.ZodObject<{
         phone_number: z.ZodString;
         otp: z.ZodString;
+    }, z.core.$strip>;
+    resetPassword: z.ZodObject<{
+        phone_number: z.ZodString;
+        reset_token: z.ZodString;
         password: z.ZodString;
         confirm_password: z.ZodString;
     }, z.core.$strip>;

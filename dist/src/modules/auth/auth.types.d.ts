@@ -55,9 +55,19 @@ export interface ForgotPasswordRequestOtpResponse {
     message: string;
     expires_in: number;
 }
-export interface ResetPasswordRequest {
+export interface VerifyForgotPasswordOtpRequest {
     phone_number: string;
     otp: string;
+}
+export interface VerifyForgotPasswordOtpResponse {
+    success: boolean;
+    message: string;
+    reset_token: string;
+    expires_in: number;
+}
+export interface ResetPasswordRequest {
+    phone_number: string;
+    reset_token: string;
     password: string;
     confirm_password: string;
 }
@@ -72,5 +82,11 @@ export interface PasswordResetOtpPayload {
     attempts: number;
     expires_at: number;
     locked_until?: number;
+}
+export interface PasswordResetTokenPayload {
+    user_id: string;
+    phone_number: string;
+    token_hash: string;
+    expires_at: number;
 }
 //# sourceMappingURL=auth.types.d.ts.map

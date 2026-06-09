@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authSchemas = exports.resetPasswordSchema = exports.forgotPasswordRequestOtpSchema = exports.loginSchema = exports.UserStatusName = exports.RoleName = void 0;
+exports.authSchemas = exports.resetPasswordSchema = exports.verifyForgotPasswordOtpSchema = exports.forgotPasswordRequestOtpSchema = exports.loginSchema = exports.UserStatusName = exports.RoleName = void 0;
 const zod_1 = require("zod");
 // ============================================
 // CONSTANTS (matches values in database tables)
@@ -50,14 +50,24 @@ exports.forgotPasswordRequestOtpSchema = zod_1.z.object({
     phone_number: phoneNumberSchema,
 });
 /**
- * Forgot password - reset password schema
+ * Forgot password - verify OTP schema
  */
-exports.resetPasswordSchema = zod_1.z.object({
+exports.verifyForgotPasswordOtpSchema = zod_1.z.object({
     phone_number: phoneNumberSchema,
     otp: zod_1.z
         .string()
         .length(6, 'OTP harus 6 digit')
         .regex(/^\d+$/, 'OTP hanya boleh berisi angka'),
+});
+/**
+ * Forgot password - reset password schema
+ */
+exports.resetPasswordSchema = zod_1.z.object({
+    phone_number: phoneNumberSchema,
+    reset_token: zod_1.z
+        .string()
+        .min(32, 'Token reset password tidak valid')
+        .max(255, 'Token reset password tidak valid'),
     password: zod_1.z
         .string()
         .min(6, 'Password minimal 6 karakter')
@@ -74,6 +84,7 @@ exports.resetPasswordSchema = zod_1.z.object({
 exports.authSchemas = {
     login: exports.loginSchema,
     forgotPasswordRequestOtp: exports.forgotPasswordRequestOtpSchema,
+    verifyForgotPasswordOtp: exports.verifyForgotPasswordOtpSchema,
     resetPassword: exports.resetPasswordSchema,
 };
 //# sourceMappingURL=auth.schema.js.map

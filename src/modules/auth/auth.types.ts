@@ -72,10 +72,23 @@ export interface ForgotPasswordRequestOtpResponse {
     expires_in: number;
 }
 
-// Reset password with OTP
-export interface ResetPasswordRequest {
+// Verify forgot password OTP
+export interface VerifyForgotPasswordOtpRequest {
     phone_number: string;
     otp: string;
+}
+
+export interface VerifyForgotPasswordOtpResponse {
+    success: boolean;
+    message: string;
+    reset_token: string;
+    expires_in: number;
+}
+
+// Reset password with reset token
+export interface ResetPasswordRequest {
+    phone_number: string;
+    reset_token: string;
     password: string;
     confirm_password: string;
 }
@@ -93,4 +106,12 @@ export interface PasswordResetOtpPayload {
     attempts: number;
     expires_at: number;
     locked_until?: number;
+}
+
+// Redis payload for verified password reset token
+export interface PasswordResetTokenPayload {
+    user_id: string;
+    phone_number: string;
+    token_hash: string;
+    expires_at: number;
 }

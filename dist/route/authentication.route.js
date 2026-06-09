@@ -13,6 +13,7 @@ const pathGroup = 'auth';
 // Public routes (no authentication required)
 router.post(`/${pathGroup}/login`, (0, zod_validation_middleware_1.zodValidation)(auth_schema_1.loginSchema), auth_controller_1.default.login);
 router.post(`/${pathGroup}/forgot-password/request-otp`, (0, zod_validation_middleware_1.zodValidation)(auth_schema_1.forgotPasswordRequestOtpSchema), auth_controller_1.default.requestForgotPasswordOtp);
+router.post(`/${pathGroup}/forgot-password/verify-otp`, (0, zod_validation_middleware_1.zodValidation)(auth_schema_1.verifyForgotPasswordOtpSchema), auth_controller_1.default.verifyForgotPasswordOtp);
 router.post(`/${pathGroup}/forgot-password/reset-password`, (0, zod_validation_middleware_1.zodValidation)(auth_schema_1.resetPasswordSchema), auth_controller_1.default.resetPassword);
 // Protected routes (authentication required)
 router.post(`/${pathGroup}/logout`, token_validation_middleware_1.tokenValidation, auth_controller_1.default.logout);

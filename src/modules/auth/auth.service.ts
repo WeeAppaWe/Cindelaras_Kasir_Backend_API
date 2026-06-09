@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { ErrorAuthenticationException } from '../../../exception/error-authentication.exception';
 import { ErrorCodeException } from '../../../exception/error-code.exception';
 import { ErrorValidationException } from '../../../exception/error-validation.exception';
@@ -14,8 +15,11 @@ import {
     LoginResponse,
     LogoutResponse,
     PasswordResetOtpPayload,
+    PasswordResetTokenPayload,
     ResetPasswordRequest,
     ResetPasswordResponse,
+    VerifyForgotPasswordOtpRequest,
+    VerifyForgotPasswordOtpResponse,
 } from './auth.types';
 import { UserStatusName } from './auth.schema';
 import { AuthenticatedRequest } from '../../../types';
@@ -25,9 +29,18 @@ const PasswordResetOtpTtlSeconds = parseInt(process.env.FORGOT_PASSWORD_OTP_TTL_
 const PasswordResetOtpMaxAttempts = parseInt(process.env.FORGOT_PASSWORD_OTP_MAX_ATTEMPTS || '5', 10);
 const PasswordResetOtpLockAttempts = parseInt(process.env.FORGOT_PASSWORD_OTP_LOCK_ATTEMPTS || '3', 10);
 const PasswordResetOtpLockSeconds = parseInt(process.env.FORGOT_PASSWORD_OTP_LOCK_SECONDS || '60', 10);
+const PasswordResetTokenTtlSeconds = parseInt(process.env.FORGOT_PASSWORD_RESET_TOKEN_TTL_SECONDS || '600', 10);
 
 const getPasswordResetOtpKey = (phoneNumber: string): string => {
     return `auth:forgot-password:otp:${phoneNumber}`;
+};
+
+const getPasswordResetTokenKey = (phoneNumber: string): string => {
+    return `auth:forgot-password:reset-token:${phoneNumber}`;
+};
+
+const generatePasswordResetToken = (): string => {
+    return crypto.randomBytes(32).toString('hex');
 };
 
 const getOtpLockMessage = (remainingSeconds: number): string => {
@@ -37,6 +50,14 @@ const getOtpLockMessage = (remainingSeconds: number): string => {
 const throwOtpValidationError = (message: string): never => {
     throw new ErrorValidationException(message, [
         { location: 'body', field: 'otp', message },
+    ]);
+};
+
+const throwResetTokenValidationError = (
+    message = 'Token reset password tidak valid atau sudah kedaluwarsa'
+): never => {
+    throw new ErrorValidationException(message, [
+        { location: 'body', field: 'reset_token', message },
     ]);
 };
 
@@ -256,18 +277,18 @@ export const requestForgotPasswordOtp = async (
 };
 
 /**
- * Reset password using OTP
+ * Verify forgot password OTP and create a short-lived reset token
  */
-export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+export const verifyForgotPasswordOtp = async (
+    data: VerifyForgotPasswordOtpRequest
+): Promise<VerifyForgotPasswordOtpResponse> => {
     try {
         const phoneNumber = formatPhoneNumber(data.phone_number);
-        const key = getPasswordResetOtpKey(phoneNumber);
-        const otpRecord = await redis.get(key);
+        const otpKey = getPasswordResetOtpKey(phoneNumber);
+        const otpRecord = await redis.get(otpKey);
 
         if (!otpRecord) {
-            throw new ErrorValidationException('OTP tidak valid atau sudah kedaluwarsa', [
-                { location: 'body', field: 'otp', message: 'OTP tidak valid atau sudah kedaluwarsa' },
-            ]);
+            throwOtpValidationError('OTP tidak valid atau sudah kedaluwarsa');
         }
 
         const payload = JSON.parse(otpRecord) as PasswordResetOtpPayload;
@@ -284,15 +305,73 @@ export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPa
         const isOtpValid = await encDec.checkBcrypt(data.otp, payload.otp_hash);
 
         if (!isOtpValid) {
-            await handleInvalidPasswordResetOtp(key, payload);
+            await handleInvalidPasswordResetOtp(otpKey, payload);
+        }
+
+        const user = await authRepository.findByPhoneNumber(phoneNumber);
+        if (!user || user.user_id !== payload.user_id) {
+            await redis.del(otpKey);
+            throwOtpValidationError('OTP tidak valid atau sudah kedaluwarsa');
+        }
+
+        if (user.user_status.name !== UserStatusName.ACTIVE) {
+            await redis.del(otpKey);
+            throw new ErrorAuthenticationException('Akun tidak aktif');
+        }
+
+        const resetToken = generatePasswordResetToken();
+        const resetTokenPayload: PasswordResetTokenPayload = {
+            user_id: user.user_id,
+            phone_number: phoneNumber,
+            token_hash: encDec.encryptBcrypt(resetToken),
+            expires_at: Date.now() + PasswordResetTokenTtlSeconds * 1000,
+        };
+
+        await redis.set(
+            getPasswordResetTokenKey(phoneNumber),
+            JSON.stringify(resetTokenPayload),
+            'EX',
+            PasswordResetTokenTtlSeconds
+        );
+        await redis.del(otpKey);
+
+        return {
+            success: true,
+            message: 'OTP berhasil diverifikasi',
+            reset_token: resetToken,
+            expires_in: PasswordResetTokenTtlSeconds,
+        };
+    } catch (error) {
+        console.error(`--- Auth Service Error: ${(error as Error).message}`);
+        throw error;
+    }
+};
+
+/**
+ * Reset password using verified reset token
+ */
+export const resetPassword = async (data: ResetPasswordRequest): Promise<ResetPasswordResponse> => {
+    try {
+        const phoneNumber = formatPhoneNumber(data.phone_number);
+        const key = getPasswordResetTokenKey(phoneNumber);
+        const resetTokenRecord = await redis.get(key);
+
+        if (!resetTokenRecord) {
+            throwResetTokenValidationError();
+        }
+
+        const payload = JSON.parse(resetTokenRecord) as PasswordResetTokenPayload;
+        const encDec = new EncryptDecryptClass();
+        const isResetTokenValid = await encDec.checkBcrypt(data.reset_token, payload.token_hash);
+
+        if (!isResetTokenValid) {
+            throwResetTokenValidationError();
         }
 
         const user = await authRepository.findByPhoneNumber(phoneNumber);
         if (!user || user.user_id !== payload.user_id) {
             await redis.del(key);
-            throw new ErrorValidationException('OTP tidak valid atau sudah kedaluwarsa', [
-                { location: 'body', field: 'otp', message: 'OTP tidak valid atau sudah kedaluwarsa' },
-            ]);
+            throwResetTokenValidationError();
         }
 
         if (user.user_status.name !== UserStatusName.ACTIVE) {
@@ -318,6 +397,7 @@ export const authService = {
     login,
     logout,
     requestForgotPasswordOtp,
+    verifyForgotPasswordOtp,
     resetPassword,
 };
 
