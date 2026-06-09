@@ -36,7 +36,7 @@ Tabel utama untuk katalog menu.
 | `price` | decimal(15,2) | Tidak | Harga jual menu. |
 | `cost` | decimal(15,2) | Tidak | HPP menu, diperbarui dari total resep. |
 | `description` | text | Ya | Deskripsi menu. |
-| `image_url` | varchar(255) | Ya | URL/path gambar menu. |
+| `image_url` | varchar(255) | Ya | URL/path gambar menu. Nilai ini biasanya berasal dari `response.url` endpoint upload target `menu`. |
 | `is_available` | boolean | Tidak | Status menu tersedia/tidak tersedia. |
 | `created_at` | timestamp | Tidak | Waktu data dibuat. |
 | `updated_at` | timestamp | Ya | Waktu data terakhir diperbarui. |
@@ -179,6 +179,18 @@ order_items.menu_id -> menus.menu_id
 - Menu tidak bisa dihapus jika sudah memiliki riwayat order aktif di `order_items`.
 - Delete menu dan delete resep memakai soft delete, kecuali bulk update resep yang mengganti semua resep menu.
 
+### Catatan Upload Gambar Menu
+
+Endpoint menu tidak menerima file gambar secara langsung. Untuk mengisi `image_url`, frontend perlu upload file terlebih dahulu melalui endpoint upload, lalu memakai nilai `response.url` sebagai `image_url` pada create/update menu.
+
+Flow yang disarankan:
+
+1. Upload gambar ke `POST /api/upload/image/menu`.
+2. Ambil nilai `response.url` dari response upload.
+3. Kirim URL tersebut ke field `image_url` saat `POST /api/menu` atau `PATCH /api/menu/:menu_id`.
+
+Detail kontrak upload gambar tersedia di [`upload.md`](./upload.md).
+
 ---
 
 ## BAGIAN A: Manajemen Data Menu
@@ -216,7 +228,7 @@ Menampilkan seluruh menu dengan fitur *pagination*, pencarian, dan *filter* (kat
         "price": 25000,
         "cost": 10000,
         "description": "Kopi susu nikmat",
-        "image_url": "https://example.com/kopi.jpg",
+        "image_url": "https://your-project-ref.supabase.co/storage/v1/object/public/images/menus/0197f1d2-8c7d-7c0f-9a6f-99b2f0e8a120.png",
         "is_available": true,
         "created_at": "2024-01-01T10:00:00Z",
         "updated_at": null,
@@ -246,7 +258,7 @@ Menampilkan seluruh menu dengan fitur *pagination*, pencarian, dan *filter* (kat
   "category_id": "uuid-category-2",
   "price": 35000,
   "description": "Nasi goreng ayam, sosis, dan telur mata sapi",
-  "image_url": "https://example.com/nasgor.jpg",
+  "image_url": "https://your-project-ref.supabase.co/storage/v1/object/public/images/menus/0197f1d2-8c7d-7c0f-9a6f-99b2f0e8a120.png",
   "is_available": true
 }
 ```
@@ -262,7 +274,7 @@ Menampilkan seluruh menu dengan fitur *pagination*, pencarian, dan *filter* (kat
     "price": 35000,
     "cost": 0,
     "description": "Nasi goreng ayam, sosis, dan telur mata sapi",
-    "image_url": "https://example.com/nasgor.jpg",
+    "image_url": "https://your-project-ref.supabase.co/storage/v1/object/public/images/menus/0197f1d2-8c7d-7c0f-9a6f-99b2f0e8a120.png",
     "is_available": true,
     "created_at": "2024-01-01T10:00:00Z",
     "updated_at": null
@@ -285,7 +297,7 @@ Menampilkan seluruh menu dengan fitur *pagination*, pencarian, dan *filter* (kat
     "price": 25000,
     "cost": 10000,
     "description": "Kopi susu nikmat",
-    "image_url": "https://example.com/kopi.jpg",
+    "image_url": "https://your-project-ref.supabase.co/storage/v1/object/public/images/menus/0197f1d2-8c7d-7c0f-9a6f-99b2f0e8a120.png",
     "is_available": true,
     "created_at": "2024-01-01T10:00:00Z",
     "updated_at": null,

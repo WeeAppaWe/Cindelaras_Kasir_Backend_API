@@ -31,7 +31,7 @@ Tabel utama untuk konfigurasi profil sistem/toko.
 | :--- | :--- | :--- | :--- |
 | `store_setting_id` | UUID | Tidak | Primary key setting. |
 | `setting_key` | varchar(50) | Tidak | Kunci setting. Format valid: huruf kecil dan underscore, contoh `store_name`. |
-| `setting_value` | text | Tidak | Nilai setting. Bisa berupa teks biasa, URL, atau string JSON untuk konfigurasi kompleks. |
+| `setting_value` | text | Tidak | Nilai setting. Bisa berupa teks biasa, URL, atau string JSON untuk konfigurasi kompleks. Untuk `store_logo`, nilai biasanya berasal dari `response.url` endpoint upload target `logo`. |
 | `created_at` | timestamp | Tidak | Waktu data dibuat. |
 | `updated_at` | timestamp | Ya | Waktu data terakhir diperbarui. |
 | `deleted_at` | timestamp | Ya | Soft delete marker. Endpoint hanya memakai data dengan `deleted_at = null`. |
@@ -56,6 +56,18 @@ Field yang dipakai per proses:
 - `setting_value` maksimal 5000 karakter dari validasi request.
 - Batch update memakai mekanisme upsert, sehingga key yang belum ada akan dibuat dan key yang sudah ada akan diperbarui.
 - Delete setting menggunakan soft delete melalui field `store_settings.deleted_at`.
+
+### Catatan Upload Logo Toko
+
+Endpoint profil sistem tidak menerima file logo secara langsung. Untuk mengisi `store_logo`, frontend perlu upload file terlebih dahulu melalui endpoint upload, lalu menyimpan nilai `response.url` ke `store_settings.setting_value` dengan `setting_key = store_logo`.
+
+Flow yang disarankan:
+
+1. Upload logo ke `POST /api/upload/image/logo`.
+2. Ambil nilai `response.url` dari response upload.
+3. Simpan URL tersebut ke `store_logo` melalui `PATCH /api/store-setting/store_logo`, `POST /api/store-setting`, atau `PATCH /api/store-setting/batch`.
+
+Detail kontrak upload logo tersedia di [`upload.md`](./upload.md).
 
 ---
 
@@ -85,7 +97,7 @@ Digunakan untuk mengambil info profil yang sifatnya publik (seperti nama toko da
   "message": "Berhasil mengambil info publik toko",
   "data": {
     "store_name": "Toko Kopi Senja",
-    "store_logo": "https://url-logo.com/logo.png",
+    "store_logo": "https://your-project-ref.supabase.co/storage/v1/object/public/images/logos/0197f1d2-9bd0-7f57-bd11-2a03d23c2c9e.png",
     "store_address": "Jl. Mawar No 12"
   }
 }
