@@ -19,7 +19,7 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **133 endpoint**.
+Total endpoint dari folder `route`: **134 endpoint**.
 
 ## Auth
 
@@ -236,6 +236,7 @@ Source: `route/receipt.route.ts`
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/api/receipt/:order_id/pdf` | Public | Generate PDF struk on-demand. |
+| `GET` | `/api/receipt/preview-sample` | ADMIN | Ambil preview sample struk tanpa order. |
 | `GET` | `/api/receipt/:order_id/preview` | ADMIN, CASHIER | Ambil preview data struk. |
 | `POST` | `/api/receipt/:order_id/send` | ADMIN, CASHIER | Kirim struk ke WhatsApp. |
 

@@ -40,6 +40,12 @@
  *         store_logo:
  *           type: string
  *           example: "/uploads/logo.png"
+ *         receipt_header:
+ *           type: string
+ *           example: "Selamat datang"
+ *         receipt_footer:
+ *           type: string
+ *           example: "Terima kasih atas kunjungan Anda"
  *         order_id:
  *           type: string
  *           format: uuid
@@ -138,6 +144,39 @@
  *               format: binary
  *       404:
  *         description: Order not found
+ *
+ * /receipt/preview-sample:
+ *   get:
+ *     summary: Get sample receipt data for admin preview
+ *     description: |
+ *       Mengambil data contoh struk tanpa order asli.
+ *       Endpoint ini dipakai halaman admin untuk melihat hasil konfigurasi profil toko,
+ *       header struk, footer struk, dan logo.
+ *     tags: [Receipt]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Sample receipt preview data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 response:
+ *                   $ref: '#/components/schemas/ReceiptPreviewResponse'
+ *                 metaData:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/MetaData'
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           example: "Berhasil mengambil preview sample struk"
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
  *
  * /receipt/{order_id}/preview:
  *   get:

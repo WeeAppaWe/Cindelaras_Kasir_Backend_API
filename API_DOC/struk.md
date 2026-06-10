@@ -15,6 +15,7 @@ Modul struk memakai tabel utama `orders` sebagai sumber data transaksi. Detail i
 | Proses | Tabel yang Dipakai | Keterangan |
 | --- | --- | --- |
 | Generate PDF struk | `orders`, `order_items`, `menus`, `users`, `store_settings` | Mengambil data order, item, menu, kasir, dan profil toko lalu membuat PDF. |
+| Preview sample struk | `store_settings` | Mengembalikan data contoh struk tanpa order asli untuk preview halaman admin. |
 | Preview struk | `orders`, `order_items`, `menus`, `users`, `store_settings` | Mengembalikan data struk dalam format JSON untuk preview frontend. |
 | Kirim struk WhatsApp | `orders`, `order_items`, `menus`, `users`, `store_settings` | Mengambil data order dan profil toko untuk membuat pesan WhatsApp berisi link PDF. |
 
@@ -45,6 +46,7 @@ Field yang dipakai per proses:
 | --- | --- |
 | Generate PDF/preview/send | `order_id`, `receipt`, `customer_name`, `customer_phone`, `total_amount`, `paid_amount`, `change_amount`, `payment_type`, `status`, `created_at`, `user_id`, `deleted_at` |
 | Filename PDF | `receipt` atau fallback ke `order_id` |
+| Preview sample | Tidak memakai tabel `orders`; nilai order memakai data contoh dari backend. |
 
 ### 2. Tabel `order_items`
 
@@ -161,6 +163,7 @@ order_items.menu_id -> menus.menu_id
 | Method | Endpoint | Akses | Deskripsi |
 | --- | --- | --- | --- |
 | `GET` | `/:order_id/pdf` | Public | Generate dan tampilkan/download PDF struk. |
+| `GET` | `/preview-sample` | ADMIN | Mengambil data contoh struk untuk preview konfigurasi toko/header/footer. |
 | `GET` | `/:order_id/preview` | ADMIN, CASHIER | Mengambil data struk dalam format JSON untuk preview. |
 | `POST` | `/:order_id/send` | ADMIN, CASHIER | Mengirim link struk PDF ke WhatsApp customer. |
 
@@ -170,7 +173,7 @@ order_items.menu_id -> menus.menu_id
 
 ## Path Parameter
 
-Semua endpoint memakai path parameter berikut:
+Endpoint `/:order_id/pdf`, `/:order_id/preview`, dan `/:order_id/send` memakai path parameter berikut. Endpoint `/preview-sample` tidak memakai path parameter.
 
 | Parameter | Type | Required | Keterangan |
 | --- | --- | --- | --- |
@@ -220,7 +223,76 @@ Data struk yang dikembalikan endpoint preview dan dipakai untuk generate PDF mem
 
 ---
 
-## 1. Generate PDF Struk
+## 1. Preview Sample Struk
+
+- **Endpoint:** `GET /preview-sample`
+- **URL Lengkap:** `/api/receipt/preview-sample`
+- **Akses:** Protected, role **ADMIN**
+- **Request Body:** Tidak ada
+
+Endpoint ini mengembalikan data contoh struk tanpa membutuhkan `order_id`. Data identitas toko, logo, header, dan footer tetap diambil dari `store_settings`, sehingga halaman admin bisa menampilkan preview hasil konfigurasi struk sebelum ada transaksi asli.
+
+### Request Headers
+
+```http
+Authorization: Bearer <token>
+x-api-key: <api-key>
+```
+
+### Request
+
+```http
+GET /api/receipt/preview-sample
+```
+
+### Response Berhasil (200 OK)
+
+```json
+{
+  "response": {
+    "store_name": "Cindelaras Resto",
+    "store_address": "Jl. Ringroad Utara, Yogyakarta",
+    "store_phone": "0274-123456",
+    "store_logo": "/uploads/logo.png",
+    "receipt_header": "Selamat datang",
+    "receipt_footer": "Terima kasih atas kunjungan Anda",
+    "order_id": "00000000-0000-0000-0000-000000000000",
+    "receipt": "PREVIEW-SAMPLE",
+    "order_date": "10 Jun 2026",
+    "order_time": "14.30",
+    "cashier_name": "Admin Preview",
+    "customer_name": "Pelanggan Contoh",
+    "customer_phone": "081234567890",
+    "items": [
+      {
+        "name": "Nasi Goreng Spesial",
+        "qty": 1,
+        "price": 25000,
+        "subtotal": 25000
+      },
+      {
+        "name": "Es Teh Manis",
+        "qty": 2,
+        "price": 5000,
+        "subtotal": 10000
+      }
+    ],
+    "total": 35000,
+    "payment_type": "CASH",
+    "paid_amount": 50000,
+    "change_amount": 15000
+  },
+  "metaData": {
+    "message": "Berhasil mengambil preview sample struk",
+    "code": 200,
+    "response_code": "0000"
+  }
+}
+```
+
+---
+
+## 2. Generate PDF Struk
 
 - **Endpoint:** `GET /:order_id/pdf`
 - **URL Lengkap:** `/api/receipt/:order_id/pdf`
@@ -273,7 +345,7 @@ Jika nomor struk belum ada, backend memakai `order_id`.
 
 ---
 
-## 2. Preview Data Struk
+## 3. Preview Data Struk
 
 - **Endpoint:** `GET /:order_id/preview`
 - **URL Lengkap:** `/api/receipt/:order_id/preview`
@@ -360,7 +432,7 @@ Jika order tidak memiliki data customer, field customer bernilai `null`.
 
 ---
 
-## 3. Kirim Struk ke WhatsApp
+## 4. Kirim Struk ke WhatsApp
 
 - **Endpoint:** `POST /:order_id/send`
 - **URL Lengkap:** `/api/receipt/:order_id/send`
@@ -592,6 +664,7 @@ Terjadi jika user tidak memiliki role **ADMIN** atau **CASHIER**.
 
 - `GET /api/receipt/:order_id/pdf` tidak membutuhkan auth, jadi aman dipakai sebagai link customer.
 - PDF selalu di-generate ulang dari data order saat link diakses.
+- `GET /api/receipt/preview-sample` khusus admin dan tidak membaca tabel order; endpoint ini memakai item transaksi contoh untuk melihat tampilan header/footer/logo toko.
 - `GET /api/receipt/:order_id/preview` cocok untuk preview internal aplikasi kasir.
 - `POST /api/receipt/:order_id/send` hanya mengirim link PDF, bukan file PDF langsung.
 - Base URL link WhatsApp mengikuti konfigurasi `API_BASE_URL`. Jika `API_BASE_URL` belum diakhiri `/api`, backend menambahkan `/api` otomatis.

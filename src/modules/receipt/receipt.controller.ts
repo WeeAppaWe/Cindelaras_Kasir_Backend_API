@@ -30,6 +30,19 @@ export const sendReceipt = async (req: AuthenticatedRequest, res: Response, next
 };
 
 /**
+ * Get Receipt Preview Sample (JSON data)
+ * GET /api/receipt/preview-sample
+ */
+export const getPreviewSample = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const data = await receiptService.getPreviewSample();
+    res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil preview sample struk' }, data));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get Receipt Preview (JSON data)
  * GET /api/receipt/:order_id/preview
  */
@@ -45,6 +58,7 @@ export const getReceiptPreview = async (req: AuthenticatedRequest, res: Response
 export const receiptController = {
   getPdfReceipt,
   sendReceipt,
+  getPreviewSample,
   getReceiptPreview,
 };
 

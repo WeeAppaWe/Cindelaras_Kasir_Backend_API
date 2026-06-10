@@ -15,10 +15,18 @@ const pathGroup = 'receipt';
 
 // Middleware for authenticated routes (kasir or admin)
 const authMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN, RoleName.CASHIER])];
+const adminMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN])];
 
 // ============================================
 // Receipt Routes
 // ============================================
+
+// GET /api/receipt/preview-sample - Get sample receipt data for admin setting preview
+router.get(
+  `/${pathGroup}/preview-sample`,
+  ...adminMiddleware,
+  receiptController.getPreviewSample
+);
 
 // GET /api/receipt/:order_id/pdf - Generate PDF on-demand (PUBLIC - no auth)
 // This is accessed via WhatsApp link by customer

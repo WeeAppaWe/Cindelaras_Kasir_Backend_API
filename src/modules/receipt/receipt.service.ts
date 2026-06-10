@@ -5,7 +5,7 @@ import { AuthenticatedRequest } from '../../../types';
 import { ReceiptDataForGenerator } from '../../../types/receipt.types';
 import receiptRepository from './receipt.repository';
 import storeSettingRepository from '../store-setting/store-setting.repository';
-import { generatePdfReceipt } from '../../../utility/receipt.utility';
+import { generatePdfReceipt, normalizeReceiptLogoValue } from '../../../utility/receipt.utility';
 import { sendWhatsAppMessage, isFonnteConfigured } from '../../../utility/fonnte.utility';
 import { SendReceiptResponse, ReceiptOrderData } from './receipt.types';
 
@@ -36,7 +36,7 @@ const getStoreInfo = async (): Promise<StoreInfoForReceipt> => {
     store_name: settingsMap['store_name'] || process.env.STORE_NAME || 'Toko Anda',
     store_address: settingsMap['store_address'] || process.env.STORE_ADDRESS || '',
     store_phone: settingsMap['store_phone'] || process.env.STORE_PHONE || '',
-    store_logo: settingsMap['store_logo'] || process.env.STORE_LOGO || '',
+    store_logo: normalizeReceiptLogoValue(settingsMap['store_logo'] || process.env.STORE_LOGO || ''),
     receipt_header: settingsMap['receipt_header'] || '',
     receipt_footer: settingsMap['receipt_footer'] || '',
   };
@@ -90,6 +90,54 @@ const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoFor
     payment_type: order.payment_type,
     paid_amount: order.paid_amount,
     change_amount: order.change_amount,
+  };
+};
+
+const buildSampleReceiptData = (storeInfo: StoreInfoForReceipt): ReceiptDataForGenerator => {
+  const now = new Date();
+  const items = [
+    {
+      name: 'Nasi Goreng Spesial',
+      qty: 1,
+      price: 25000,
+      subtotal: 25000,
+    },
+    {
+      name: 'Es Teh Manis',
+      qty: 2,
+      price: 5000,
+      subtotal: 10000,
+    },
+  ];
+  const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+  const paidAmount = 50000;
+
+  return {
+    store_name: storeInfo.store_name,
+    store_address: storeInfo.store_address,
+    store_phone: storeInfo.store_phone,
+    store_logo: storeInfo.store_logo,
+    receipt_header: storeInfo.receipt_header,
+    receipt_footer: storeInfo.receipt_footer,
+    order_id: '00000000-0000-0000-0000-000000000000',
+    receipt: 'PREVIEW-SAMPLE',
+    order_date: now.toLocaleDateString('id-ID', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }),
+    order_time: now.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    cashier_name: 'Admin Preview',
+    customer_name: 'Pelanggan Contoh',
+    customer_phone: '081234567890',
+    items,
+    total,
+    payment_type: 'CASH',
+    paid_amount: paidAmount,
+    change_amount: paidAmount - total,
   };
 };
 
@@ -203,6 +251,21 @@ Terima kasih! 🙏`;
 };
 
 /**
+ * Get sample receipt preview data for admin store-setting page.
+ * GET /api/receipt/preview-sample
+ */
+export const getPreviewSample = async (): Promise<ReceiptDataForGenerator> => {
+  try {
+    const storeInfo = await getStoreInfo();
+
+    return buildSampleReceiptData(storeInfo);
+  } catch (error) {
+    console.error(`--- Receipt Service Error: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
  * Get receipt preview (JSON data for frontend display)
  * GET /api/receipt/:order_id/preview
  */
@@ -231,6 +294,7 @@ export const getReceiptPreview = async (req: AuthenticatedRequest): Promise<Rece
 export const receiptService = {
   getPdfReceipt,
   sendReceipt,
+  getPreviewSample,
   getReceiptPreview,
 };
 
