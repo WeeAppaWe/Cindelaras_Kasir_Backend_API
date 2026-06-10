@@ -3,11 +3,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateHtmlReceipt = exports.generatePdfReceipt = void 0;
+exports.generateHtmlReceipt = exports.generatePdfReceipt = exports.normalizeReceiptLogoValue = void 0;
 const pdfkit_1 = __importDefault(require("pdfkit"));
+const axios_1 = __importDefault(require("axios"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const format_money_utility_1 = require("./format-money.utility");
+const supabase_config_1 = require("../config/supabase.config");
+const MAX_PDF_LOGO_BYTES = 5 * 1024 * 1024;
 const getReceiptDisplayNumber = (data) => {
     return data.receipt || '-';
 };
@@ -65,13 +68,111 @@ const getDataUriLogoBuffer = (logoValue) => {
         return null;
     }
 };
-const getPdfLogoSource = (logoValue) => {
-    return getDataUriLogoBuffer(logoValue) || getLocalLogoPath(logoValue);
+const isHttpUrl = (value) => /^https?:\/\//i.test(value);
+const buildSupabasePublicUrl = (objectPath) => {
+    const supabaseUrl = process.env.SUPABASE_URL?.trim().replace(/\/+$/, '');
+    const normalizedObjectPath = objectPath.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!supabaseUrl || !normalizedObjectPath) {
+        return null;
+    }
+    const encodedPath = normalizedObjectPath
+        .split('/')
+        .filter(Boolean)
+        .map(encodeURIComponent)
+        .join('/');
+    return `${supabaseUrl}/storage/v1/object/public/${supabase_config_1.SUPABASE_STORAGE_BUCKET}/${encodedPath}`;
+};
+const getSupabaseLogoUrlCandidates = (logoValue) => {
+    const rawLogo = logoValue?.trim();
+    if (!rawLogo || rawLogo.startsWith('data:image/') || isHttpUrl(rawLogo)) {
+        return [];
+    }
+    const normalizedLogo = rawLogo.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!normalizedLogo || normalizedLogo.startsWith('uploads/')) {
+        return [];
+    }
+    const logoFolder = (0, supabase_config_1.getSupabaseStorageFolder)('logo');
+    const filename = normalizedLogo.split('/').filter(Boolean).pop();
+    const objectPathCandidates = [
+        normalizedLogo.includes('/') ? normalizedLogo : '',
+        filename ? `${logoFolder}/${filename}` : '',
+    ].filter(Boolean);
+    return Array.from(new Set(objectPathCandidates
+        .map(buildSupabasePublicUrl)
+        .filter((url) => Boolean(url))));
+};
+const normalizeReceiptLogoValue = (logoValue) => {
+    const rawLogo = logoValue?.trim();
+    if (!rawLogo) {
+        return '';
+    }
+    const normalizedLogo = rawLogo.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (rawLogo.startsWith('data:image/') || isHttpUrl(rawLogo) || normalizedLogo.startsWith('uploads/')) {
+        return rawLogo;
+    }
+    return getSupabaseLogoUrlCandidates(rawLogo)[0] || rawLogo;
+};
+exports.normalizeReceiptLogoValue = normalizeReceiptLogoValue;
+const isSupportedPdfImageBuffer = (buffer) => {
+    const isPng = buffer.length >= 8
+        && buffer[0] === 0x89
+        && buffer[1] === 0x50
+        && buffer[2] === 0x4E
+        && buffer[3] === 0x47
+        && buffer[4] === 0x0D
+        && buffer[5] === 0x0A
+        && buffer[6] === 0x1A
+        && buffer[7] === 0x0A;
+    const isJpeg = buffer.length >= 3
+        && buffer[0] === 0xFF
+        && buffer[1] === 0xD8
+        && buffer[2] === 0xFF;
+    return isPng || isJpeg;
+};
+const getRemoteLogoBuffer = async (logoValue) => {
+    const rawLogo = logoValue?.trim();
+    if (!rawLogo) {
+        return null;
+    }
+    const logoUrls = isHttpUrl(rawLogo) ? [rawLogo] : getSupabaseLogoUrlCandidates(rawLogo);
+    for (const logoUrl of logoUrls) {
+        try {
+            const response = await axios_1.default.get(logoUrl, {
+                responseType: 'arraybuffer',
+                timeout: 5000,
+                maxContentLength: MAX_PDF_LOGO_BYTES,
+                headers: {
+                    Accept: 'image/png,image/jpeg,image/jpg,*/*;q=0.8',
+                },
+                validateStatus: (status) => status >= 200 && status < 300,
+            });
+            const buffer = Buffer.from(response.data);
+            if (isSupportedPdfImageBuffer(buffer)) {
+                return buffer;
+            }
+        }
+        catch {
+            continue;
+        }
+    }
+    return null;
+};
+const getPdfLogoSource = async (logoValue) => {
+    const dataUriLogo = getDataUriLogoBuffer(logoValue);
+    if (dataUriLogo) {
+        return dataUriLogo;
+    }
+    const localLogo = getLocalLogoPath(logoValue);
+    if (localLogo) {
+        return localLogo;
+    }
+    return getRemoteLogoBuffer(logoValue);
 };
 /**
  * Generate PDF receipt as base64 string
  */
 const generatePdfReceipt = async (data) => {
+    const logoSource = await getPdfLogoSource(data.store_logo);
     return new Promise((resolve, reject) => {
         try {
             // Create PDF with thermal printer dimensions (80mm width ≈ 227 points)
@@ -83,7 +184,7 @@ const generatePdfReceipt = async (data) => {
             const itemHeightEstimate = data.items.reduce((sum, item) => {
                 return sum + 34 + Math.ceil(item.name.length / 28) * 8;
             }, 0);
-            const estimatedHeight = Math.max(560, 330 + logoHeight + itemHeightEstimate + addressLines * 9 + phoneLines * 9 + headerLines * 8 + footerLines * 9);
+            const estimatedHeight = Math.max(620, 390 + logoHeight + itemHeightEstimate + addressLines * 9 + phoneLines * 9 + headerLines * 8 + footerLines * 9);
             const doc = new pdfkit_1.default({
                 size: [227, estimatedHeight],
                 margins: { top: 0, bottom: 0, left: 0, right: 0 },
@@ -106,39 +207,65 @@ const generatePdfReceipt = async (data) => {
             const accentSoft = '#ECFDF5';
             const receiptNumber = getReceiptDisplayNumber(data);
             let y = 16;
-            const logoSource = getPdfLogoSource(data.store_logo);
-            const drawDivider = (positionY, color = border) => {
+            const drawDivider = (positionY, color = border, inset = 0) => {
                 doc
                     .strokeColor(color)
                     .lineWidth(0.6)
-                    .moveTo(margin, positionY)
-                    .lineTo(pageWidth - margin, positionY)
+                    .moveTo(margin + inset, positionY)
+                    .lineTo(pageWidth - margin - inset, positionY)
                     .stroke();
             };
+            const fitFontSize = (text, maxWidth, font, maxSize, minSize) => {
+                for (let size = maxSize; size >= minSize; size -= 0.5) {
+                    doc.font(font).fontSize(size);
+                    if (doc.widthOfString(text) <= maxWidth) {
+                        return size;
+                    }
+                }
+                return minSize;
+            };
             const drawKeyValue = (label, value, positionY, valueColor = ink) => {
+                const labelWidth = 58;
+                const valueX = margin + 78;
+                const valueWidth = contentWidth - 88;
+                const normalizedValue = value || '-';
                 doc
                     .font('Helvetica')
-                    .fontSize(6.5)
+                    .fontSize(6.8)
                     .fillColor(muted)
-                    .text(label, margin + 10, positionY, { width: 64 });
+                    .text(label, margin + 10, positionY, { width: labelWidth });
                 doc
                     .font('Helvetica-Bold')
-                    .fontSize(7.5)
+                    .fontSize(7.6)
                     .fillColor(valueColor)
-                    .text(value || '-', margin + 74, positionY, {
-                    width: contentWidth - 84,
+                    .text(normalizedValue, valueX, positionY, {
+                    width: valueWidth,
                     align: 'right',
+                    lineGap: 1,
                 });
+                const labelHeight = doc
+                    .font('Helvetica')
+                    .fontSize(6.8)
+                    .heightOfString(label, { width: labelWidth });
+                const valueHeight = doc
+                    .font('Helvetica-Bold')
+                    .fontSize(7.6)
+                    .heightOfString(normalizedValue, {
+                    width: valueWidth,
+                    align: 'right',
+                    lineGap: 1,
+                });
+                return Math.max(12, labelHeight, valueHeight);
             };
             const drawAmountRow = (label, value, positionY, bold = false, valueColor = ink) => {
                 doc
                     .font(bold ? 'Helvetica-Bold' : 'Helvetica')
-                    .fontSize(bold ? 8.5 : 7.5)
+                    .fontSize(bold ? 8.7 : 7.5)
                     .fillColor(bold ? ink : muted)
-                    .text(label, margin + 12, positionY, { width: 74 });
+                    .text(label, margin + 12, positionY, { width: 72 });
                 doc
                     .font('Helvetica-Bold')
-                    .fontSize(bold ? 10 : 8)
+                    .fontSize(bold ? 10.5 : 8.2)
                     .fillColor(valueColor)
                     .text(value, margin + 86, positionY, {
                     width: contentWidth - 98,
@@ -167,14 +294,17 @@ const generatePdfReceipt = async (data) => {
                 align: 'center',
             });
             y = doc.y + 4;
-            doc.font('Helvetica').fontSize(7).fillColor(muted);
-            data.store_address.split('\n').forEach((line) => {
-                doc.text(line, margin + 8, y, {
-                    width: contentWidth - 16,
-                    align: 'center',
+            if (data.store_address) {
+                doc.font('Helvetica').fontSize(7).fillColor(muted);
+                data.store_address.split('\n').forEach((line) => {
+                    doc.text(line, margin + 8, y, {
+                        width: contentWidth - 16,
+                        align: 'center',
+                        lineGap: 1,
+                    });
+                    y = doc.y;
                 });
-                y = doc.y;
-            });
+            }
             if (data.store_phone) {
                 doc.text(`Telp: ${data.store_phone}`, margin + 8, y + 1, {
                     width: contentWidth - 16,
@@ -189,12 +319,24 @@ const generatePdfReceipt = async (data) => {
                     doc.text(line, margin + 8, y, {
                         width: contentWidth - 16,
                         align: 'center',
+                        lineGap: 1,
                     });
                     y = doc.y;
                 });
             }
-            y += 10;
-            doc.roundedRect(margin, y, contentWidth, 48, 8).fill(accent);
+            y += 12;
+            const receiptTextWidth = contentWidth - 24;
+            const receiptFontSize = fitFontSize(receiptNumber, receiptTextWidth, 'Helvetica-Bold', 13, 8.5);
+            const receiptNumberHeight = doc
+                .font('Helvetica-Bold')
+                .fontSize(receiptFontSize)
+                .heightOfString(receiptNumber, {
+                width: receiptTextWidth,
+                align: 'left',
+                lineGap: 1,
+            });
+            const receiptCardHeight = Math.max(54, 34 + receiptNumberHeight);
+            doc.roundedRect(margin, y, contentWidth, receiptCardHeight, 8).fill(accent);
             doc
                 .font('Helvetica')
                 .fontSize(6.5)
@@ -202,20 +344,37 @@ const generatePdfReceipt = async (data) => {
                 .text('NO. STRUK', margin + 12, y + 10, { width: contentWidth - 24 });
             doc
                 .font('Helvetica-Bold')
-                .fontSize(14)
+                .fontSize(receiptFontSize)
                 .fillColor('#FFFFFF')
-                .text(receiptNumber, margin + 12, y + 22, {
-                width: contentWidth - 24,
+                .text(receiptNumber, margin + 12, y + 25, {
+                width: receiptTextWidth,
                 align: 'left',
+                lineGap: 1,
             });
-            y += 60;
-            const metaHeight = data.customer_name ? 62 : 48;
+            y += receiptCardHeight + 14;
+            const metaRows = [
+                { label: 'Tanggal', value: `${data.order_date} ${data.order_time}` },
+                { label: 'Kasir', value: data.cashier_name },
+                ...(data.customer_name ? [{ label: 'Pelanggan', value: data.customer_name }] : []),
+            ];
+            const metaHeight = 20 + metaRows.reduce((height, row) => {
+                const valueWidth = contentWidth - 88;
+                const valueHeight = doc
+                    .font('Helvetica-Bold')
+                    .fontSize(7.6)
+                    .heightOfString(row.value || '-', {
+                    width: valueWidth,
+                    align: 'right',
+                    lineGap: 1,
+                });
+                return height + Math.max(12, valueHeight) + 5;
+            }, 0);
             doc.roundedRect(margin, y, contentWidth, metaHeight, 7).fillAndStroke(subtle, border);
-            drawKeyValue('Tanggal', `${data.order_date} ${data.order_time}`, y + 11);
-            drawKeyValue('Kasir', data.cashier_name, y + 27);
-            if (data.customer_name) {
-                drawKeyValue('Pelanggan', data.customer_name, y + 43);
-            }
+            let metaRowY = y + 11;
+            metaRows.forEach((row) => {
+                const rowHeight = drawKeyValue(row.label, row.value, metaRowY);
+                metaRowY += rowHeight + 5;
+            });
             y += metaHeight + 16;
             doc
                 .font('Helvetica-Bold')
@@ -235,21 +394,23 @@ const generatePdfReceipt = async (data) => {
             y += 9;
             data.items.forEach((item, index) => {
                 const subtotal = (0, format_money_utility_1.formatMoney)(item.subtotal);
-                const itemNameWidth = contentWidth - 70;
+                const itemNameWidth = contentWidth - 82;
+                doc.font('Helvetica-Bold').fontSize(8);
                 const nameHeight = doc.heightOfString(item.name, {
                     width: itemNameWidth,
+                    lineGap: 1,
                 });
                 doc
                     .font('Helvetica-Bold')
                     .fontSize(8)
                     .fillColor(ink)
-                    .text(item.name, margin, y, { width: itemNameWidth });
+                    .text(item.name, margin, y, { width: itemNameWidth, lineGap: 1 });
                 doc
                     .font('Helvetica-Bold')
                     .fontSize(8)
                     .fillColor(ink)
                     .text(subtotal, margin + itemNameWidth, y, {
-                    width: 70,
+                    width: 82,
                     align: 'right',
                 });
                 y += Math.max(nameHeight, 9) + 3;
@@ -267,7 +428,12 @@ const generatePdfReceipt = async (data) => {
                 }
             });
             y += 8;
-            const summaryHeight = data.change_amount > 0 ? 98 : 82;
+            const summaryRows = [
+                { label: 'Subtotal', value: (0, format_money_utility_1.formatMoney)(data.total) },
+                { label: 'Bayar', value: (0, format_money_utility_1.formatMoney)(data.paid_amount) },
+                ...(data.change_amount > 0 ? [{ label: 'Kembalian', value: (0, format_money_utility_1.formatMoney)(data.change_amount) }] : []),
+            ];
+            const summaryHeight = 74 + summaryRows.length * 16;
             doc.roundedRect(margin, y, contentWidth, summaryHeight, 8).fillAndStroke(subtle, border);
             doc.roundedRect(margin + 12, y + 11, 44, 14, 7).fill(accentSoft);
             doc
@@ -278,13 +444,13 @@ const generatePdfReceipt = async (data) => {
                 width: 44,
                 align: 'center',
             });
-            drawAmountRow('Subtotal', (0, format_money_utility_1.formatMoney)(data.total), y + 34);
-            drawAmountRow('Bayar', (0, format_money_utility_1.formatMoney)(data.paid_amount), y + 50);
-            if (data.change_amount > 0) {
-                drawAmountRow('Kembalian', (0, format_money_utility_1.formatMoney)(data.change_amount), y + 66);
-            }
-            drawDivider(y + summaryHeight - 28, '#D1D5DB');
-            drawAmountRow('TOTAL', (0, format_money_utility_1.formatMoney)(data.total), y + summaryHeight - 19, true, accent);
+            let amountRowY = y + 38;
+            summaryRows.forEach((row) => {
+                drawAmountRow(row.label, row.value, amountRowY);
+                amountRowY += 16;
+            });
+            drawDivider(amountRowY + 4, '#D1D5DB', 12);
+            drawAmountRow('TOTAL', (0, format_money_utility_1.formatMoney)(data.total), amountRowY + 13, true, accent);
             y += summaryHeight + 16;
             doc
                 .font('Helvetica-Bold')

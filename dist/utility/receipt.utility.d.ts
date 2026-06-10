@@ -1,4 +1,5 @@
 import { ReceiptDataForGenerator } from '../types';
+export declare const normalizeReceiptLogoValue: (logoValue: string | null | undefined) => string;
 /**
  * Generate PDF receipt as base64 string
  */

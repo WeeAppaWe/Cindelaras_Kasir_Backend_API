@@ -14,9 +14,12 @@ const router = express_1.default.Router();
 const pathGroup = 'receipt';
 // Middleware for authenticated routes (kasir or admin)
 const authMiddleware = [token_validation_middleware_1.tokenValidation, (0, role_validation_middleware_1.roleValidation)([auth_schema_1.RoleName.ADMIN, auth_schema_1.RoleName.CASHIER])];
+const adminMiddleware = [token_validation_middleware_1.tokenValidation, (0, role_validation_middleware_1.roleValidation)([auth_schema_1.RoleName.ADMIN])];
 // ============================================
 // Receipt Routes
 // ============================================
+// GET /api/receipt/preview-sample - Get sample receipt data for admin setting preview
+router.get(`/${pathGroup}/preview-sample`, ...adminMiddleware, receipt_controller_1.default.getPreviewSample);
 // GET /api/receipt/:order_id/pdf - Generate PDF on-demand (PUBLIC - no auth)
 // This is accessed via WhatsApp link by customer
 router.get(`/${pathGroup}/:order_id/pdf`, (0, zod_validation_middleware_1.zodValidation)(receipt_schema_1.orderIdParamSchema, 'params'), receipt_controller_1.default.getPdfReceipt);

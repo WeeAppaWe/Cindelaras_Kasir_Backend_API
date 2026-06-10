@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.receiptService = exports.getReceiptPreview = exports.sendReceipt = exports.getPdfReceipt = void 0;
+exports.receiptService = exports.getReceiptPreview = exports.getPreviewSample = exports.sendReceipt = exports.getPdfReceipt = void 0;
 const error_not_found_exception_1 = require("../../../exception/error-not-found.exception");
 const error_validation_exception_1 = require("../../../exception/error-validation.exception");
 const receipt_repository_1 = __importDefault(require("./receipt.repository"));
@@ -23,7 +23,7 @@ const getStoreInfo = async () => {
         store_name: settingsMap['store_name'] || process.env.STORE_NAME || 'Toko Anda',
         store_address: settingsMap['store_address'] || process.env.STORE_ADDRESS || '',
         store_phone: settingsMap['store_phone'] || process.env.STORE_PHONE || '',
-        store_logo: settingsMap['store_logo'] || process.env.STORE_LOGO || '',
+        store_logo: (0, receipt_utility_1.normalizeReceiptLogoValue)(settingsMap['store_logo'] || process.env.STORE_LOGO || ''),
         receipt_header: settingsMap['receipt_header'] || '',
         receipt_footer: settingsMap['receipt_footer'] || '',
     };
@@ -72,6 +72,52 @@ const transformToReceiptData = (order, storeInfo) => {
         payment_type: order.payment_type,
         paid_amount: order.paid_amount,
         change_amount: order.change_amount,
+    };
+};
+const buildSampleReceiptData = (storeInfo) => {
+    const now = new Date();
+    const items = [
+        {
+            name: 'Nasi Goreng Spesial',
+            qty: 1,
+            price: 25000,
+            subtotal: 25000,
+        },
+        {
+            name: 'Es Teh Manis',
+            qty: 2,
+            price: 5000,
+            subtotal: 10000,
+        },
+    ];
+    const total = items.reduce((sum, item) => sum + item.subtotal, 0);
+    const paidAmount = 50000;
+    return {
+        store_name: storeInfo.store_name,
+        store_address: storeInfo.store_address,
+        store_phone: storeInfo.store_phone,
+        store_logo: storeInfo.store_logo,
+        receipt_header: storeInfo.receipt_header,
+        receipt_footer: storeInfo.receipt_footer,
+        order_id: '00000000-0000-0000-0000-000000000000',
+        receipt: 'PREVIEW-SAMPLE',
+        order_date: now.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+        }),
+        order_time: now.toLocaleTimeString('id-ID', {
+            hour: '2-digit',
+            minute: '2-digit',
+        }),
+        cashier_name: 'Admin Preview',
+        customer_name: 'Pelanggan Contoh',
+        customer_phone: '081234567890',
+        items,
+        total,
+        payment_type: 'CASH',
+        paid_amount: paidAmount,
+        change_amount: paidAmount - total,
     };
 };
 /**
@@ -170,6 +216,21 @@ Terima kasih! 🙏`;
 };
 exports.sendReceipt = sendReceipt;
 /**
+ * Get sample receipt preview data for admin store-setting page.
+ * GET /api/receipt/preview-sample
+ */
+const getPreviewSample = async () => {
+    try {
+        const storeInfo = await getStoreInfo();
+        return buildSampleReceiptData(storeInfo);
+    }
+    catch (error) {
+        console.error(`--- Receipt Service Error: ${error.message}`);
+        throw error;
+    }
+};
+exports.getPreviewSample = getPreviewSample;
+/**
  * Get receipt preview (JSON data for frontend display)
  * GET /api/receipt/:order_id/preview
  */
@@ -195,6 +256,7 @@ exports.getReceiptPreview = getReceiptPreview;
 exports.receiptService = {
     getPdfReceipt: exports.getPdfReceipt,
     sendReceipt: exports.sendReceipt,
+    getPreviewSample: exports.getPreviewSample,
     getReceiptPreview: exports.getReceiptPreview,
 };
 exports.default = exports.receiptService;
