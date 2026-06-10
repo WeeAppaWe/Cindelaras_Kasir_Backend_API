@@ -7,6 +7,7 @@ import {
     createUnitMeasureSchema,
     updateUnitMeasureSchema,
     unitMeasureIdParamSchema,
+    unitMeasureReferenceQuerySchema,
     unitMeasureListQuerySchema,
 } from '../src/modules/unit-measure/unit-measure.schema';
 import unitMeasureController from '../src/modules/unit-measure/unit-measure.controller';
@@ -21,6 +22,14 @@ const adminMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN])];
 // ============================================
 // Unit Measure Routes
 // ============================================
+
+// GET /api/unit-measure/options - Get unit measure references for dropdown
+router.get(
+    `/${pathGroup}/options`,
+    ...adminMiddleware,
+    zodValidation(unitMeasureReferenceQuerySchema, 'query'),
+    unitMeasureController.getReferences
+);
 
 // GET /api/unit-measure - Get all unit measures
 router.get(

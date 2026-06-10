@@ -1,5 +1,9 @@
-import { RawIngredientFilter, RawIngredientPaginationOptions, RawIngredientWithRelations } from './ingredient-raw.types';
+import { RawIngredientFilter, RawIngredientPaginationOptions, RawIngredientReference, RawIngredientWithRelations } from './ingredient-raw.types';
 import { Prisma } from '../../../generated/prisma/client';
+/**
+ * Find all raw ingredients (for dropdown/selection)
+ */
+export declare const findAllReferences: () => Promise<RawIngredientReference[]>;
 /**
  * Find all raw ingredients with pagination and filters
  */
@@ -51,6 +55,7 @@ export declare const findLowStock: () => Promise<RawIngredientWithRelations[]>;
  */
 export declare const countLowStock: () => Promise<number>;
 export declare const rawIngredientRepository: {
+    findAllReferences: () => Promise<RawIngredientReference[]>;
     findAll: (options: RawIngredientPaginationOptions, filter: RawIngredientFilter) => Promise<RawIngredientWithRelations[]>;
     count: (filter: RawIngredientFilter) => Promise<number>;
     findById: (ingredientId: string) => Promise<RawIngredientWithRelations | null>;

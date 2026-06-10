@@ -4,11 +4,16 @@ import { roleValidation } from '../middleware/role-validation.middleware';
 import { zodValidation } from '../middleware/zod-validation.middleware';
 import { RoleName } from '../src/modules/auth/auth.schema';
 
+// All Ingredient imports
+import { ingredientAllReferenceQuerySchema } from '../src/modules/ingredient/all/ingredient-all.schema';
+import ingredientAllController from '../src/modules/ingredient/all/ingredient-all.controller';
+
 // Raw Ingredient imports
 import {
     createRawIngredientSchema,
     updateRawIngredientSchema,
     ingredientIdParamSchema,
+    rawIngredientReferenceQuerySchema,
     rawIngredientListQuerySchema,
 } from '../src/modules/ingredient/raw/ingredient-raw.schema';
 import rawIngredientController from '../src/modules/ingredient/raw/ingredient-raw.controller';
@@ -28,11 +33,30 @@ const router: Router = express.Router();
 const adminMiddleware = [tokenValidation, roleValidation([RoleName.ADMIN])];
 
 // ============================================
+// ALL INGREDIENT ROUTES (/api/ingredient)
+// ============================================
+const ingredientPath = 'ingredient';
+
+// Reference/Dropdown Routes
+router.get(
+    `/${ingredientPath}/options`,
+    ...adminMiddleware,
+    zodValidation(ingredientAllReferenceQuerySchema, 'query'),
+    ingredientAllController.getReferences
+);
+
+// ============================================
 // RAW INGREDIENT ROUTES (/api/ingredient/raw)
 // ============================================
 const rawPath = 'ingredient/raw';
 
 // Reference/Dropdown Routes (must be before :ingredient_id routes)
+router.get(
+    `/${rawPath}/options`,
+    ...adminMiddleware,
+    zodValidation(rawIngredientReferenceQuerySchema, 'query'),
+    rawIngredientController.getReferences
+);
 router.get(`/${rawPath}/units`, ...adminMiddleware, rawIngredientController.getUnitMeasures);
 router.get(`/${rawPath}/low-stock`, ...adminMiddleware, rawIngredientController.getLowStockAlerts);
 

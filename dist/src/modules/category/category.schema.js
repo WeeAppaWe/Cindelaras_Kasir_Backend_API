@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.categorySchemas = exports.categoryListQuerySchema = exports.categoryIdParamSchema = exports.updateCategorySchema = exports.createCategorySchema = void 0;
+exports.categorySchemas = exports.categoryReferenceQuerySchema = exports.categoryListQuerySchema = exports.categoryIdParamSchema = exports.updateCategorySchema = exports.createCategorySchema = void 0;
 const zod_1 = require("zod");
 // ============================================
 // ZOD SCHEMAS
@@ -40,12 +40,17 @@ exports.categoryListQuerySchema = zod_1.z.object({
     size: zod_1.z.coerce.number().min(1).max(100).default(10).optional(),
     search: zod_1.z.string().optional(),
 });
+/**
+ * Query params schema for category references
+ */
+exports.categoryReferenceQuerySchema = zod_1.z.object({});
 // Export schemas
 exports.categorySchemas = {
     create: exports.createCategorySchema,
     update: exports.updateCategorySchema,
     categoryIdParam: exports.categoryIdParamSchema,
     listQuery: exports.categoryListQuerySchema,
+    referenceQuery: exports.categoryReferenceQuerySchema,
 };
 exports.default = exports.categorySchemas;
 //# sourceMappingURL=category.schema.js.map

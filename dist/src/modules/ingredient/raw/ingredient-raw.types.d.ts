@@ -40,6 +40,15 @@ export interface RawIngredientWithRelations {
         name: string;
     };
 }
+export interface RawIngredientReference {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    unit: {
+        unit_measure_id: string;
+        name: string;
+    };
+}
 export interface RawIngredientListResponse {
     page: {
         total_record_count: number;

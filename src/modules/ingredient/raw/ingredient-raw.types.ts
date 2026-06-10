@@ -54,6 +54,17 @@ export interface RawIngredientWithRelations {
     };
 }
 
+// Raw ingredient reference (for dropdown/selection)
+export interface RawIngredientReference {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    unit: {
+        unit_measure_id: string;
+        name: string;
+    };
+}
+
 // Raw ingredient list response
 export interface RawIngredientListResponse {
     page: {

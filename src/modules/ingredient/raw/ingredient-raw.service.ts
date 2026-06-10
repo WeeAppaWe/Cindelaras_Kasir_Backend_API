@@ -10,6 +10,7 @@ import {
     CreateRawIngredientRequest,
     UpdateRawIngredientRequest,
     RawIngredientListResponse,
+    RawIngredientReference,
     RawIngredientWithRelations,
     DeleteRawIngredientResponse,
     LowStockAlertResponse,
@@ -17,6 +18,18 @@ import {
 } from './ingredient-raw.types';
 
 const prisma = getPrismaClient();
+
+/**
+ * Get all raw ingredients (for dropdown/selection)
+ */
+export const getAllReferences = async (): Promise<RawIngredientReference[]> => {
+    try {
+        return await rawIngredientRepository.findAllReferences();
+    } catch (error) {
+        console.error(`--- Raw Ingredient Service Error: ${(error as Error).message}`);
+        throw error;
+    }
+};
 
 /**
  * Get all raw ingredients with pagination and filters
@@ -233,6 +246,7 @@ export const getLowStockAlerts = async (): Promise<LowStockAlertResponse> => {
 };
 
 export const rawIngredientService = {
+    getAllReferences,
     getAll,
     getDetail,
     create,

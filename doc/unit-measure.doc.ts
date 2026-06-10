@@ -139,6 +139,38 @@
 
 /**
  * @swagger
+ * /unit-measure/options:
+ *   get:
+ *     summary: Get unit measure references for dropdown
+ *     description: Mengambil semua satuan ukur aktif tanpa pagination untuk kebutuhan dropdown.
+ *     tags: [Unit Measure]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Unit measure references retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UnitMeasureReferenceListResponse'
+ *             example:
+ *               response:
+ *                 - unit_measure_id: "660e8400-e29b-41d4-a716-446655440001"
+ *                   name: "Kilogram"
+ *                 - unit_measure_id: "660e8400-e29b-41d4-a716-446655440002"
+ *                   name: "Liter"
+ *               metaData:
+ *                 message: "Berhasil mengambil data pilihan satuan"
+ *                 code: 200
+ *                 response_code: "0000"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  * /unit-measure:
  *   get:
  *     summary: Get all unit measures

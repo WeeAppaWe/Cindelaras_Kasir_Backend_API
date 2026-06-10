@@ -49,6 +49,17 @@
  *           format: date-time
  *           nullable: true
  *
+ *     CategoryReference:
+ *       type: object
+ *       properties:
+ *         category_id:
+ *           type: string
+ *           format: uuid
+ *           example: "880e8400-e29b-41d4-a716-446655440001"
+ *         name:
+ *           type: string
+ *           example: "Makanan"
+ *
  *     CategoryWithCount:
  *       allOf:
  *         - $ref: '#/components/schemas/CategoryData'
@@ -91,6 +102,21 @@
  *                 message:
  *                   example: "Berhasil mengambil data kategori"
  *
+ *     CategoryReferenceListResponse:
+ *       type: object
+ *       properties:
+ *         response:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/CategoryReference'
+ *         metaData:
+ *           allOf:
+ *             - $ref: '#/components/schemas/MetaData'
+ *             - type: object
+ *               properties:
+ *                 message:
+ *                   example: "Berhasil mengambil data pilihan kategori"
+ *
  *     CategoryDetailResponse:
  *       type: object
  *       properties:
@@ -107,6 +133,38 @@
 
 /**
  * @swagger
+ * /category/options:
+ *   get:
+ *     summary: Get category references for dropdown
+ *     description: Mengambil semua kategori aktif tanpa pagination untuk kebutuhan dropdown.
+ *     tags: [Category]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Category references retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CategoryReferenceListResponse'
+ *             example:
+ *               response:
+ *                 - category_id: "880e8400-e29b-41d4-a716-446655440001"
+ *                   name: "Makanan"
+ *                 - category_id: "880e8400-e29b-41d4-a716-446655440002"
+ *                   name: "Minuman"
+ *               metaData:
+ *                 message: "Berhasil mengambil data pilihan kategori"
+ *                 code: 200
+ *                 response_code: "0000"
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  * /category:
  *   get:
  *     summary: Get all categories
@@ -171,7 +229,7 @@
  *           schema:
  *             $ref: '#/components/schemas/CreateCategoryInput'
  *     responses:
- *       200:
+ *       201:
  *         description: Category created successfully
  *         content:
  *           application/json:

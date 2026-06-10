@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.categoryService = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = void 0;
+exports.categoryService = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = exports.getAllReferences = void 0;
 const error_not_found_exception_1 = require("../../../exception/error-not-found.exception");
 const error_data_already_exist_exception_1 = require("../../../exception/error-data-already-exist.exception");
 const error_validation_exception_1 = require("../../../exception/error-validation.exception");
@@ -11,6 +11,19 @@ const postgres_connection_1 = __importDefault(require("../../../database/postgre
 const pagination_utility_1 = require("../../../utility/pagination.utility");
 const category_repository_1 = __importDefault(require("./category.repository"));
 const prisma = (0, postgres_connection_1.default)();
+/**
+ * Get all categories (for dropdown/selection)
+ */
+const getAllReferences = async () => {
+    try {
+        return await category_repository_1.default.findAllReferences();
+    }
+    catch (error) {
+        console.error(`--- Category Service Error: ${error.message}`);
+        throw error;
+    }
+};
+exports.getAllReferences = getAllReferences;
 /**
  * Get all categories with pagination and filters
  */
@@ -155,6 +168,7 @@ const softDelete = async (req) => {
 };
 exports.softDelete = softDelete;
 exports.categoryService = {
+    getAllReferences: exports.getAllReferences,
     getAll: exports.getAll,
     getDetail: exports.getDetail,
     create: exports.create,

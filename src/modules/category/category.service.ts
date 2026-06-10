@@ -10,10 +10,23 @@ import {
     UpdateCategoryRequest,
     CategoryListResponse,
     CategoryData,
+    CategoryReference,
     DeleteCategoryResponse,
 } from './category.types';
 
 const prisma = getPrismaClient();
+
+/**
+ * Get all categories (for dropdown/selection)
+ */
+export const getAllReferences = async (): Promise<CategoryReference[]> => {
+    try {
+        return await categoryRepository.findAllReferences();
+    } catch (error) {
+        console.error(`--- Category Service Error: ${(error as Error).message}`);
+        throw error;
+    }
+};
 
 /**
  * Get all categories with pagination and filters
@@ -175,6 +188,7 @@ export const softDelete = async (req: AuthenticatedRequest): Promise<DeleteCateg
 };
 
 export const categoryService = {
+    getAllReferences,
     getAll,
     getDetail,
     create,

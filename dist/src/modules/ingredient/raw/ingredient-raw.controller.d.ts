@@ -1,6 +1,11 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../../../types';
 /**
+ * Get Raw Ingredient References (for dropdown)
+ * GET /api/ingredient/raw/options
+ */
+export declare const getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
  * Get All Raw Ingredients
  * GET /api/ingredient/raw
  */
@@ -36,6 +41,7 @@ export declare const getUnitMeasures: (req: AuthenticatedRequest, res: Response,
  */
 export declare const getLowStockAlerts: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const rawIngredientController: {
+    getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     showAll: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     detail: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     create: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;

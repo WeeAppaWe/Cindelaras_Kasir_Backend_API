@@ -85,11 +85,17 @@ export const rawIngredientListQuerySchema = z.object({
     low_stock: z.coerce.boolean().optional(),
 });
 
+/**
+ * Query params schema for raw ingredient references
+ */
+export const rawIngredientReferenceQuerySchema = z.object({});
+
 // Infer types from schemas
 export type CreateRawIngredientInput = z.infer<typeof createRawIngredientSchema>;
 export type UpdateRawIngredientInput = z.infer<typeof updateRawIngredientSchema>;
 export type IngredientIdParam = z.infer<typeof ingredientIdParamSchema>;
 export type RawIngredientListQuery = z.infer<typeof rawIngredientListQuerySchema>;
+export type RawIngredientReferenceQuery = z.infer<typeof rawIngredientReferenceQuerySchema>;
 
 // Export schemas
 export const rawIngredientSchemas = {
@@ -97,6 +103,7 @@ export const rawIngredientSchemas = {
     update: updateRawIngredientSchema,
     ingredientIdParam: ingredientIdParamSchema,
     listQuery: rawIngredientListQuerySchema,
+    referenceQuery: rawIngredientReferenceQuerySchema,
 };
 
 export default rawIngredientSchemas;

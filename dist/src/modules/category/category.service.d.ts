@@ -1,5 +1,9 @@
 import { AuthenticatedRequest } from '../../../types';
-import { CategoryListResponse, CategoryData, DeleteCategoryResponse } from './category.types';
+import { CategoryListResponse, CategoryData, CategoryReference, DeleteCategoryResponse } from './category.types';
+/**
+ * Get all categories (for dropdown/selection)
+ */
+export declare const getAllReferences: () => Promise<CategoryReference[]>;
 /**
  * Get all categories with pagination and filters
  */
@@ -21,6 +25,7 @@ export declare const update: (req: AuthenticatedRequest) => Promise<CategoryData
  */
 export declare const softDelete: (req: AuthenticatedRequest) => Promise<DeleteCategoryResponse>;
 export declare const categoryService: {
+    getAllReferences: () => Promise<CategoryReference[]>;
     getAll: (req: AuthenticatedRequest) => Promise<CategoryListResponse>;
     getDetail: (req: AuthenticatedRequest) => Promise<CategoryData>;
     create: (req: AuthenticatedRequest) => Promise<CategoryData>;

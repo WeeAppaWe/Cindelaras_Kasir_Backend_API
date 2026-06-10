@@ -1,6 +1,12 @@
 import getPrismaClient from '../../../../database/postgres.connection';
 import { handlePrismaError } from '../../../../utility/prisma-error-handler.utility';
-import { RawIngredientFilter, RawIngredientPaginationOptions, RawIngredientWithRelations, IngredientType } from './ingredient-raw.types';
+import {
+    RawIngredientFilter,
+    RawIngredientPaginationOptions,
+    RawIngredientReference,
+    RawIngredientWithRelations,
+    IngredientType,
+} from './ingredient-raw.types';
 import { Prisma } from '../../../generated/prisma/client';
 
 const prisma = getPrismaClient();
@@ -21,6 +27,40 @@ const rawIngredientSelectFields = {
             name: true,
         },
     },
+};
+
+// Select fields for dropdown/reference usage
+const rawIngredientReferenceSelectFields = {
+    ingredient_id: true,
+    name: true,
+    type: true,
+    unit: {
+        select: {
+            unit_measure_id: true,
+            name: true,
+        },
+    },
+};
+
+/**
+ * Find all raw ingredients (for dropdown/selection)
+ */
+export const findAllReferences = async (): Promise<RawIngredientReference[]> => {
+    try {
+        const ingredients = await prisma.ingredient.findMany({
+            where: {
+                deleted_at: null,
+                type: IngredientType.RAW,
+            },
+            select: rawIngredientReferenceSelectFields,
+            orderBy: { name: 'asc' },
+        });
+
+        return ingredients as RawIngredientReference[];
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
 };
 
 /**
@@ -312,6 +352,7 @@ export const countLowStock = async (): Promise<number> => {
 };
 
 export const rawIngredientRepository = {
+    findAllReferences,
     findAll,
     count,
     findById,

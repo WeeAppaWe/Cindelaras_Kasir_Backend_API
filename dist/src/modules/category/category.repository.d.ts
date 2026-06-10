@@ -1,5 +1,9 @@
-import { CategoryFilter, CategoryPaginationOptions, CategoryData, CategoryWithCount } from './category.types';
+import { CategoryFilter, CategoryPaginationOptions, CategoryData, CategoryReference, CategoryWithCount } from './category.types';
 import { Prisma } from '../../generated/prisma/client';
+/**
+ * Find all categories (for dropdown/selection)
+ */
+export declare const findAllReferences: () => Promise<CategoryReference[]>;
 /**
  * Find all categories with pagination and filters
  */
@@ -33,6 +37,7 @@ export declare const softDelete: (categoryId: string, transaction?: Prisma.Trans
  */
 export declare const hasMenus: (categoryId: string) => Promise<boolean>;
 export declare const categoryRepository: {
+    findAllReferences: () => Promise<CategoryReference[]>;
     findAll: (options: CategoryPaginationOptions, filter: CategoryFilter) => Promise<CategoryWithCount[]>;
     count: (filter: CategoryFilter) => Promise<number>;
     findById: (categoryId: string) => Promise<CategoryData | null>;

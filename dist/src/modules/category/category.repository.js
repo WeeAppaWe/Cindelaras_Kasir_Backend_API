@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.categoryRepository = exports.hasMenus = exports.softDelete = exports.update = exports.create = exports.findByName = exports.findById = exports.count = exports.findAll = void 0;
+exports.categoryRepository = exports.hasMenus = exports.softDelete = exports.update = exports.create = exports.findByName = exports.findById = exports.count = exports.findAll = exports.findAllReferences = void 0;
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -14,6 +14,11 @@ const categorySelectFields = {
     created_at: true,
     updated_at: true,
 };
+// Select fields for dropdown/reference usage
+const categoryReferenceSelectFields = {
+    category_id: true,
+    name: true,
+};
 // Select fields with menu count
 const categoryWithCountSelectFields = {
     ...categorySelectFields,
@@ -23,6 +28,26 @@ const categoryWithCountSelectFields = {
         },
     },
 };
+/**
+ * Find all categories (for dropdown/selection)
+ */
+const findAllReferences = async () => {
+    try {
+        const categories = await prisma.category.findMany({
+            where: {
+                deleted_at: null,
+            },
+            select: categoryReferenceSelectFields,
+            orderBy: { name: 'asc' },
+        });
+        return categories;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.findAllReferences = findAllReferences;
 /**
  * Find all categories with pagination and filters
  */
@@ -192,6 +217,7 @@ const hasMenus = async (categoryId) => {
 };
 exports.hasMenus = hasMenus;
 exports.categoryRepository = {
+    findAllReferences: exports.findAllReferences,
     findAll: exports.findAll,
     count: exports.count,
     findById: exports.findById,

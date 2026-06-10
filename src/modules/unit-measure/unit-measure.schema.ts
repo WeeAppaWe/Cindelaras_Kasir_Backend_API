@@ -45,11 +45,17 @@ export const unitMeasureListQuerySchema = z.object({
     search: z.string().optional(),
 });
 
+/**
+ * Query params schema for unit measure references
+ */
+export const unitMeasureReferenceQuerySchema = z.object({});
+
 // Infer types from schemas
 export type CreateUnitMeasureInput = z.infer<typeof createUnitMeasureSchema>;
 export type UpdateUnitMeasureInput = z.infer<typeof updateUnitMeasureSchema>;
 export type UnitMeasureIdParam = z.infer<typeof unitMeasureIdParamSchema>;
 export type UnitMeasureListQuery = z.infer<typeof unitMeasureListQuerySchema>;
+export type UnitMeasureReferenceQuery = z.infer<typeof unitMeasureReferenceQuerySchema>;
 
 // Export schemas
 export const unitMeasureSchemas = {
@@ -57,6 +63,7 @@ export const unitMeasureSchemas = {
     update: updateUnitMeasureSchema,
     unitMeasureIdParam: unitMeasureIdParamSchema,
     listQuery: unitMeasureListQuerySchema,
+    referenceQuery: unitMeasureReferenceQuerySchema,
 };
 
 export default unitMeasureSchemas;

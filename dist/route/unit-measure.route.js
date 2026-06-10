@@ -17,6 +17,8 @@ const adminMiddleware = [token_validation_middleware_1.tokenValidation, (0, role
 // ============================================
 // Unit Measure Routes
 // ============================================
+// GET /api/unit-measure/options - Get unit measure references for dropdown
+router.get(`/${pathGroup}/options`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(unit_measure_schema_1.unitMeasureReferenceQuerySchema, 'query'), unit_measure_controller_1.default.getReferences);
 // GET /api/unit-measure - Get all unit measures
 router.get(`/${pathGroup}`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(unit_measure_schema_1.unitMeasureListQuerySchema, 'query'), unit_measure_controller_1.default.showAll);
 // GET /api/unit-measure/:unit_measure_id - Get unit measure detail

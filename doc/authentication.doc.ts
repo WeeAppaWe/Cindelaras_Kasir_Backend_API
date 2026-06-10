@@ -179,13 +179,11 @@
  *                 message:
  *                   example: "OTP reset password berhasil dikirim"
  *
- *     ResetPasswordInput:
+ *     VerifyForgotPasswordOtpInput:
  *       type: object
  *       required:
  *         - phone_number
  *         - otp
- *         - password
- *         - confirm_password
  *       properties:
  *         phone_number:
  *           type: string
@@ -198,7 +196,60 @@
  *           description: Six-digit OTP received via WhatsApp
  *           minLength: 6
  *           maxLength: 6
+ *           pattern: "^\\d+$"
  *           example: "123456"
+ *
+ *     VerifyForgotPasswordOtpData:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "OTP berhasil diverifikasi"
+ *         reset_token:
+ *           type: string
+ *           description: Short-lived token used to reset the password
+ *           example: "6f7c8d9e0a1b2c3d4e5f60718293a4b56c7d8e9f0a1b2c3d4e5f60718293a4b5"
+ *         expires_in:
+ *           type: integer
+ *           description: Reset token validity duration in seconds
+ *           example: 600
+ *
+ *     VerifyForgotPasswordOtpResponse:
+ *       type: object
+ *       properties:
+ *         response:
+ *           $ref: '#/components/schemas/VerifyForgotPasswordOtpData'
+ *         metaData:
+ *           allOf:
+ *             - $ref: '#/components/schemas/MetaData'
+ *             - type: object
+ *               properties:
+ *                 message:
+ *                   example: "OTP berhasil diverifikasi"
+ *
+ *     ResetPasswordInput:
+ *       type: object
+ *       required:
+ *         - phone_number
+ *         - reset_token
+ *         - password
+ *         - confirm_password
+ *       properties:
+ *         phone_number:
+ *           type: string
+ *           description: Registered WhatsApp phone number
+ *           minLength: 9
+ *           maxLength: 20
+ *           example: "081234567890"
+ *         reset_token:
+ *           type: string
+ *           description: Reset token returned by verify OTP endpoint
+ *           minLength: 32
+ *           maxLength: 255
+ *           example: "6f7c8d9e0a1b2c3d4e5f60718293a4b56c7d8e9f0a1b2c3d4e5f60718293a4b5"
  *         password:
  *           type: string
  *           format: password
@@ -327,10 +378,41 @@
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *
+ * /auth/forgot-password/verify-otp:
+ *   post:
+ *     summary: Verify forgot password OTP
+ *     description: Verifies the OTP sent via WhatsApp and returns a short-lived reset token.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VerifyForgotPasswordOtpInput'
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/VerifyForgotPasswordOtpResponse'
+ *       401:
+ *         description: Unauthorized (Inactive account)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       422:
+ *         description: Validation error, invalid OTP, expired OTP, or OTP cooldown is active
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *
  * /auth/forgot-password/reset-password:
  *   post:
- *     summary: Reset password using OTP
- *     description: Resets the account password after validating the OTP sent via WhatsApp.
+ *     summary: Reset password using reset token
+ *     description: Resets the account password using the reset token returned by verify OTP.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -352,7 +434,7 @@
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       422:
- *         description: Validation error, invalid OTP, expired OTP, or OTP cooldown is active
+ *         description: Validation error, invalid reset token, or expired reset token
  *         content:
  *           application/json:
  *             schema:

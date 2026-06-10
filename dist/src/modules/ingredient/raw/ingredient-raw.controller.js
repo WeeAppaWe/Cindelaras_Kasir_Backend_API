@@ -3,10 +3,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rawIngredientController = exports.getLowStockAlerts = exports.getUnitMeasures = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = void 0;
+exports.rawIngredientController = exports.getLowStockAlerts = exports.getUnitMeasures = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = exports.getReferences = void 0;
 const ingredient_raw_service_1 = __importDefault(require("./ingredient-raw.service"));
 const unit_measure_service_1 = __importDefault(require("../../unit-measure/unit-measure.service"));
 const response_api_1 = __importDefault(require("../../../../utility/response-api"));
+/**
+ * Get Raw Ingredient References (for dropdown)
+ * GET /api/ingredient/raw/options
+ */
+const getReferences = async (req, res, next) => {
+    try {
+        const data = await ingredient_raw_service_1.default.getAllReferences();
+        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'Berhasil mengambil data pilihan bahan baku' }, data));
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getReferences = getReferences;
 /**
  * Get All Raw Ingredients
  * GET /api/ingredient/raw
@@ -106,6 +120,7 @@ const getLowStockAlerts = async (req, res, next) => {
 };
 exports.getLowStockAlerts = getLowStockAlerts;
 exports.rawIngredientController = {
+    getReferences: exports.getReferences,
     showAll: exports.showAll,
     detail: exports.detail,
     create: exports.create,

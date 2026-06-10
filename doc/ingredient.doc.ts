@@ -1,6 +1,8 @@
 /**
  * @swagger
  * tags:
+ *   - name: Ingredient
+ *     description: Referensi bahan untuk dropdown
  *   - name: Ingredient Raw
  *     description: Manajemen bahan baku mentah
  *   - name: Ingredient Semi
@@ -68,7 +70,7 @@
  *           type: string
  *         type:
  *           type: string
- *           enum: [raw, semi]
+ *           enum: [RAW, SEMI]
  *         stock_qty:
  *           type: number
  *         min_stock:
@@ -91,6 +93,46 @@
  *             name:
  *               type: string
  *               example: "Kg"
+ *
+ *     IngredientReference:
+ *       type: object
+ *       properties:
+ *         ingredient_id:
+ *           type: string
+ *           format: uuid
+ *           example: "550e8400-e29b-41d4-a716-446655440000"
+ *         name:
+ *           type: string
+ *           example: "Tepung Terigu"
+ *         type:
+ *           type: string
+ *           enum: [RAW, SEMI]
+ *           example: "RAW"
+ *         unit:
+ *           type: object
+ *           properties:
+ *             unit_measure_id:
+ *               type: string
+ *               format: uuid
+ *               example: "660e8400-e29b-41d4-a716-446655440001"
+ *             name:
+ *               type: string
+ *               example: "Kilogram"
+ *
+ *     IngredientReferenceListResponse:
+ *       type: object
+ *       properties:
+ *         response:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/IngredientReference'
+ *         metaData:
+ *           allOf:
+ *             - $ref: '#/components/schemas/MetaData'
+ *             - type: object
+ *               properties:
+ *                 message:
+ *                   example: "Berhasil mengambil data pilihan bahan"
  *
  *     CreateSemiIngredientInput:
  *       type: object
@@ -248,6 +290,74 @@
 
 /**
  * @swagger
+ * /ingredient/options:
+ *   get:
+ *     summary: Get all ingredient references for dropdown
+ *     description: Mengambil semua bahan aktif, baik RAW maupun SEMI, tanpa pagination untuk kebutuhan dropdown.
+ *     tags: [Ingredient]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Ingredient references retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/IngredientReferenceListResponse'
+ *             example:
+ *               response:
+ *                 - ingredient_id: "550e8400-e29b-41d4-a716-446655440000"
+ *                   name: "Tepung Terigu"
+ *                   type: "RAW"
+ *                   unit:
+ *                     unit_measure_id: "660e8400-e29b-41d4-a716-446655440001"
+ *                     name: "Kilogram"
+ *                 - ingredient_id: "550e8400-e29b-41d4-a716-446655440003"
+ *                   name: "Adonan Pizza"
+ *                   type: "SEMI"
+ *                   unit:
+ *                     unit_measure_id: "660e8400-e29b-41d4-a716-446655440002"
+ *                     name: "Porsi"
+ *               metaData:
+ *                 message: "Berhasil mengambil data pilihan bahan"
+ *                 code: 200
+ *                 response_code: "0000"
+ *
+ * /ingredient/raw/options:
+ *   get:
+ *     summary: Get raw ingredient references for dropdown
+ *     description: Mengambil semua bahan baku aktif (type RAW) tanpa pagination untuk kebutuhan dropdown.
+ *     tags: [Ingredient Raw]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Raw ingredient references retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/IngredientReferenceListResponse'
+ *             example:
+ *               response:
+ *                 - ingredient_id: "550e8400-e29b-41d4-a716-446655440000"
+ *                   name: "Tepung Terigu"
+ *                   type: "RAW"
+ *                   unit:
+ *                     unit_measure_id: "660e8400-e29b-41d4-a716-446655440001"
+ *                     name: "Kilogram"
+ *                 - ingredient_id: "550e8400-e29b-41d4-a716-446655440002"
+ *                   name: "Gula Pasir"
+ *                   type: "RAW"
+ *                   unit:
+ *                     unit_measure_id: "660e8400-e29b-41d4-a716-446655440001"
+ *                     name: "Kilogram"
+ *               metaData:
+ *                 message: "Berhasil mengambil data pilihan bahan baku"
+ *                 code: 200
+ *                 response_code: "0000"
+ *
  * /ingredient/raw/units:
  *   get:
  *     summary: Get unit measures for dropdown

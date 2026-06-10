@@ -5,6 +5,19 @@ import responseApi from '../../../../utility/response-api';
 import { AuthenticatedRequest } from '../../../../types';
 
 /**
+ * Get Raw Ingredient References (for dropdown)
+ * GET /api/ingredient/raw/options
+ */
+export const getReferences = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await rawIngredientService.getAllReferences();
+        res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil data pilihan bahan baku' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get All Raw Ingredients
  * GET /api/ingredient/raw
  */
@@ -96,6 +109,7 @@ export const getLowStockAlerts = async (req: AuthenticatedRequest, res: Response
 };
 
 export const rawIngredientController = {
+    getReferences,
     showAll,
     detail,
     create,

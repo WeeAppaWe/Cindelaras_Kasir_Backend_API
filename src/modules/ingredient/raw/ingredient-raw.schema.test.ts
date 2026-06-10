@@ -2,7 +2,9 @@ import {
     createRawIngredientSchema,
     updateRawIngredientSchema,
     ingredientIdParamSchema,
+    rawIngredientReferenceQuerySchema,
     rawIngredientListQuerySchema,
+    rawIngredientSchemas,
 } from './ingredient-raw.schema';
 
 // Mock raw ingredient request data
@@ -323,6 +325,18 @@ describe('Raw Ingredient Schema Validation', () => {
             });
 
             expect(result.success).toBe(false);
+        });
+    });
+
+    describe('rawIngredientReferenceQuerySchema', () => {
+        it('should pass validation with empty query', () => {
+            const result = rawIngredientReferenceQuerySchema.safeParse({});
+
+            expect(result.success).toBe(true);
+        });
+
+        it('should be exported in rawIngredientSchemas', () => {
+            expect(rawIngredientSchemas.referenceQuery).toBe(rawIngredientReferenceQuerySchema);
         });
     });
 });

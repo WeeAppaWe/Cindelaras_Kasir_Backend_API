@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unitMeasureSchemas = exports.unitMeasureListQuerySchema = exports.unitMeasureIdParamSchema = exports.updateUnitMeasureSchema = exports.createUnitMeasureSchema = void 0;
+exports.unitMeasureSchemas = exports.unitMeasureReferenceQuerySchema = exports.unitMeasureListQuerySchema = exports.unitMeasureIdParamSchema = exports.updateUnitMeasureSchema = exports.createUnitMeasureSchema = void 0;
 const zod_1 = require("zod");
 // ============================================
 // ZOD SCHEMAS
@@ -42,12 +42,17 @@ exports.unitMeasureListQuerySchema = zod_1.z.object({
     size: zod_1.z.coerce.number().min(1).max(100).default(10).optional(),
     search: zod_1.z.string().optional(),
 });
+/**
+ * Query params schema for unit measure references
+ */
+exports.unitMeasureReferenceQuerySchema = zod_1.z.object({});
 // Export schemas
 exports.unitMeasureSchemas = {
     create: exports.createUnitMeasureSchema,
     update: exports.updateUnitMeasureSchema,
     unitMeasureIdParam: exports.unitMeasureIdParamSchema,
     listQuery: exports.unitMeasureListQuerySchema,
+    referenceQuery: exports.unitMeasureReferenceQuerySchema,
 };
 exports.default = exports.unitMeasureSchemas;
 //# sourceMappingURL=unit-measure.schema.js.map

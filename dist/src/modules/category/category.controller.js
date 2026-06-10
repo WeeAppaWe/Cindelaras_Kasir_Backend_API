@@ -3,9 +3,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.categoryController = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = void 0;
+exports.categoryController = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = exports.getReferences = void 0;
 const category_service_1 = __importDefault(require("./category.service"));
 const response_api_1 = __importDefault(require("../../../utility/response-api"));
+/**
+ * Get Category References (for dropdown)
+ * GET /api/category/options
+ */
+const getReferences = async (req, res, next) => {
+    try {
+        const data = await category_service_1.default.getAllReferences();
+        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'Berhasil mengambil data pilihan kategori' }, data));
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getReferences = getReferences;
 /**
  * Get All Categories
  * GET /api/category
@@ -77,6 +91,7 @@ const softDelete = async (req, res, next) => {
 };
 exports.softDelete = softDelete;
 exports.categoryController = {
+    getReferences: exports.getReferences,
     showAll: exports.showAll,
     detail: exports.detail,
     create: exports.create,

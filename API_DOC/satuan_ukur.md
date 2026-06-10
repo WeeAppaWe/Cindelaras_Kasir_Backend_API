@@ -81,11 +81,44 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 - Nama satuan dicek duplikat secara case-insensitive.
 - Hapus satuan memakai soft delete dengan mengisi `unit_measures.deleted_at`.
 - Satuan tidak dapat dihapus jika masih digunakan bahan aktif (`ingredients.deleted_at = null`).
-- Endpoint dropdown satuan untuk bahan tersedia di `/api/ingredient/raw/units` dan `/api/ingredient/semi/units`.
+- Endpoint dropdown master satuan tersedia di `/api/unit-measure/options`.
+- Endpoint dropdown satuan untuk bahan tetap tersedia di `/api/ingredient/raw/units` dan `/api/ingredient/semi/units`.
 
 ---
 
-## 1. Menampilkan Semua Satuan Ukur
+## 1. Menampilkan Pilihan Satuan Ukur untuk Dropdown
+
+- **Endpoint:** `GET /options`
+- **Akses:** Protected (ADMIN)
+- **Query Params:** Tidak ada
+- **Request Body:** Tidak ada
+
+Endpoint ini mengembalikan semua satuan aktif dalam format ringan tanpa pagination.
+
+**Response Berhasil (200 OK):**
+```json
+{
+  "response": [
+    {
+      "unit_measure_id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Kilogram"
+    },
+    {
+      "unit_measure_id": "660e8400-e29b-41d4-a716-446655440002",
+      "name": "Liter"
+    }
+  ],
+  "metaData": {
+    "message": "Berhasil mengambil data pilihan satuan",
+    "code": 200,
+    "response_code": "0000"
+  }
+}
+```
+
+---
+
+## 2. Menampilkan Semua Satuan Ukur
 
 - **Endpoint:** `GET /`
 - **Akses:** Protected (ADMIN)
@@ -124,7 +157,7 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 
 ---
 
-## 2. Menampilkan Detail Satuan Ukur
+## 3. Menampilkan Detail Satuan Ukur
 
 - **Endpoint:** `GET /:unit_measure_id`
 - **Akses:** Protected (ADMIN)
@@ -149,7 +182,7 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 
 ---
 
-## 3. Membuat Satuan Ukur
+## 4. Membuat Satuan Ukur
 
 - **Endpoint:** `POST /`
 - **Akses:** Protected (ADMIN)
@@ -180,7 +213,7 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 
 ---
 
-## 4. Mengubah Satuan Ukur
+## 5. Mengubah Satuan Ukur
 
 - **Endpoint:** `PATCH /:unit_measure_id`
 - **Akses:** Protected (ADMIN)
@@ -211,7 +244,7 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 
 ---
 
-## 5. Menghapus Satuan Ukur
+## 6. Menghapus Satuan Ukur
 
 - **Endpoint:** `DELETE /:unit_measure_id`
 - **Akses:** Protected (ADMIN)
@@ -239,7 +272,8 @@ ingredients.unit_id -> unit_measures.unit_measure_id
 
 Endpoint dropdown untuk form ingredient tetap tersedia melalui:
 
+- `GET /api/unit-measure/options`
 - `GET /api/ingredient/raw/units`
 - `GET /api/ingredient/semi/units`
 
-Keduanya mengembalikan array sederhana tanpa pagination.
+Ketiganya mengembalikan array sederhana tanpa pagination.

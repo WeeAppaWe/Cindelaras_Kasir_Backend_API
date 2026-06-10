@@ -14,9 +14,12 @@ const router = express_1.default.Router();
 const pathGroup = 'category';
 // All routes require authentication and ADMIN role
 const adminMiddleware = [token_validation_middleware_1.tokenValidation, (0, role_validation_middleware_1.roleValidation)([auth_schema_1.RoleName.ADMIN])];
+const adminAndCashierMiddleware = [token_validation_middleware_1.tokenValidation, (0, role_validation_middleware_1.roleValidation)([auth_schema_1.RoleName.ADMIN, auth_schema_1.RoleName.CASHIER])];
 // ============================================
 // CRUD Routes
 // ============================================
+// GET /api/category/options - Get category references for dropdown
+router.get(`/${pathGroup}/options`, ...adminAndCashierMiddleware, (0, zod_validation_middleware_1.zodValidation)(category_schema_1.categoryReferenceQuerySchema, 'query'), category_controller_1.default.getReferences);
 // GET /api/category - Get all categories
 router.get(`/${pathGroup}`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(category_schema_1.categoryListQuerySchema, 'query'), category_controller_1.default.showAll);
 // GET /api/category/:category_id - Get category detail

@@ -5,10 +5,24 @@ import { ErrorNotFoundException } from '../../../../exception/error-not-found.ex
 import { ErrorDataAlreadyExistException } from '../../../../exception/error-data-already-exist.exception';
 import { ErrorValidationException } from '../../../../exception/error-validation.exception';
 
-import { mockIngredient, mockIngredient2, mockLowStockIngredients } from '../../../tests/mocks/ingredient.mock';
+import {
+    mockIngredient,
+    mockIngredient2,
+    mockLowStockIngredients,
+    mockRawIngredientReferences,
+} from '../../../tests/mocks/ingredient.mock';
 import { mockUnitMeasure } from '../../../tests/mocks/unit-measure.mock';
 
 // Mock dependencies
+jest.mock('../../../generated/prisma/client', () => ({
+    Prisma: {
+        PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error { },
+        PrismaClientUnknownRequestError: class PrismaClientUnknownRequestError extends Error { },
+        PrismaClientRustPanicError: class PrismaClientRustPanicError extends Error { },
+        PrismaClientInitializationError: class PrismaClientInitializationError extends Error { },
+        PrismaClientValidationError: class PrismaClientValidationError extends Error { },
+    },
+}));
 jest.mock('./ingredient-raw.repository');
 jest.mock('../../unit-measure/unit-measure.service');
 jest.mock('../../../../database/postgres.connection', () => ({
@@ -34,6 +48,45 @@ jest.mock('../../../../database/postgres.connection', () => ({
 describe('Raw Ingredient Service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    describe('getAllReferences', () => {
+        it('should return raw ingredient references for dropdown', async () => {
+            // Arrange
+            (rawIngredientRepository.findAllReferences as jest.Mock).mockResolvedValue(mockRawIngredientReferences);
+
+            // Act
+            const result = await rawIngredientService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual(mockRawIngredientReferences[0]);
+            expect(result[1].type).toBe('RAW');
+            expect(rawIngredientRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return empty array when no raw ingredient references exist', async () => {
+            // Arrange
+            (rawIngredientRepository.findAllReferences as jest.Mock).mockResolvedValue([]);
+
+            // Act
+            const result = await rawIngredientService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(0);
+            expect(rawIngredientRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should propagate error from repository', async () => {
+            // Arrange
+            const mockError = new Error('Database connection failed');
+            (rawIngredientRepository.findAllReferences as jest.Mock).mockRejectedValue(mockError);
+
+            // Act & Assert
+            await expect(rawIngredientService.getAllReferences())
+                .rejects
+                .toThrow('Database connection failed');
+        });
     });
 
     describe('getAll', () => {

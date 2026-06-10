@@ -7,6 +7,7 @@ import { AuthenticatedRequest } from '../../../types';
 import {
     mockCategory,
     mockCategory2,
+    mockCategoryReferences,
     mockCategoryWithCount,
     mockCategoryWithCount2,
     mockCategoriesWithCount,
@@ -16,6 +17,15 @@ import {
 // MOCKS
 // ============================================
 
+jest.mock('../../generated/prisma/client', () => ({
+    Prisma: {
+        PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error { },
+        PrismaClientUnknownRequestError: class PrismaClientUnknownRequestError extends Error { },
+        PrismaClientRustPanicError: class PrismaClientRustPanicError extends Error { },
+        PrismaClientInitializationError: class PrismaClientInitializationError extends Error { },
+        PrismaClientValidationError: class PrismaClientValidationError extends Error { },
+    },
+}));
 jest.mock('./category.repository');
 
 // Mock getPrismaClient - create mock transaction inside factory
@@ -46,6 +56,38 @@ describe('Category Service', () => {
     // ============================================
     // GET ALL TESTS
     // ============================================
+
+    describe('getAllReferences', () => {
+        it('should return category references for dropdown', async () => {
+            (categoryRepository.findAllReferences as jest.Mock).mockResolvedValue(mockCategoryReferences);
+
+            const result = await categoryService.getAllReferences();
+
+            expect(result).toHaveLength(3);
+            expect(result[0].category_id).toBe(mockCategory.category_id);
+            expect(result[0].name).toBe('Makanan');
+            expect(result).toEqual(mockCategoryReferences);
+            expect(categoryRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return empty array when no category references exist', async () => {
+            (categoryRepository.findAllReferences as jest.Mock).mockResolvedValue([]);
+
+            const result = await categoryService.getAllReferences();
+
+            expect(result).toHaveLength(0);
+            expect(categoryRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should propagate error from repository', async () => {
+            const mockError = new Error('Database connection failed');
+            (categoryRepository.findAllReferences as jest.Mock).mockRejectedValue(mockError);
+
+            await expect(categoryService.getAllReferences())
+                .rejects
+                .toThrow('Database connection failed');
+        });
+    });
 
     describe('getAll', () => {
         it('should return paginated list of categories', async () => {

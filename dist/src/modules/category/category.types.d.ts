@@ -19,6 +19,10 @@ export interface CategoryData {
     created_at: Date;
     updated_at?: Date | null;
 }
+export interface CategoryReference {
+    category_id: string;
+    name: string;
+}
 export interface CategoryWithCount extends CategoryData {
     _count?: {
         menus: number;

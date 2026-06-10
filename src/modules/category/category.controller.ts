@@ -4,6 +4,19 @@ import responseApi from '../../../utility/response-api';
 import { AuthenticatedRequest } from '../../../types';
 
 /**
+ * Get Category References (for dropdown)
+ * GET /api/category/options
+ */
+export const getReferences = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await categoryService.getAllReferences();
+        res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil data pilihan kategori' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get All Categories
  * GET /api/category
  */
@@ -69,6 +82,7 @@ export const softDelete = async (req: AuthenticatedRequest, res: Response, next:
 };
 
 export const categoryController = {
+    getReferences,
     showAll,
     detail,
     create,

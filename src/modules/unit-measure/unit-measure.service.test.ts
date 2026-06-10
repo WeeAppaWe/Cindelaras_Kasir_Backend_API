@@ -1,17 +1,91 @@
 import unitMeasureService from './unit-measure.service';
 import unitMeasureRepository from './unit-measure.repository';
 
-import { mockUnitMeasure, mockUnitMeasure2, mockUnitMeasure3 } from '../../tests/mocks/unit-measure.mock';
+import {
+    mockUnitMeasure,
+    mockUnitMeasure2,
+    mockUnitMeasure3,
+    mockUnitMeasureReferences,
+} from '../../tests/mocks/unit-measure.mock';
 import { AuthenticatedRequest } from '../../../types';
 
 // Mock dependencies
+jest.mock('../../generated/prisma/client', () => ({
+    PrismaClient: class PrismaClient { },
+    Prisma: {
+        PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error { },
+        PrismaClientUnknownRequestError: class PrismaClientUnknownRequestError extends Error { },
+        PrismaClientRustPanicError: class PrismaClientRustPanicError extends Error { },
+        PrismaClientInitializationError: class PrismaClientInitializationError extends Error { },
+        PrismaClientValidationError: class PrismaClientValidationError extends Error { },
+    },
+}));
 jest.mock('./unit-measure.repository');
+jest.mock('../../../database/postgres.connection', () => ({
+    __esModule: true,
+    default: jest.fn(() => ({
+        unitMeasure: {
+            findMany: jest.fn(),
+            count: jest.fn(),
+            findUnique: jest.fn(),
+            findFirst: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+        },
+        ingredient: {
+            count: jest.fn(),
+        },
+    })),
+}));
 
 describe('Unit Measure Service', () => {
     const unitMeasureId = '660e8400-e29b-41d4-a716-446655440001';
 
     beforeEach(() => {
         jest.clearAllMocks();
+    });
+
+    describe('getAllReferences', () => {
+        it('should return unit measure references for dropdown', async () => {
+            // Arrange
+            const findAllReferencesMock = unitMeasureRepository.findAllReferences as jest.Mock;
+            findAllReferencesMock.mockResolvedValue(mockUnitMeasureReferences);
+
+            // Act
+            const result = await unitMeasureService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(3);
+            expect(result[0].unit_measure_id).toBe(mockUnitMeasure.unit_measure_id);
+            expect(result[0].name).toBe('Kilogram');
+            expect(result).toEqual(mockUnitMeasureReferences);
+            expect(unitMeasureRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return empty array when no unit measure references exist', async () => {
+            // Arrange
+            const findAllReferencesMock = unitMeasureRepository.findAllReferences as jest.Mock;
+            findAllReferencesMock.mockResolvedValue([]);
+
+            // Act
+            const result = await unitMeasureService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(0);
+            expect(unitMeasureRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should propagate error from repository', async () => {
+            // Arrange
+            const mockError = new Error('Database connection failed');
+            const findAllReferencesMock = unitMeasureRepository.findAllReferences as jest.Mock;
+            findAllReferencesMock.mockRejectedValue(mockError);
+
+            // Act and Assert
+            await expect(unitMeasureService.getAllReferences())
+                .rejects
+                .toThrow('Database connection failed');
+        });
     });
 
     describe('getAll', () => {

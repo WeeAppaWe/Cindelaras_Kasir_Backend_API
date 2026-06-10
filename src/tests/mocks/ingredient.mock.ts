@@ -57,6 +57,38 @@ export const mockSemiIngredient2 = {
     name: 'Sambal Goreng',
 };
 
+// INGREDIENT REFERENCES (for dropdown/selection)
+export const mockRawIngredientReference = {
+    ingredient_id: mockIngredient.ingredient_id,
+    name: mockIngredient.name,
+    type: mockIngredient.type,
+    unit: mockIngredient.unit,
+};
+
+export const mockRawIngredientReference2 = {
+    ingredient_id: mockIngredient2.ingredient_id,
+    name: mockIngredient2.name,
+    type: mockIngredient2.type,
+    unit: mockIngredient2.unit,
+};
+
+export const mockRawIngredientReferences = [
+    mockRawIngredientReference,
+    mockRawIngredientReference2,
+];
+
+export const mockSemiIngredientReference = {
+    ingredient_id: '550e8400-e29b-41d4-a716-446655440003',
+    name: mockSemiIngredient.name,
+    type: mockSemiIngredient.type,
+    unit: mockSemiIngredient.unit,
+};
+
+export const mockAllIngredientReferences = [
+    mockRawIngredientReference,
+    mockSemiIngredientReference,
+];
+
 // COMPOSITIONS
 // Child ingredients for compositions
 export const mockChildIngredient1 = {

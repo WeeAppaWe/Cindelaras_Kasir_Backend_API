@@ -25,10 +25,15 @@ export declare const unitMeasureListQuerySchema: z.ZodObject<{
     size: z.ZodOptional<z.ZodDefault<z.ZodCoercedNumber<unknown>>>;
     search: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+/**
+ * Query params schema for unit measure references
+ */
+export declare const unitMeasureReferenceQuerySchema: z.ZodObject<{}, z.core.$strip>;
 export type CreateUnitMeasureInput = z.infer<typeof createUnitMeasureSchema>;
 export type UpdateUnitMeasureInput = z.infer<typeof updateUnitMeasureSchema>;
 export type UnitMeasureIdParam = z.infer<typeof unitMeasureIdParamSchema>;
 export type UnitMeasureListQuery = z.infer<typeof unitMeasureListQuerySchema>;
+export type UnitMeasureReferenceQuery = z.infer<typeof unitMeasureReferenceQuerySchema>;
 export declare const unitMeasureSchemas: {
     create: z.ZodObject<{
         name: z.ZodString;
@@ -44,6 +49,7 @@ export declare const unitMeasureSchemas: {
         size: z.ZodOptional<z.ZodDefault<z.ZodCoercedNumber<unknown>>>;
         search: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
+    referenceQuery: z.ZodObject<{}, z.core.$strip>;
 };
 export default unitMeasureSchemas;
 //# sourceMappingURL=unit-measure.schema.d.ts.map

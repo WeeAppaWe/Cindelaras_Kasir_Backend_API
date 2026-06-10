@@ -25,10 +25,15 @@ export declare const categoryListQuerySchema: z.ZodObject<{
     size: z.ZodOptional<z.ZodDefault<z.ZodCoercedNumber<unknown>>>;
     search: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+/**
+ * Query params schema for category references
+ */
+export declare const categoryReferenceQuerySchema: z.ZodObject<{}, z.core.$strip>;
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 export type CategoryIdParam = z.infer<typeof categoryIdParamSchema>;
 export type CategoryListQuery = z.infer<typeof categoryListQuerySchema>;
+export type CategoryReferenceQuery = z.infer<typeof categoryReferenceQuerySchema>;
 export declare const categorySchemas: {
     create: z.ZodObject<{
         name: z.ZodString;
@@ -44,6 +49,7 @@ export declare const categorySchemas: {
         size: z.ZodOptional<z.ZodDefault<z.ZodCoercedNumber<unknown>>>;
         search: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
+    referenceQuery: z.ZodObject<{}, z.core.$strip>;
 };
 export default categorySchemas;
 //# sourceMappingURL=category.schema.d.ts.map

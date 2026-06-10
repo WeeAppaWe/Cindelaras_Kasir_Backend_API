@@ -43,11 +43,17 @@ export const categoryListQuerySchema = z.object({
     search: z.string().optional(),
 });
 
+/**
+ * Query params schema for category references
+ */
+export const categoryReferenceQuerySchema = z.object({});
+
 // Infer types from schemas
 export type CreateCategoryInput = z.infer<typeof createCategorySchema>;
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
 export type CategoryIdParam = z.infer<typeof categoryIdParamSchema>;
 export type CategoryListQuery = z.infer<typeof categoryListQuerySchema>;
+export type CategoryReferenceQuery = z.infer<typeof categoryReferenceQuerySchema>;
 
 // Export schemas
 export const categorySchemas = {
@@ -55,6 +61,7 @@ export const categorySchemas = {
     update: updateCategorySchema,
     categoryIdParam: categoryIdParamSchema,
     listQuery: categoryListQuerySchema,
+    referenceQuery: categoryReferenceQuerySchema,
 };
 
 export default categorySchemas;

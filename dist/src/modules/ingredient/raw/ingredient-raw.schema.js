@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rawIngredientSchemas = exports.rawIngredientListQuerySchema = exports.ingredientIdParamSchema = exports.updateRawIngredientSchema = exports.createRawIngredientSchema = exports.IngredientType = void 0;
+exports.rawIngredientSchemas = exports.rawIngredientReferenceQuerySchema = exports.rawIngredientListQuerySchema = exports.ingredientIdParamSchema = exports.updateRawIngredientSchema = exports.createRawIngredientSchema = exports.IngredientType = void 0;
 const zod_1 = require("zod");
 // ============================================
 // CONSTANTS
@@ -81,12 +81,17 @@ exports.rawIngredientListQuerySchema = zod_1.z.object({
     unit_id: zod_1.z.string().uuid('Format unit_id tidak valid').optional(),
     low_stock: zod_1.z.coerce.boolean().optional(),
 });
+/**
+ * Query params schema for raw ingredient references
+ */
+exports.rawIngredientReferenceQuerySchema = zod_1.z.object({});
 // Export schemas
 exports.rawIngredientSchemas = {
     create: exports.createRawIngredientSchema,
     update: exports.updateRawIngredientSchema,
     ingredientIdParam: exports.ingredientIdParamSchema,
     listQuery: exports.rawIngredientListQuerySchema,
+    referenceQuery: exports.rawIngredientReferenceQuerySchema,
 };
 exports.default = exports.rawIngredientSchemas;
 //# sourceMappingURL=ingredient-raw.schema.js.map

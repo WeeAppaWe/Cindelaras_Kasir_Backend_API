@@ -2,7 +2,7 @@
 
 Dokumentasi ini menjelaskan rute API (endpoints) yang digunakan oleh Frontend untuk halaman **Manajemen Kategori**. Fitur ini meliputi operasi CRUD (Create, Read, Update, Delete) untuk kategori menu yang ada di sistem.
 
-**Catatan Penting:** Semua endpoint pada rute ini memerlukan otorisasi dengan role **ADMIN**. Kasir biasa tidak memiliki akses untuk menambah, mengubah, atau menghapus kategori.
+**Catatan Penting:** Endpoint daftar dan dropdown kategori dapat diakses oleh role **ADMIN** dan **CASHIER**. Endpoint tambah, ubah, hapus, dan detail kategori memerlukan role **ADMIN**.
 
 Base URL: `/api/category`
 
@@ -16,6 +16,7 @@ Modul kategori memakai tabel utama `categories`. Tabel `menus` juga dibaca untuk
 
 | Proses | Tabel yang Dipakai | Keterangan |
 | :--- | :--- | :--- |
+| Dropdown kategori | `categories` | Mengambil kategori aktif tanpa pagination untuk pilihan form. |
 | Menampilkan daftar kategori | `categories`, `menus` | Mengambil kategori aktif dan jumlah menu terkait melalui `_count.menus`. |
 | Detail kategori | `categories` | Mengambil satu kategori berdasarkan `category_id`. |
 | Membuat kategori | `categories` | Validasi nama duplikat, lalu membuat kategori baru. |
@@ -38,6 +39,7 @@ Field yang dipakai per proses:
 
 | Proses | Field yang Dipakai |
 | :--- | :--- |
+| Dropdown | `category_id`, `name`, `deleted_at` |
 | List | `category_id`, `name`, `created_at`, `updated_at`, `deleted_at` |
 | Search | `name` |
 | Detail | `category_id`, `name`, `created_at`, `updated_at`, `deleted_at` |
@@ -81,15 +83,47 @@ menus.category_id -> categories.category_id
 - Nama kategori dicek duplikat secara case-insensitive.
 - Hapus kategori memakai soft delete dengan mengisi `categories.deleted_at`.
 - Kategori tidak dapat dihapus jika masih memiliki menu aktif (`menus.deleted_at = null`).
+- Endpoint dropdown kategori mengembalikan data ringan tanpa pagination.
 
 ---
 
-## 1. Menampilkan Daftar Kategori
+## 1. Menampilkan Pilihan Kategori untuk Dropdown
+
+Endpoint ini digunakan untuk mengambil semua kategori aktif dalam bentuk data ringan untuk kebutuhan dropdown.
+
+- **Endpoint:** `GET /options`
+- **Akses:** Protected (ADMIN, CASHIER)
+- **Query Parameters:** Tidak ada
+
+**Contoh Penggunaan URL:**
+`GET /api/category/options`
+
+### Response Berhasil (200 OK)
+```json
+{
+  "code": 200,
+  "message": "Berhasil mengambil data pilihan kategori",
+  "data": [
+    {
+      "category_id": "uuid-category-1",
+      "name": "Makanan Utama"
+    },
+    {
+      "category_id": "uuid-category-2",
+      "name": "Minuman"
+    }
+  ]
+}
+```
+
+---
+
+## 2. Menampilkan Daftar Kategori
 
 Endpoint ini digunakan untuk mengambil daftar kategori dengan fitur pencarian dan *pagination*. Setiap *record* juga akan mengembalikan jumlah menu (`_count.menus`) yang terhubung dengan kategori tersebut.
 
 - **Endpoint:** `GET /`
-- **Akses:** Protected (ADMIN)
+- **Akses:** Protected (ADMIN, CASHIER)
 
 ### Query Parameters
 
@@ -142,7 +176,7 @@ Semua parameter bersifat opsional:
 
 ---
 
-## 2. Membuat Kategori Baru
+## 3. Membuat Kategori Baru
 
 Endpoint ini digunakan untuk menambahkan kategori menu baru ke dalam sistem.
 
@@ -178,7 +212,7 @@ Endpoint ini digunakan untuk menambahkan kategori menu baru ke dalam sistem.
 
 ---
 
-## 3. Melihat Detail Kategori
+## 4. Melihat Detail Kategori
 
 Endpoint ini mengambil rincian dari satu kategori tertentu berdasarkan ID-nya.
 
@@ -201,7 +235,7 @@ Endpoint ini mengambil rincian dari satu kategori tertentu berdasarkan ID-nya.
 
 ---
 
-## 4. Memperbarui Kategori
+## 5. Memperbarui Kategori
 
 Endpoint ini digunakan untuk mengubah nama dari kategori yang sudah ada.
 
@@ -237,7 +271,7 @@ Endpoint ini digunakan untuk mengubah nama dari kategori yang sudah ada.
 
 ---
 
-## 5. Menghapus Kategori (Soft Delete)
+## 6. Menghapus Kategori (Soft Delete)
 
 Endpoint ini digunakan untuk menghapus kategori secara logika (*soft delete*). Kategori tidak akan benar-benar dihapus dari *database*, melainkan kolom `deleted_at` akan diisi.
 

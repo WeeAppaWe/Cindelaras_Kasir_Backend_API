@@ -41,10 +41,15 @@ export declare const rawIngredientListQuerySchema: z.ZodObject<{
     unit_id: z.ZodOptional<z.ZodString>;
     low_stock: z.ZodOptional<z.ZodCoercedBoolean<unknown>>;
 }, z.core.$strip>;
+/**
+ * Query params schema for raw ingredient references
+ */
+export declare const rawIngredientReferenceQuerySchema: z.ZodObject<{}, z.core.$strip>;
 export type CreateRawIngredientInput = z.infer<typeof createRawIngredientSchema>;
 export type UpdateRawIngredientInput = z.infer<typeof updateRawIngredientSchema>;
 export type IngredientIdParam = z.infer<typeof ingredientIdParamSchema>;
 export type RawIngredientListQuery = z.infer<typeof rawIngredientListQuerySchema>;
+export type RawIngredientReferenceQuery = z.infer<typeof rawIngredientReferenceQuerySchema>;
 export declare const rawIngredientSchemas: {
     create: z.ZodObject<{
         name: z.ZodString;
@@ -69,6 +74,7 @@ export declare const rawIngredientSchemas: {
         unit_id: z.ZodOptional<z.ZodString>;
         low_stock: z.ZodOptional<z.ZodCoercedBoolean<unknown>>;
     }, z.core.$strip>;
+    referenceQuery: z.ZodObject<{}, z.core.$strip>;
 };
 export default rawIngredientSchemas;
 //# sourceMappingURL=ingredient-raw.schema.d.ts.map

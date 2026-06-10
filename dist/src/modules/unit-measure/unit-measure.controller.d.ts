@@ -1,7 +1,13 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../../types';
 /**
- * Get all unit measures (for dropdown/selection)
+ * Get Unit Measure References (for dropdown)
+ * GET /api/unit-measure/options
+ */
+export declare const getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
+ * Get All Unit Measures
+ * GET /api/unit-measure
  */
 export declare const showAll: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 /**
@@ -25,6 +31,7 @@ export declare const update: (req: AuthenticatedRequest, res: Response, next: Ne
  */
 export declare const softDelete: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const unitMeasureController: {
+    getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     showAll: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     detail: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     create: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;

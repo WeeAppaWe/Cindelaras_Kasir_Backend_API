@@ -1,4 +1,4 @@
-import { CategoryData, CategoryWithCount } from '../../modules/category/category.types';
+import { CategoryData, CategoryReference, CategoryWithCount } from '../../modules/category/category.types';
 
 // ============================================
 // CATEGORY MOCK DATA
@@ -48,6 +48,20 @@ export const mockCategoryWithCount3: CategoryWithCount = {
 
 export const mockCategories: CategoryData[] = [mockCategory, mockCategory2, mockCategory3];
 export const mockCategoriesWithCount: CategoryWithCount[] = [mockCategoryWithCount, mockCategoryWithCount2, mockCategoryWithCount3];
+export const mockCategoryReferences: CategoryReference[] = [
+    {
+        category_id: mockCategory.category_id,
+        name: mockCategory.name,
+    },
+    {
+        category_id: mockCategory2.category_id,
+        name: mockCategory2.name,
+    },
+    {
+        category_id: mockCategory3.category_id,
+        name: mockCategory3.name,
+    },
+];
 
 // ============================================
 // SCHEMA VALIDATION MOCK DATA

@@ -3,7 +3,13 @@ import { tokenValidation } from '../middleware/token-validation.middleware';
 import { roleValidation } from '../middleware/role-validation.middleware';
 import { zodValidation } from '../middleware/zod-validation.middleware';
 import { RoleName } from '../src/modules/auth/auth.schema';
-import { createCategorySchema, updateCategorySchema, categoryIdParamSchema, categoryListQuerySchema } from '../src/modules/category/category.schema';
+import {
+    createCategorySchema,
+    updateCategorySchema,
+    categoryIdParamSchema,
+    categoryReferenceQuerySchema,
+    categoryListQuerySchema,
+} from '../src/modules/category/category.schema';
 import categoryController from '../src/modules/category/category.controller';
 
 const router: Router = express.Router();
@@ -18,10 +24,18 @@ const adminAndCashierMiddleware = [tokenValidation, roleValidation([RoleName.ADM
 // CRUD Routes
 // ============================================
 
+// GET /api/category/options - Get category references for dropdown
+router.get(
+    `/${pathGroup}/options`,
+    ...adminAndCashierMiddleware,
+    zodValidation(categoryReferenceQuerySchema, 'query'),
+    categoryController.getReferences
+);
+
 // GET /api/category - Get all categories
 router.get(
     `/${pathGroup}`,
-    ...adminAndCashierMiddleware,
+    ...adminMiddleware,
     zodValidation(categoryListQuerySchema, 'query'),
     categoryController.showAll
 );

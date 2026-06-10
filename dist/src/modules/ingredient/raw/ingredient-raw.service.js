@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rawIngredientService = exports.getLowStockAlerts = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = void 0;
+exports.rawIngredientService = exports.getLowStockAlerts = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = exports.getAllReferences = void 0;
 const error_not_found_exception_1 = require("../../../../exception/error-not-found.exception");
 const error_data_already_exist_exception_1 = require("../../../../exception/error-data-already-exist.exception");
 const error_validation_exception_1 = require("../../../../exception/error-validation.exception");
@@ -13,6 +13,19 @@ const ingredient_raw_repository_1 = __importDefault(require("./ingredient-raw.re
 const unit_measure_service_1 = __importDefault(require("../../unit-measure/unit-measure.service"));
 const ingredient_raw_types_1 = require("./ingredient-raw.types");
 const prisma = (0, postgres_connection_1.default)();
+/**
+ * Get all raw ingredients (for dropdown/selection)
+ */
+const getAllReferences = async () => {
+    try {
+        return await ingredient_raw_repository_1.default.findAllReferences();
+    }
+    catch (error) {
+        console.error(`--- Raw Ingredient Service Error: ${error.message}`);
+        throw error;
+    }
+};
+exports.getAllReferences = getAllReferences;
 /**
  * Get all raw ingredients with pagination and filters
  */
@@ -207,6 +220,7 @@ const getLowStockAlerts = async () => {
 };
 exports.getLowStockAlerts = getLowStockAlerts;
 exports.rawIngredientService = {
+    getAllReferences: exports.getAllReferences,
     getAll: exports.getAll,
     getDetail: exports.getDetail,
     create: exports.create,

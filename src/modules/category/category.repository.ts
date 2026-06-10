@@ -1,6 +1,12 @@
 import getPrismaClient from '../../../database/postgres.connection';
 import { handlePrismaError } from '../../../utility/prisma-error-handler.utility';
-import { CategoryFilter, CategoryPaginationOptions, CategoryData, CategoryWithCount } from './category.types';
+import {
+    CategoryFilter,
+    CategoryPaginationOptions,
+    CategoryData,
+    CategoryReference,
+    CategoryWithCount,
+} from './category.types';
 import { Prisma } from '../../generated/prisma/client';
 
 const prisma = getPrismaClient();
@@ -13,6 +19,12 @@ const categorySelectFields = {
     updated_at: true,
 };
 
+// Select fields for dropdown/reference usage
+const categoryReferenceSelectFields = {
+    category_id: true,
+    name: true,
+};
+
 // Select fields with menu count
 const categoryWithCountSelectFields = {
     ...categorySelectFields,
@@ -21,6 +33,26 @@ const categoryWithCountSelectFields = {
             menus: true,
         },
     },
+};
+
+/**
+ * Find all categories (for dropdown/selection)
+ */
+export const findAllReferences = async (): Promise<CategoryReference[]> => {
+    try {
+        const categories = await prisma.category.findMany({
+            where: {
+                deleted_at: null,
+            },
+            select: categoryReferenceSelectFields,
+            orderBy: { name: 'asc' },
+        });
+
+        return categories as CategoryReference[];
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
 };
 
 /**
@@ -217,6 +249,7 @@ export const hasMenus = async (categoryId: string): Promise<boolean> => {
 };
 
 export const categoryRepository = {
+    findAllReferences,
     findAll,
     count,
     findById,

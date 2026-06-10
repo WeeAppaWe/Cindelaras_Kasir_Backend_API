@@ -2,7 +2,9 @@ import {
     createCategorySchema,
     updateCategorySchema,
     categoryIdParamSchema,
+    categoryReferenceQuerySchema,
     categoryListQuerySchema,
+    categorySchemas,
 } from './category.schema';
 import { mockCreateCategoryData } from '../../tests/mocks/category.mock';
 
@@ -228,6 +230,22 @@ describe('Category Schema Validation', () => {
             });
 
             expect(result.success).toBe(true);
+        });
+    });
+
+    // ============================================
+    // CATEGORY REFERENCE QUERY SCHEMA TESTS
+    // ============================================
+
+    describe('categoryReferenceQuerySchema', () => {
+        it('should pass validation with empty query', () => {
+            const result = categoryReferenceQuerySchema.safeParse({});
+
+            expect(result.success).toBe(true);
+        });
+
+        it('should be exported in categorySchemas', () => {
+            expect(categorySchemas.referenceQuery).toBe(categoryReferenceQuerySchema);
         });
     });
 });

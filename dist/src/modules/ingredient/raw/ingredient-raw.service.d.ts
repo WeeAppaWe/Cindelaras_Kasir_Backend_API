@@ -1,5 +1,9 @@
 import { AuthenticatedRequest } from '../../../../types';
-import { RawIngredientListResponse, RawIngredientWithRelations, DeleteRawIngredientResponse, LowStockAlertResponse } from './ingredient-raw.types';
+import { RawIngredientListResponse, RawIngredientReference, RawIngredientWithRelations, DeleteRawIngredientResponse, LowStockAlertResponse } from './ingredient-raw.types';
+/**
+ * Get all raw ingredients (for dropdown/selection)
+ */
+export declare const getAllReferences: () => Promise<RawIngredientReference[]>;
 /**
  * Get all raw ingredients with pagination and filters
  */
@@ -25,6 +29,7 @@ export declare const softDelete: (req: AuthenticatedRequest) => Promise<DeleteRa
  */
 export declare const getLowStockAlerts: () => Promise<LowStockAlertResponse>;
 export declare const rawIngredientService: {
+    getAllReferences: () => Promise<RawIngredientReference[]>;
     getAll: (req: AuthenticatedRequest) => Promise<RawIngredientListResponse>;
     getDetail: (req: AuthenticatedRequest) => Promise<RawIngredientWithRelations>;
     create: (req: AuthenticatedRequest) => Promise<RawIngredientWithRelations>;

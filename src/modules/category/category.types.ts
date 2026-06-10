@@ -31,6 +31,12 @@ export interface CategoryData {
     updated_at?: Date | null;
 }
 
+// Category reference (for dropdown/selection)
+export interface CategoryReference {
+    category_id: string;
+    name: string;
+}
+
 // Category with menus count (for list view)
 export interface CategoryWithCount extends CategoryData {
     _count?: {

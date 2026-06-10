@@ -19,7 +19,7 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **129 endpoint**.
+Total endpoint dari folder `route`: **133 endpoint**.
 
 ## Auth
 
@@ -53,7 +53,8 @@ Source: `route/category.route.ts`
 
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
-| `GET` | `/api/category` | ADMIN | Ambil daftar kategori. |
+| `GET` | `/api/category/options` | ADMIN, CASHIER | Ambil daftar kategori untuk dropdown. |
+| `GET` | `/api/category` | ADMIN, CASHIER | Ambil daftar kategori. |
 | `GET` | `/api/category/:category_id` | ADMIN | Ambil detail kategori. |
 | `POST` | `/api/category` | ADMIN | Buat kategori baru. |
 | `PATCH` | `/api/category/:category_id` | ADMIN | Update kategori. |
@@ -65,6 +66,7 @@ Source: `route/unit-measure.route.ts`
 
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
+| `GET` | `/api/unit-measure/options` | ADMIN | Ambil daftar satuan ukur untuk dropdown. |
 | `GET` | `/api/unit-measure` | ADMIN | Ambil daftar satuan ukur. |
 | `GET` | `/api/unit-measure/:unit_measure_id` | ADMIN | Ambil detail satuan ukur. |
 | `POST` | `/api/unit-measure` | ADMIN | Buat satuan ukur baru. |
@@ -77,6 +79,8 @@ Source: `route/ingredient.route.ts`
 
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
+| `GET` | `/api/ingredient/options` | ADMIN | Ambil daftar semua jenis bahan untuk dropdown. |
+| `GET` | `/api/ingredient/raw/options` | ADMIN | Ambil daftar bahan baku untuk dropdown. |
 | `GET` | `/api/ingredient/raw/units` | ADMIN | Ambil daftar satuan untuk bahan baku. |
 | `GET` | `/api/ingredient/raw/low-stock` | ADMIN | Ambil alert bahan baku stok rendah. |
 | `GET` | `/api/ingredient/raw` | ADMIN | Ambil daftar bahan baku. |

@@ -8,6 +8,9 @@ const token_validation_middleware_1 = require("../middleware/token-validation.mi
 const role_validation_middleware_1 = require("../middleware/role-validation.middleware");
 const zod_validation_middleware_1 = require("../middleware/zod-validation.middleware");
 const auth_schema_1 = require("../src/modules/auth/auth.schema");
+// All Ingredient imports
+const ingredient_all_schema_1 = require("../src/modules/ingredient/all/ingredient-all.schema");
+const ingredient_all_controller_1 = __importDefault(require("../src/modules/ingredient/all/ingredient-all.controller"));
 // Raw Ingredient imports
 const ingredient_raw_schema_1 = require("../src/modules/ingredient/raw/ingredient-raw.schema");
 const ingredient_raw_controller_1 = __importDefault(require("../src/modules/ingredient/raw/ingredient-raw.controller"));
@@ -18,10 +21,17 @@ const router = express_1.default.Router();
 // All routes require authentication and ADMIN role
 const adminMiddleware = [token_validation_middleware_1.tokenValidation, (0, role_validation_middleware_1.roleValidation)([auth_schema_1.RoleName.ADMIN])];
 // ============================================
+// ALL INGREDIENT ROUTES (/api/ingredient)
+// ============================================
+const ingredientPath = 'ingredient';
+// Reference/Dropdown Routes
+router.get(`/${ingredientPath}/options`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(ingredient_all_schema_1.ingredientAllReferenceQuerySchema, 'query'), ingredient_all_controller_1.default.getReferences);
+// ============================================
 // RAW INGREDIENT ROUTES (/api/ingredient/raw)
 // ============================================
 const rawPath = 'ingredient/raw';
 // Reference/Dropdown Routes (must be before :ingredient_id routes)
+router.get(`/${rawPath}/options`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(ingredient_raw_schema_1.rawIngredientReferenceQuerySchema, 'query'), ingredient_raw_controller_1.default.getReferences);
 router.get(`/${rawPath}/units`, ...adminMiddleware, ingredient_raw_controller_1.default.getUnitMeasures);
 router.get(`/${rawPath}/low-stock`, ...adminMiddleware, ingredient_raw_controller_1.default.getLowStockAlerts);
 // CRUD Routes

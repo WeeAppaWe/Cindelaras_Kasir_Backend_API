@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rawIngredientRepository = exports.countLowStock = exports.findLowStock = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.update = exports.create = exports.findByName = exports.findById = exports.count = exports.findAll = void 0;
+exports.rawIngredientRepository = exports.countLowStock = exports.findLowStock = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.update = exports.create = exports.findByName = exports.findById = exports.count = exports.findAll = exports.findAllReferences = void 0;
 const postgres_connection_1 = __importDefault(require("../../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../../utility/prisma-error-handler.utility");
 const ingredient_raw_types_1 = require("./ingredient-raw.types");
@@ -25,6 +25,39 @@ const rawIngredientSelectFields = {
         },
     },
 };
+// Select fields for dropdown/reference usage
+const rawIngredientReferenceSelectFields = {
+    ingredient_id: true,
+    name: true,
+    type: true,
+    unit: {
+        select: {
+            unit_measure_id: true,
+            name: true,
+        },
+    },
+};
+/**
+ * Find all raw ingredients (for dropdown/selection)
+ */
+const findAllReferences = async () => {
+    try {
+        const ingredients = await prisma.ingredient.findMany({
+            where: {
+                deleted_at: null,
+                type: ingredient_raw_types_1.IngredientType.RAW,
+            },
+            select: rawIngredientReferenceSelectFields,
+            orderBy: { name: 'asc' },
+        });
+        return ingredients;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.findAllReferences = findAllReferences;
 /**
  * Find all raw ingredients with pagination and filters
  */
@@ -288,6 +321,7 @@ const countLowStock = async () => {
 };
 exports.countLowStock = countLowStock;
 exports.rawIngredientRepository = {
+    findAllReferences: exports.findAllReferences,
     findAll: exports.findAll,
     count: exports.count,
     findById: exports.findById,
