@@ -310,39 +310,26 @@
  *
  *     FullInventoryReportResponse:
  *       type: object
+ *       description: Laporan persediaan lengkap — kondisi stok seluruh bahan baku saat ini
  *       properties:
  *         response:
  *           type: object
  *           properties:
- *             current_stock:
- *               type: object
- *               properties:
- *                 total_items:
- *                   type: integer
- *                 total_value:
- *                   type: number
- *                 low_stock_count:
- *                   type: integer
- *                 out_of_stock_count:
- *                   type: integer
- *             movement_summary:
- *               type: object
- *               properties:
- *                 total_in:
- *                   type: number
- *                 total_out:
- *                   type: number
- *                 shrinkage_value:
- *                   type: number
- *             alerts:
- *               type: object
- *               properties:
- *                 low_stock_count:
- *                   type: integer
- *                 out_of_stock_count:
- *                   type: integer
- *             top_value_items:
+ *             total_items:
+ *               type: integer
+ *               description: Jumlah total bahan yang tampil
+ *             total_value:
+ *               type: number
+ *               description: Total nilai seluruh aset stok (Rp)
+ *             low_stock_count:
+ *               type: integer
+ *               description: Jumlah bahan dengan status LOW (menipis)
+ *             out_of_stock_count:
+ *               type: integer
+ *               description: Jumlah bahan dengan status OUT (habis)
+ *             items:
  *               type: array
+ *               description: Detail per bahan, diurutkan ascending berdasarkan nama
  *               items:
  *                 $ref: '#/components/schemas/CurrentStockItem'
  *         metaData:

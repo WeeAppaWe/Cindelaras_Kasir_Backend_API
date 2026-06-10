@@ -288,24 +288,61 @@ describe('Report Inventory Service', () => {
     // ============================================
 
     describe('getFullReport', () => {
-        it('should combine all reports', async () => {
+        it('should return all ingredients as table data', async () => {
             (reportInventoryRepository.getAllIngredientsWithStatus as jest.Mock)
                 .mockResolvedValue(mockAllIngredients);
-            (reportInventoryRepository.getStockMovementsForPeriod as jest.Mock)
-                .mockResolvedValue(mockAllStockMovements);
-            (reportInventoryRepository.getLastRestockDates as jest.Mock)
-                .mockResolvedValue(new Map());
 
             const result = await getFullReport(mockRequest);
 
-            expect(result.current_stock).toBeDefined();
-            expect(result.movement_summary).toBeDefined();
-            expect(result.alerts).toBeDefined();
-            expect(result.top_value_items).toBeDefined();
+            expect(result.total_items).toBe(4);
+            expect(result.total_value).toBe(expectedTotalStockValue);
+            expect(result.low_stock_count).toBe(expectedLowStockCount);
+            expect(result.out_of_stock_count).toBe(expectedOutOfStockCount);
+            expect(result.items).toHaveLength(4);
+        });
 
-            expect(result.current_stock.total_items).toBe(4);
-            expect(result.alerts.low_stock_count).toBe(expectedLowStockCount);
-            expect(result.alerts.out_of_stock_count).toBe(expectedOutOfStockCount);
+        it('should include all required columns per item', async () => {
+            (reportInventoryRepository.getAllIngredientsWithStatus as jest.Mock)
+                .mockResolvedValue(mockAllIngredients);
+
+            const result = await getFullReport(mockRequest);
+
+            // Beras: stock_qty=50, min_stock=10, avg_cost=15000, stock_value=750000, status=NORMAL
+            const beras = result.items.find(i => i.name === 'Beras');
+            expect(beras).toBeDefined();
+            expect(beras!.type).toBe('raw');
+            expect(beras!.unit).toBe('Kg');
+            expect(beras!.current_stock).toBe(50);
+            expect(beras!.min_stock).toBe(10);
+            expect(beras!.avg_cost).toBe(15000);
+            expect(beras!.stock_value).toBe(750000);
+            expect(beras!.status).toBe('NORMAL');
+        });
+
+        it('should correctly identify stock status for all items', async () => {
+            (reportInventoryRepository.getAllIngredientsWithStatus as jest.Mock)
+                .mockResolvedValue(mockAllIngredients);
+
+            const result = await getFullReport(mockRequest);
+
+            const normalItem = result.items.find(i => i.name === 'Beras');
+            const lowItem = result.items.find(i => i.name === 'Gula');
+            const outItem = result.items.find(i => i.name === 'Minyak');
+
+            expect(normalItem!.status).toBe('NORMAL');
+            expect(lowItem!.status).toBe('LOW');
+            expect(outItem!.status).toBe('OUT');
+        });
+
+        it('should handle empty ingredients', async () => {
+            (reportInventoryRepository.getAllIngredientsWithStatus as jest.Mock)
+                .mockResolvedValue([]);
+
+            const result = await getFullReport(mockRequest);
+
+            expect(result.total_items).toBe(0);
+            expect(result.total_value).toBe(0);
+            expect(result.items).toHaveLength(0);
         });
     });
 });
