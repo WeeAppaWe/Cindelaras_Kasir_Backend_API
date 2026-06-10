@@ -246,28 +246,69 @@ describe('Report Operational Service', () => {
     // ============================================
 
     describe('getFullReport', () => {
-        it('should combine all reports', async () => {
-            // Mock all repository methods
-            (reportOperationalRepository.getUsersWithOrderStats as jest.Mock)
-                .mockResolvedValue(mockUserOrdersAndShifts);
+        it('should return shift-level report data', async () => {
             (reportOperationalRepository.getShiftsWithOrderCounts as jest.Mock)
                 .mockResolvedValue(mockShiftsWithOrders);
-            (reportOperationalRepository.getAllOrdersForPeriod as jest.Mock)
-                .mockResolvedValue(mockAllOrders);
-            (reportOperationalRepository.getMenuPerformanceData as jest.Mock)
-                .mockResolvedValue(mockMenuPerformanceData);
 
             const result = await getFullReport(mockRequest);
 
             expect(result.period).toBeDefined();
-            expect(result.cashier_summary).toBeDefined();
-            expect(result.shift_summary).toBeDefined();
-            expect(result.transaction_stats).toBeDefined();
-            expect(result.order_status).toBeDefined();
-            expect(result.top_menus).toBeDefined();
+            expect(result.total_shifts).toBe(2);
+            expect(result.shifts).toHaveLength(2);
+        });
 
-            expect(result.cashier_summary.total_cashiers).toBe(2);
-            expect(result.shift_summary.total_shifts).toBe(2);
+        it('should calculate financial columns correctly for closed shift', async () => {
+            (reportOperationalRepository.getShiftsWithOrderCounts as jest.Mock)
+                .mockResolvedValue(mockShiftsWithOrders);
+
+            const result = await getFullReport(mockRequest);
+
+            // Shift 1:
+            //   start_cash = 500000
+            //   total_sales (all COMPLETED) = 80000 (CASH) + 50000 (QRIS) = 130000
+            //   cash_in (IN movements) = 100000
+            //   cash_out (OUT movements) = 0
+            //   expected_cash = start_cash + CASH_sales_only + cash_in - cash_out
+            //                 = 500000 + 80000 + 100000 - 0 = 680000
+            //   actual_cash = end_cash = 1200000
+            //   variance = actual_cash - expected_cash = 1200000 - 680000 = 520000
+            const shift1 = result.shifts.find(s => s.shift_id === 'shift-001');
+            expect(shift1).toBeDefined();
+            expect(shift1!.cashier_name).toBe('Kasir Satu');
+            expect(shift1!.start_cash).toBe(500000);
+            expect(shift1!.total_sales).toBe(130000);
+            expect(shift1!.cash_in).toBe(100000);
+            expect(shift1!.cash_out).toBe(0);
+            expect(shift1!.expected_cash).toBe(680000);
+            expect(shift1!.actual_cash).toBe(1200000);
+            expect(shift1!.variance).toBe(520000);
+            expect(shift1!.transaction_count).toBe(2);
+            expect(shift1!.status).toBe('CLOSED');
+        });
+
+        it('should handle active shift with null actual_cash and variance', async () => {
+            (reportOperationalRepository.getShiftsWithOrderCounts as jest.Mock)
+                .mockResolvedValue(mockShiftsWithOrders);
+
+            const result = await getFullReport(mockRequest);
+
+            // Shift 2: active, end_cash=null
+            const shift2 = result.shifts.find(s => s.shift_id === 'shift-002');
+            expect(shift2).toBeDefined();
+            expect(shift2!.cashier_name).toBe('Kasir Dua');
+            expect(shift2!.actual_cash).toBeNull();
+            expect(shift2!.variance).toBeNull();
+            expect(shift2!.status).toBe('ACTIVE');
+        });
+
+        it('should handle empty shifts', async () => {
+            (reportOperationalRepository.getShiftsWithOrderCounts as jest.Mock)
+                .mockResolvedValue([]);
+
+            const result = await getFullReport(mockRequest);
+
+            expect(result.total_shifts).toBe(0);
+            expect(result.shifts).toHaveLength(0);
         });
     });
 });

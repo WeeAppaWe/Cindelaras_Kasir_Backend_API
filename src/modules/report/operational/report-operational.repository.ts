@@ -120,6 +120,7 @@ export const getShiftsWithOrderCounts = async (filter: ReportFilter) => {
                         order_id: true,
                         status: true,
                         total_amount: true,
+                        payment_type: true,
                     },
                 },
                 cash_movements: {

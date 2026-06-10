@@ -15,6 +15,7 @@ import {
     OrderStatusSummary,
     OrderItem,
     OrderStatusResponse,
+    FullReportShiftItem,
     FullOperationalReportResponse,
 } from './report-operational.types';
 
@@ -505,35 +506,76 @@ export const getOrderStatus = async (req: AuthenticatedRequest): Promise<OrderSt
 export const getFullReport = async (req: AuthenticatedRequest): Promise<FullOperationalReportResponse> => {
     try {
         const filter = extractFilter(req);
+        const shifts = await reportOperationalRepository.getShiftsWithOrderCounts(filter);
 
-        const [cashierData, shiftData, statsData, statusData, menuData] = await Promise.all([
-            getCashierPerformance(req),
-            getShiftSummary(req),
-            getTransactionStats(req),
-            getOrderStatus(req),
-            getMenuPerformance(req),
-        ]);
+        if (!shifts || shifts.length === 0) {
+            return {
+                period: createPeriod(filter),
+                total_shifts: 0,
+                shifts: [],
+            };
+        }
+
+        const shiftItems: FullReportShiftItem[] = shifts.map(shift => {
+            const startTime = new Date(shift.start_time);
+            const endTime = shift.end_time ? new Date(shift.end_time) : null;
+
+            // Total penjualan shift (dari order COMPLETED, semua metode pembayaran)
+            const totalSales = shift.orders
+                .filter(o => o.status === 'COMPLETED')
+                .reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+            // Penjualan CASH saja — hanya ini yang masuk ke laci kasir
+            const cashSalesOnly = shift.orders
+                .filter(o => o.status === 'COMPLETED' && o.payment_type === 'CASH')
+                .reduce((sum, o) => sum + Number(o.total_amount), 0);
+
+            // Kas masuk non-transaksi (kasbon masuk, dll)
+            const cashIn = shift.cash_movements
+                .filter(cm => cm.type === 'IN')
+                .reduce((sum, cm) => sum + Number(cm.amount), 0);
+
+            // Kas keluar non-transaksi (kasbon keluar, petty cash, dll)
+            const cashOut = shift.cash_movements
+                .filter(cm => cm.type === 'OUT')
+                .reduce((sum, cm) => sum + Number(cm.amount), 0);
+
+            // Kas sistem = Kas Awal + Penjualan CASH + Kas Masuk - Kas Keluar
+            // (QRIS tidak masuk laci fisik, jadi tidak dihitung)
+            const startCash = Number(shift.start_cash);
+            const expectedCash = startCash + cashSalesOnly + cashIn - cashOut;
+
+            // Kas aktual (dari input kasir saat tutup shift)
+            const actualCash = shift.end_cash ? Number(shift.end_cash) : null;
+
+            // Selisih = Kas Aktual - Kas Sistem
+            const variance = actualCash !== null ? actualCash - expectedCash : null;
+
+            // Jumlah transaksi berhasil
+            const transactionCount = shift.orders.filter(o => o.status === 'COMPLETED').length;
+
+            return {
+                shift_id: shift.shift_id,
+                date: formatDate(startTime),
+                start_time: formatTime(startTime),
+                end_time: endTime ? formatTime(endTime) : null,
+                cashier_name: shift.user.name,
+                start_cash: Math.round(startCash),
+                total_sales: Math.round(totalSales),
+                cash_in: Math.round(cashIn),
+                cash_out: Math.round(cashOut),
+                expected_cash: Math.round(expectedCash),
+                actual_cash: actualCash !== null ? Math.round(actualCash) : null,
+                variance: variance !== null ? Math.round(variance) : null,
+                transaction_count: transactionCount,
+                status: shift.end_time ? 'CLOSED' : 'ACTIVE',
+            };
+        });
 
         return {
             period: createPeriod(filter),
-            cashier_summary: {
-                total_cashiers: cashierData.total_cashiers,
-                top_performer: cashierData.cashiers.length > 0 ? cashierData.cashiers[0] : null,
-            },
-            shift_summary: {
-                total_shifts: shiftData.total_shifts,
-                active_shifts: shiftData.active_shifts,
-                closed_shifts: shiftData.closed_shifts,
-            },
-            transaction_stats: {
-                total_transactions: statsData.total_transactions,
-                total_sales: statsData.total_sales,
-                average_per_transaction: statsData.average_per_transaction,
-                peak_hour: statsData.peak_hour,
-                busiest_day: statsData.busiest_day,
-            },
-            order_status: statusData.summary,
-            top_menus: menuData.menus.slice(0, 5),
+            total_shifts: shiftItems.length,
+            shifts: shiftItems,
         };
     } catch (error) {
         console.error(`--- Report Operational Service Error: ${(error as Error).message}`);

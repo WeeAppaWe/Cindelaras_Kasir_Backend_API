@@ -237,51 +237,74 @@
  *         metaData:
  *           $ref: '#/components/schemas/MetaData'
  *
+ *     FullReportShiftItem:
+ *       type: object
+ *       description: Data operasional per shift kasir
+ *       properties:
+ *         shift_id:
+ *           type: string
+ *           format: uuid
+ *         date:
+ *           type: string
+ *           format: date
+ *           description: Tanggal shift dimulai (YYYY-MM-DD)
+ *         start_time:
+ *           type: string
+ *           description: Waktu mulai shift (HH:MM:SS)
+ *         end_time:
+ *           type: string
+ *           nullable: true
+ *           description: Waktu selesai shift. null jika shift masih aktif.
+ *         cashier_name:
+ *           type: string
+ *           description: Nama kasir yang bertugas
+ *         start_cash:
+ *           type: number
+ *           description: Kas awal (modal) saat membuka shift (Rp)
+ *         total_sales:
+ *           type: number
+ *           description: Total penjualan semua metode pembayaran dalam shift (Rp)
+ *         cash_in:
+ *           type: number
+ *           description: Total kas masuk non-transaksi (kasbon masuk, dll) (Rp)
+ *         cash_out:
+ *           type: number
+ *           description: Total kas keluar non-transaksi (kasbon keluar, petty cash, dll) (Rp)
+ *         expected_cash:
+ *           type: number
+ *           description: "Kas sistem = start_cash + penjualan_CASH + cash_in - cash_out (Rp)"
+ *         actual_cash:
+ *           type: number
+ *           nullable: true
+ *           description: Kas fisik aktual yang dihitung kasir saat tutup shift. null jika shift masih aktif.
+ *         variance:
+ *           type: number
+ *           nullable: true
+ *           description: "Selisih = actual_cash - expected_cash. Negatif = kekurangan, positif = kelebihan. null jika shift masih aktif."
+ *         transaction_count:
+ *           type: integer
+ *           description: Jumlah order COMPLETED dalam shift
+ *         status:
+ *           type: string
+ *           enum: [ACTIVE, CLOSED]
+ *
  *     FullOperationalReportResponse:
  *       type: object
+ *       description: Laporan operasional lengkap per shift kasir dalam rentang periode
  *       properties:
  *         response:
  *           type: object
  *           properties:
  *             period:
  *               $ref: '#/components/schemas/ReportPeriod'
- *             cashier_summary:
- *               type: object
- *               properties:
- *                 total_cashiers:
- *                   type: integer
- *                 top_performer:
- *                   $ref: '#/components/schemas/CashierPerformanceItem'
- *             shift_summary:
- *               type: object
- *               properties:
- *                 total_shifts:
- *                   type: integer
- *                 active_shifts:
- *                   type: integer
- *                 closed_shifts:
- *                   type: integer
- *             transaction_stats:
- *               type: object
- *               properties:
- *                 total_transactions:
- *                   type: integer
- *                 total_sales:
- *                   type: number
- *                 average_per_transaction:
- *                   type: number
- *                 peak_hour:
- *                   type: integer
- *                 busiest_day:
- *                   type: string
- *             order_status:
+ *             total_shifts:
+ *               type: integer
+ *               description: Jumlah shift dalam periode
+ *             shifts:
  *               type: array
+ *               description: Detail operasional per shift, diurutkan descending berdasarkan start_time
  *               items:
- *                 $ref: '#/components/schemas/OrderStatusItem'
- *             top_menus:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/MenuPerformanceItem'
+ *                 $ref: '#/components/schemas/FullReportShiftItem'
  *         metaData:
  *           $ref: '#/components/schemas/MetaData'
  */

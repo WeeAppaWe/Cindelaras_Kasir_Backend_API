@@ -31,8 +31,8 @@ export const mockShift1 = {
     deleted_at: null,
     user: mockCashier1,
     orders: [
-        { order_id: 'order-001', status: 'COMPLETED', total_amount: 80000 },
-        { order_id: 'order-002', status: 'COMPLETED', total_amount: 50000 },
+        { order_id: 'order-001', status: 'COMPLETED', total_amount: 80000, payment_type: 'CASH' },
+        { order_id: 'order-002', status: 'COMPLETED', total_amount: 50000, payment_type: 'QRIS' },
     ],
     cash_movements: [
         { cash_movement_id: 'cm-001', type: 'IN', amount: 100000 },
@@ -50,7 +50,7 @@ export const mockShift2 = {
     deleted_at: null,
     user: mockCashier2,
     orders: [
-        { order_id: 'order-003', status: 'COMPLETED', total_amount: 30000 },
+        { order_id: 'order-003', status: 'COMPLETED', total_amount: 30000, payment_type: 'CASH' },
     ],
     cash_movements: [],
 };
