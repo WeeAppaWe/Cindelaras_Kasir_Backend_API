@@ -49,6 +49,7 @@ export const mockRecipe = {
 export const mockMenu1 = {
     menu_id: 'menu-001',
     name: 'Nasi Goreng',
+    cost: 10000, // used by getFullReport (OrderItem.qty × Menu.cost)
     category_id: 'cat-001',
     category: mockCategory,
     recipes: [mockRecipe],
@@ -57,6 +58,7 @@ export const mockMenu1 = {
 export const mockMenu2 = {
     menu_id: 'menu-002',
     name: 'Es Teh',
+    cost: 0,
     category_id: 'cat-002',
     category: mockCategory2,
     recipes: [],
@@ -131,11 +133,45 @@ export const mockCompletedOrderCash2 = {
     order_items: [{ ...mockOrderItem2, order_item_id: 'item-004' }],
 };
 
-// All completed orders for period
+// All completed orders for period (full shape — used by getSummary, getPaymentBreakdown, getCashFlow)
 export const mockCompletedOrders = [
     mockCompletedOrderCash,
     mockCompletedOrderQris,
     mockCompletedOrderCash2,
+];
+
+// ============================================
+// LEAN ORDER MOCKS (used by getOrdersForFullReport)
+// Only contains fields selected by the lean query: order_id, total_amount, created_at,
+// order_items.qty, order_items.menu.cost
+// ============================================
+
+export const mockLeanOrders = [
+    {
+        order_id: 'order-001',
+        total_amount: 80000,
+        created_at: new Date('2026-01-01T10:00:00Z'),
+        order_items: [
+            { qty: 2, menu: { cost: 10000 } }, // COGS: 2 * 10000 = 20000
+            { qty: 3, menu: { cost: 0 } },      // COGS: 3 * 0 = 0
+        ],
+    },
+    {
+        order_id: 'order-002',
+        total_amount: 50000,
+        created_at: new Date('2026-01-01T11:00:00Z'),
+        order_items: [
+            { qty: 2, menu: { cost: 10000 } }, // COGS: 2 * 10000 = 20000
+        ],
+    },
+    {
+        order_id: 'order-003',
+        total_amount: 30000,
+        created_at: new Date('2026-01-01T14:00:00Z'),
+        order_items: [
+            { qty: 3, menu: { cost: 0 } }, // COGS: 0
+        ],
+    },
 ];
 
 // ============================================
@@ -161,6 +197,12 @@ export const mockCashMovementOut = {
 };
 
 export const mockCashMovements = [mockCashMovementIn, mockCashMovementOut];
+
+// Lean OUT-only mock (used by getCashMovementsOutForFullReport)
+// Only contains fields selected: amount, created_at
+export const mockCashMovementsOut = [
+    { amount: 50000, created_at: new Date('2026-01-01T12:00:00Z') },
+];
 
 // ============================================
 // MOCK SHIFTS
@@ -211,8 +253,11 @@ export const mockAggregatedByCategory = [
 // Total: 80000 + 50000 + 30000 = 160000
 export const expectedTotalSales = 160000;
 
-// COGS: Order1 (2 * 10000) + Order2 (2 * 10000) + Order3 (0) = 40000
+// COGS (via recipes avg_cost): Order1 (2 * 10000) + Order2 (2 * 10000) + Order3 (0) = 40000
 export const expectedTotalCOGS = 40000;
+
+// COGS (via Menu.cost, used by getFullReport): same result = 40000
+export const expectedTotalCOGSByMenuCost = 40000;
 
 // Cash sales: Order1 (80000) + Order3 (30000) = 110000
 export const expectedCashSales = 110000;

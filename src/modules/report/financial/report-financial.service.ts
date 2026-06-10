@@ -11,6 +11,7 @@ import {
     TopMenuItem,
     SalesByCategoryResponse,
     SalesByCategoryItem,
+    DailyFinancialItem,
     FullFinancialReportResponse,
 } from './report-financial.types';
 
@@ -277,44 +278,91 @@ export const getSalesByCategory = async (req: AuthenticatedRequest): Promise<Sal
 };
 
 // ============================================
-// GET FULL REPORT
+// GET FULL REPORT (DAILY P&L)
 // ============================================
 
 export const getFullReport = async (req: AuthenticatedRequest): Promise<FullFinancialReportResponse> => {
     try {
         const filter = extractFilter(req);
 
-        // Get all data in parallel
-        const [summaryData, paymentData, cashFlowData, topMenusData, salesByCategoryData] = await Promise.all([
-            getSummary(req),
-            getPaymentBreakdown(req),
-            getCashFlow(req),
-            getTopMenus(req),
-            getSalesByCategory(req),
+        // Use lean dedicated queries — only fetch fields needed for daily P&L
+        const [orders, cashMovementsOut] = await Promise.all([
+            reportFinancialRepository.getOrdersForFullReport(filter),
+            reportFinancialRepository.getCashMovementsOutForFullReport(filter),
         ]);
+
+        const safeOrders = orders || [];
+        const safeCashMovementsOut = cashMovementsOut || [];
+
+        // Group orders by date
+        const dailyMap = new Map<string, {
+            transaction_count: number;
+            total_revenue: number;
+            total_cogs: number;
+            expenses: number;
+        }>();
+
+        for (const order of safeOrders) {
+            const dateKey = new Date(order.created_at).toISOString().split('T')[0];
+
+            if (!dailyMap.has(dateKey)) {
+                dailyMap.set(dateKey, {
+                    transaction_count: 0,
+                    total_revenue: 0,
+                    total_cogs: 0,
+                    expenses: 0,
+                });
+            }
+
+            const day = dailyMap.get(dateKey)!;
+            day.transaction_count += 1;
+            day.total_revenue += Number(order.total_amount);
+
+            // Calculate COGS from OrderItem.qty × Menu.cost
+            for (const item of order.order_items) {
+                const menuCost = Number(item.menu?.cost ?? 0);
+                day.total_cogs += item.qty * menuCost;
+            }
+        }
+
+        // Add expenses from CashMovement type OUT
+        for (const cm of safeCashMovementsOut) {
+            const dateKey = new Date(cm.created_at).toISOString().split('T')[0];
+
+            if (!dailyMap.has(dateKey)) {
+                dailyMap.set(dateKey, {
+                    transaction_count: 0,
+                    total_revenue: 0,
+                    total_cogs: 0,
+                    expenses: 0,
+                });
+            }
+
+            dailyMap.get(dateKey)!.expenses += Number(cm.amount);
+        }
+
+        // Build sorted daily items
+        const items: DailyFinancialItem[] = Array.from(dailyMap.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([date, data]) => {
+                const grossProfit = Math.round(data.total_revenue - data.total_cogs);
+                const netProfit = Math.round(grossProfit - data.expenses);
+
+                return {
+                    date,
+                    transaction_count: data.transaction_count,
+                    total_revenue: Math.round(data.total_revenue),
+                    total_cogs: Math.round(data.total_cogs),
+                    gross_profit: grossProfit,
+                    expenses: Math.round(data.expenses),
+                    net_profit: netProfit,
+                };
+            });
 
         return {
             period: createPeriod(filter),
-            summary: {
-                revenue: summaryData.revenue,
-                transaction_count: summaryData.transaction_count,
-                average_transaction_value: summaryData.average_transaction_value,
-            },
-            payment_breakdown: {
-                total_transactions: paymentData.total_transactions,
-                total_amount: paymentData.total_amount,
-                by_payment_type: paymentData.by_payment_type,
-            },
-            cash_flow: {
-                opening_cash: cashFlowData.opening_cash,
-                cash_in: cashFlowData.cash_in,
-                cash_out: cashFlowData.cash_out,
-                closing_cash: cashFlowData.closing_cash,
-                expected_cash: cashFlowData.expected_cash,
-                difference: cashFlowData.difference,
-            },
-            top_menus: topMenusData.top_menus,
-            sales_by_category: salesByCategoryData.by_category,
+            total_days: items.length,
+            items,
         };
     } catch (error) {
         console.error(`--- Report Financial Service Error: ${(error as Error).message}`);

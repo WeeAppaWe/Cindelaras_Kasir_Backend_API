@@ -169,6 +169,100 @@ export const getShiftsForPeriod = async (filter: ReportFilter) => {
 };
 
 // ============================================
+// GET ORDERS FOR FULL REPORT (lean - only fields needed for daily P&L)
+// ============================================
+
+export const getOrdersForFullReport = async (filter: ReportFilter) => {
+    try {
+        const { startDate, endDate } = buildDateRangeFilter(filter);
+
+        const where: Prisma.OrderWhereInput = {
+            status: 'COMPLETED',
+            deleted_at: null,
+            created_at: {
+                gte: startDate,
+                lte: endDate,
+            },
+        };
+
+        if (filter.shift_id) {
+            where.shift_id = filter.shift_id;
+        }
+
+        if (filter.user_id) {
+            where.user_id = filter.user_id;
+        }
+
+        const orders = await prisma.order.findMany({
+            where,
+            select: {
+                order_id: true,
+                total_amount: true,
+                created_at: true,
+                order_items: {
+                    where: { deleted_at: null },
+                    select: {
+                        qty: true,
+                        menu: {
+                            select: {
+                                cost: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                created_at: 'asc',
+            },
+        });
+
+        return orders;
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
+// ============================================
+// GET CASH MOVEMENTS (OUT) FOR FULL REPORT
+// ============================================
+
+export const getCashMovementsOutForFullReport = async (filter: ReportFilter) => {
+    try {
+        const { startDate, endDate } = buildDateRangeFilter(filter);
+
+        const where: Prisma.CashMovementWhereInput = {
+            type: 'OUT',
+            deleted_at: null,
+            created_at: {
+                gte: startDate,
+                lte: endDate,
+            },
+        };
+
+        if (filter.shift_id) {
+            where.shift_id = filter.shift_id;
+        }
+
+        const cashMovements = await prisma.cashMovement.findMany({
+            where,
+            select: {
+                amount: true,
+                created_at: true,
+            },
+            orderBy: {
+                created_at: 'asc',
+            },
+        });
+
+        return cashMovements;
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
+// ============================================
 // GET ORDER ITEMS AGGREGATED BY MENU
 // ============================================
 
@@ -338,7 +432,9 @@ export const getOrderItemsAggregatedByCategory = async (filter: ReportFilter) =>
 
 export const reportFinancialRepository = {
     getCompletedOrdersForPeriod,
+    getOrdersForFullReport,
     getCashMovementsForPeriod,
+    getCashMovementsOutForFullReport,
     getShiftsForPeriod,
     getOrderItemsAggregatedByMenu,
     getOrderItemsAggregatedByCategory,

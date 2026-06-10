@@ -186,6 +186,32 @@
  *         metaData:
  *           $ref: '#/components/schemas/MetaData'
  *
+ *     DailyFinancialItem:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date
+ *           description: Tanggal rekapitulasi (YYYY-MM-DD)
+ *         transaction_count:
+ *           type: integer
+ *           description: Jumlah order COMPLETED pada hari tersebut
+ *         total_revenue:
+ *           type: number
+ *           description: Total omzet penjualan (semua metode pembayaran)
+ *         total_cogs:
+ *           type: number
+ *           description: Harga Pokok Penjualan = SUM(OrderItem.qty × Menu.cost)
+ *         gross_profit:
+ *           type: number
+ *           description: Laba Kotor = total_revenue - total_cogs
+ *         expenses:
+ *           type: number
+ *           description: Pengeluaran lain-lain dari CashMovement type OUT
+ *         net_profit:
+ *           type: number
+ *           description: Laba Bersih = gross_profit - expenses. Bisa negatif.
+ *
  *     FullFinancialReportResponse:
  *       type: object
  *       properties:
@@ -194,61 +220,14 @@
  *           properties:
  *             period:
  *               $ref: '#/components/schemas/ReportPeriod'
- *             summary:
- *               type: object
- *               properties:
- *                 revenue:
- *                   $ref: '#/components/schemas/RevenueSummary'
- *                 transaction_count:
- *                   type: integer
- *                 average_transaction_value:
- *                   type: number
- *             payment_breakdown:
- *               type: object
- *               properties:
- *                 total_transactions:
- *                   type: integer
- *                 total_amount:
- *                   type: number
- *                 by_payment_type:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/PaymentTypeDetail'
- *             cash_flow:
- *               type: object
- *               properties:
- *                 opening_cash:
- *                   type: number
- *                 cash_in:
- *                   type: object
- *                   properties:
- *                     from_sales:
- *                       type: number
- *                     adjustments:
- *                       type: number
- *                     total:
- *                       type: number
- *                 cash_out:
- *                   type: object
- *                   properties:
- *                     adjustments:
- *                       type: number
- *                     total:
- *                       type: number
- *                 closing_cash:
- *                   type: number
- *                 expected_cash:
- *                   type: number
- *                 difference:
- *                   type: number
- *             top_menus:
+ *             total_days:
+ *               type: integer
+ *               description: Jumlah hari yang memiliki data dalam periode
+ *             items:
  *               type: array
+ *               description: Data P&L per hari, diurutkan ascending berdasarkan tanggal
  *               items:
- *                 $ref: '#/components/schemas/TopMenuItem'
- *             sales_by_category:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/SalesByCategoryItem'
+ *                 $ref: '#/components/schemas/DailyFinancialItem'
  *         metaData:
  *           $ref: '#/components/schemas/MetaData'
  */
