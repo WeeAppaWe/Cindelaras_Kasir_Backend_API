@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reportFinancialRepository = exports.getOrderItemsAggregatedByCategory = exports.getOrderItemsAggregatedByMenu = exports.getShiftsForPeriod = exports.getCashMovementsForPeriod = exports.getCompletedOrdersForPeriod = void 0;
+exports.reportFinancialRepository = exports.getOrderItemsAggregatedByCategory = exports.getOrderItemsAggregatedByMenu = exports.getCashMovementsOutForFullReport = exports.getOrdersForFullReport = exports.getShiftsForPeriod = exports.getCashMovementsForPeriod = exports.getCompletedOrdersForPeriod = void 0;
 const postgres_connection_1 = __importDefault(require("../../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -153,6 +153,91 @@ const getShiftsForPeriod = async (filter) => {
 };
 exports.getShiftsForPeriod = getShiftsForPeriod;
 // ============================================
+// GET ORDERS FOR FULL REPORT (lean - only fields needed for daily P&L)
+// ============================================
+const getOrdersForFullReport = async (filter) => {
+    try {
+        const { startDate, endDate } = buildDateRangeFilter(filter);
+        const where = {
+            status: 'COMPLETED',
+            deleted_at: null,
+            created_at: {
+                gte: startDate,
+                lte: endDate,
+            },
+        };
+        if (filter.shift_id) {
+            where.shift_id = filter.shift_id;
+        }
+        if (filter.user_id) {
+            where.user_id = filter.user_id;
+        }
+        const orders = await prisma.order.findMany({
+            where,
+            select: {
+                order_id: true,
+                total_amount: true,
+                created_at: true,
+                order_items: {
+                    where: { deleted_at: null },
+                    select: {
+                        qty: true,
+                        menu: {
+                            select: {
+                                cost: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                created_at: 'asc',
+            },
+        });
+        return orders;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.getOrdersForFullReport = getOrdersForFullReport;
+// ============================================
+// GET CASH MOVEMENTS (OUT) FOR FULL REPORT
+// ============================================
+const getCashMovementsOutForFullReport = async (filter) => {
+    try {
+        const { startDate, endDate } = buildDateRangeFilter(filter);
+        const where = {
+            type: 'OUT',
+            deleted_at: null,
+            created_at: {
+                gte: startDate,
+                lte: endDate,
+            },
+        };
+        if (filter.shift_id) {
+            where.shift_id = filter.shift_id;
+        }
+        const cashMovements = await prisma.cashMovement.findMany({
+            where,
+            select: {
+                amount: true,
+                created_at: true,
+            },
+            orderBy: {
+                created_at: 'asc',
+            },
+        });
+        return cashMovements;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.getCashMovementsOutForFullReport = getCashMovementsOutForFullReport;
+// ============================================
 // GET ORDER ITEMS AGGREGATED BY MENU
 // ============================================
 const getOrderItemsAggregatedByMenu = async (filter, limit = 10) => {
@@ -300,7 +385,9 @@ exports.getOrderItemsAggregatedByCategory = getOrderItemsAggregatedByCategory;
 // ============================================
 exports.reportFinancialRepository = {
     getCompletedOrdersForPeriod: exports.getCompletedOrdersForPeriod,
+    getOrdersForFullReport: exports.getOrdersForFullReport,
     getCashMovementsForPeriod: exports.getCashMovementsForPeriod,
+    getCashMovementsOutForFullReport: exports.getCashMovementsOutForFullReport,
     getShiftsForPeriod: exports.getShiftsForPeriod,
     getOrderItemsAggregatedByMenu: exports.getOrderItemsAggregatedByMenu,
     getOrderItemsAggregatedByCategory: exports.getOrderItemsAggregatedByCategory,

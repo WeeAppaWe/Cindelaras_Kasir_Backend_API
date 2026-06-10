@@ -131,21 +131,10 @@ export interface IngredientMovementCardResponse {
     movements: MovementCardItem[];
 }
 export interface FullInventoryReportResponse {
-    current_stock: {
-        total_items: number;
-        total_value: number;
-        low_stock_count: number;
-        out_of_stock_count: number;
-    };
-    movement_summary: {
-        total_in: number;
-        total_out: number;
-        shrinkage_value: number;
-    };
-    alerts: {
-        low_stock_count: number;
-        out_of_stock_count: number;
-    };
-    top_value_items: CurrentStockItem[];
+    total_items: number;
+    total_value: number;
+    low_stock_count: number;
+    out_of_stock_count: number;
+    items: CurrentStockItem[];
 }
 //# sourceMappingURL=report-inventory.types.d.ts.map

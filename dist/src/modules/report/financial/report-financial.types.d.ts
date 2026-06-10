@@ -75,27 +75,18 @@ export interface SalesByCategoryResponse {
     total_revenue: number;
     by_category: SalesByCategoryItem[];
 }
+export interface DailyFinancialItem {
+    date: string;
+    transaction_count: number;
+    total_revenue: number;
+    total_cogs: number;
+    gross_profit: number;
+    expenses: number;
+    net_profit: number;
+}
 export interface FullFinancialReportResponse {
     period: ReportPeriod;
-    summary: {
-        revenue: RevenueSummary;
-        transaction_count: number;
-        average_transaction_value: number;
-    };
-    payment_breakdown: {
-        total_transactions: number;
-        total_amount: number;
-        by_payment_type: PaymentTypeDetail[];
-    };
-    cash_flow: {
-        opening_cash: number;
-        cash_in: CashInDetails;
-        cash_out: CashOutDetails;
-        closing_cash: number;
-        expected_cash: number;
-        difference: number;
-    };
-    top_menus: TopMenuItem[];
-    sales_by_category: SalesByCategoryItem[];
+    total_days: number;
+    items: DailyFinancialItem[];
 }
 //# sourceMappingURL=report-financial.types.d.ts.map

@@ -110,25 +110,25 @@ export interface OrderStatusResponse {
     summary: OrderStatusSummary[];
     orders: OrderItem[];
 }
+export interface FullReportShiftItem {
+    shift_id: string;
+    date: string;
+    start_time: string;
+    end_time: string | null;
+    cashier_name: string;
+    start_cash: number;
+    total_sales: number;
+    cash_in: number;
+    cash_out: number;
+    expected_cash: number;
+    actual_cash: number | null;
+    variance: number | null;
+    transaction_count: number;
+    status: 'ACTIVE' | 'CLOSED';
+}
 export interface FullOperationalReportResponse {
     period: ReportPeriod;
-    cashier_summary: {
-        total_cashiers: number;
-        top_performer: CashierPerformanceItem | null;
-    };
-    shift_summary: {
-        total_shifts: number;
-        active_shifts: number;
-        closed_shifts: number;
-    };
-    transaction_stats: {
-        total_transactions: number;
-        total_sales: number;
-        average_per_transaction: number;
-        peak_hour: number;
-        busiest_day: string;
-    };
-    order_status: OrderStatusSummary[];
-    top_menus: MenuPerformanceItem[];
+    total_shifts: number;
+    shifts: FullReportShiftItem[];
 }
 //# sourceMappingURL=report-operational.types.d.ts.map

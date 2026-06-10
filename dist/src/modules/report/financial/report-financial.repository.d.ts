@@ -112,6 +112,21 @@ export declare const getShiftsForPeriod: (filter: ReportFilter) => Promise<({
     start_time: Date;
     end_time: Date | null;
 })[]>;
+export declare const getOrdersForFullReport: (filter: ReportFilter) => Promise<{
+    created_at: Date;
+    order_items: {
+        menu: {
+            cost: import("@prisma/client/runtime/client").Decimal;
+        };
+        qty: number;
+    }[];
+    order_id: string;
+    total_amount: import("@prisma/client/runtime/client").Decimal;
+}[]>;
+export declare const getCashMovementsOutForFullReport: (filter: ReportFilter) => Promise<{
+    created_at: Date;
+    amount: import("@prisma/client/runtime/client").Decimal;
+}[]>;
 export declare const getOrderItemsAggregatedByMenu: (filter: ReportFilter, limit?: number) => Promise<{
     menu_id: string;
     name: string;
@@ -202,6 +217,17 @@ export declare const reportFinancialRepository: {
         change_amount: import("@prisma/client/runtime/client").Decimal;
         payment_type: string;
     })[]>;
+    getOrdersForFullReport: (filter: ReportFilter) => Promise<{
+        created_at: Date;
+        order_items: {
+            menu: {
+                cost: import("@prisma/client/runtime/client").Decimal;
+            };
+            qty: number;
+        }[];
+        order_id: string;
+        total_amount: import("@prisma/client/runtime/client").Decimal;
+    }[]>;
     getCashMovementsForPeriod: (filter: ReportFilter) => Promise<{
         type: string;
         created_at: Date;
@@ -211,6 +237,10 @@ export declare const reportFinancialRepository: {
         note: string | null;
         cash_movement_id: string;
         shift_id: string;
+    }[]>;
+    getCashMovementsOutForFullReport: (filter: ReportFilter) => Promise<{
+        created_at: Date;
+        amount: import("@prisma/client/runtime/client").Decimal;
     }[]>;
     getShiftsForPeriod: (filter: ReportFilter) => Promise<({
         user: {

@@ -431,30 +431,44 @@ exports.getIngredientCard = getIngredientCard;
 // ============================================
 const getFullReport = async (req) => {
     try {
-        const [currentStockData, movementData, alertsData] = await Promise.all([
-            (0, exports.getCurrentStock)(req),
-            (0, exports.getMovementSummary)(req),
-            (0, exports.getStockAlerts)(req),
-        ]);
+        const ingredientType = req.query.ingredient_type || null;
+        const ingredients = await report_inventory_repository_1.default.getAllIngredientsWithStatus(ingredientType, 'all', 500);
+        if (!ingredients || ingredients.length === 0) {
+            return {
+                total_items: 0,
+                total_value: 0,
+                low_stock_count: 0,
+                out_of_stock_count: 0,
+                items: [],
+            };
+        }
+        const items = ingredients.map(i => {
+            const currentStock = Number(i.stock_qty);
+            const minStock = Number(i.min_stock);
+            const avgCost = Number(i.avg_cost);
+            const stockValue = currentStock * avgCost;
+            const stockStatus = getStockStatus(currentStock, minStock);
+            return {
+                ingredient_id: i.ingredient_id,
+                name: i.name,
+                type: i.type,
+                unit: i.unit.name,
+                current_stock: currentStock,
+                min_stock: minStock,
+                avg_cost: avgCost,
+                stock_value: Math.round(stockValue),
+                status: stockStatus,
+            };
+        });
+        const totalValue = items.reduce((sum, i) => sum + i.stock_value, 0);
+        const lowStockCount = items.filter(i => i.status === 'LOW').length;
+        const outOfStockCount = items.filter(i => i.status === 'OUT').length;
         return {
-            current_stock: {
-                total_items: currentStockData.total_items,
-                total_value: currentStockData.total_value,
-                low_stock_count: currentStockData.low_stock_count,
-                out_of_stock_count: currentStockData.out_of_stock_count,
-            },
-            movement_summary: {
-                total_in: movementData.total_in.qty,
-                total_out: movementData.total_out.qty,
-                shrinkage_value: movementData.shrinkage.total_value,
-            },
-            alerts: {
-                low_stock_count: alertsData.low_stock_items.length,
-                out_of_stock_count: alertsData.out_of_stock_items.length,
-            },
-            top_value_items: currentStockData.items
-                .sort((a, b) => b.stock_value - a.stock_value)
-                .slice(0, 5),
+            total_items: items.length,
+            total_value: Math.round(totalValue),
+            low_stock_count: lowStockCount,
+            out_of_stock_count: outOfStockCount,
+            items,
         };
     }
     catch (error) {

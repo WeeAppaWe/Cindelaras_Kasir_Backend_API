@@ -80,6 +80,7 @@ export declare const getShiftsWithOrderCounts: (filter: ReportFilter) => Promise
         status: string;
         order_id: string;
         total_amount: import("@prisma/client/runtime/client").Decimal;
+        payment_type: string;
     }[];
     user: {
         user_id: string;
@@ -224,6 +225,7 @@ export declare const reportOperationalRepository: {
             status: string;
             order_id: string;
             total_amount: import("@prisma/client/runtime/client").Decimal;
+            payment_type: string;
         }[];
         user: {
             user_id: string;
