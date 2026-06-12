@@ -4,9 +4,11 @@ import { ErrorValidationException } from '../../../../exception/error-validation
 import getPrismaClient from '../../../../database/postgres.connection';
 import { getPagination } from '../../../../utility/pagination.utility';
 import { calculateHPP, roundCurrency } from '../../../../utility/cost-calculation.utility';
+import { getMetadataInfo } from '../../../../utility/metadata-info.utility';
 import { AuthenticatedRequest } from '../../../../types';
 import semiIngredientRepository from './ingredient-semi.repository';
 import unitMeasureService from '../../unit-measure/unit-measure.service';
+import stockTypeRepository from '../../stock-type/stock-type.repository';
 import {
     CreateSemiIngredientRequest,
     UpdateSemiIngredientRequest,
@@ -16,7 +18,10 @@ import {
     DeleteSemiIngredientResponse,
     SemiIngredientHPPResult,
     IngredientType,
+    ProduceSemiIngredientRequest,
+    ProduceSemiIngredientResult,
 } from './ingredient-semi.types';
+import { StockTypeName } from '../../stock-type/stock-type.schema';
 
 const prisma = getPrismaClient();
 
@@ -294,6 +299,175 @@ export const recalculateAvgCost = async (
     }
 };
 
+/**
+ * Produce semi ingredient — deduct child ingredients stock and increment semi ingredient stock
+ */
+export const produce = async (req: AuthenticatedRequest): Promise<ProduceSemiIngredientResult> => {
+    try {
+        const ingredientId = req.params.ingredient_id;
+        const body: ProduceSemiIngredientRequest = req.body;
+        const metadata = getMetadataInfo(req);
+
+        if (!metadata.account_id) {
+            throw new ErrorValidationException('User tidak terautentikasi', [
+                { location: 'auth', field: 'user_id', message: 'User ID tidak ditemukan' },
+            ]);
+        }
+
+        // 1. Ambil data bahan semi + komposisi + stock_qty child
+        const ingredient = await semiIngredientRepository.findByIdWithCompositionsAndStock(ingredientId);
+
+        // 2. Guard: tidak ditemukan
+        if (!ingredient) {
+            throw new ErrorNotFoundException('Bahan setengah jadi tidak ditemukan');
+        }
+
+        // 3. Guard: tidak punya komposisi
+        if (ingredient.child_compositions.length === 0) {
+            throw new ErrorValidationException('Bahan setengah jadi belum memiliki komposisi', [
+                { location: 'body', field: 'ingredient_id', message: 'Bahan setengah jadi belum memiliki komposisi' },
+            ]);
+        }
+
+        // 4. Hitung kebutuhan total per bahan penyusun
+        const insufficientItems: { ingredient_name: string; needed: number; available: number }[] = [];
+
+        for (const composition of ingredient.child_compositions) {
+            const qtyNeededTotal = Number(composition.qty_needed) * body.qty;
+            const available = Number(composition.child_ingredient.stock_qty);
+
+            if (available < qtyNeededTotal) {
+                insufficientItems.push({
+                    ingredient_name: composition.child_ingredient.name,
+                    needed: qtyNeededTotal,
+                    available,
+                });
+            }
+        }
+
+        // 5 & 6. Guard: ada stok yang kurang
+        if (insufficientItems.length > 0) {
+            throw new ErrorValidationException('Stok bahan penyusun tidak mencukupi', [
+                {
+                    location: 'body',
+                    field: 'qty',
+                    message: 'Stok bahan penyusun tidak mencukupi',
+                },
+                ...insufficientItems.map((item) => ({
+                    location: 'body' as const,
+                    field: item.ingredient_name,
+                    message: `Dibutuhkan: ${item.needed}, tersedia: ${item.available}`,
+                })),
+            ]);
+        }
+
+        // Lookup stock types sebelum transaksi (pola dari inventory.service & opname.service)
+        const [stockTypeOut, stockTypeIn] = await Promise.all([
+            stockTypeRepository.findByName(StockTypeName.OUT_PRODUCTION),
+            stockTypeRepository.findByName(StockTypeName.IN_PRODUCTION),
+        ]);
+
+        if (!stockTypeOut) {
+            throw new ErrorValidationException('Tipe stok OUT_PRODUCTION tidak ditemukan', [
+                { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
+            ]);
+        }
+
+        if (!stockTypeIn) {
+            throw new ErrorValidationException('Tipe stok IN_PRODUCTION tidak ditemukan', [
+                { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
+            ]);
+        }
+
+        // 7. Eksekusi dalam satu transaksi
+        const deductedIngredients: ProduceSemiIngredientResult['deducted_ingredients'] = [];
+
+        await prisma.$transaction(async (transaction) => {
+            // a. Untuk tiap bahan penyusun: decrement stock, INSERT stock_movement OUT
+            for (const composition of ingredient.child_compositions) {
+                const qtyDeducted = Number(composition.qty_needed) * body.qty;
+                const currentChildStock = Number(composition.child_ingredient.stock_qty);
+                const remainingStock = currentChildStock - qtyDeducted;
+
+                // Decrement stock child ingredient
+                await transaction.ingredient.update({
+                    where: { ingredient_id: composition.child_ingredient.ingredient_id },
+                    data: { stock_qty: remainingStock },
+                });
+
+                // Insert stock_movement OUT_PRODUCTION (qty negatif)
+                await transaction.stockMovement.create({
+                    data: {
+                        ingredient_id: composition.child_ingredient.ingredient_id,
+                        user_id: metadata.account_id,
+                        stock_type_id: stockTypeOut.stock_type_id,
+                        qty: -qtyDeducted,
+                        current_stock: remainingStock,
+                        notes: `[Produksi] ${body.notes || ''}`.trim(),
+                    },
+                });
+
+                deductedIngredients.push({
+                    ingredient_id: composition.child_ingredient.ingredient_id,
+                    ingredient_name: composition.child_ingredient.name,
+                    qty_deducted: qtyDeducted,
+                    remaining_stock: remainingStock,
+                });
+            }
+
+            // b. Increment stock bahan semi, INSERT stock_movement IN_PRODUCTION
+            const currentSemiStock = Number(ingredient.stock_qty);
+            const newSemiStock = currentSemiStock + body.qty;
+
+            await transaction.ingredient.update({
+                where: { ingredient_id: ingredientId },
+                data: { stock_qty: newSemiStock },
+            });
+
+            await transaction.stockMovement.create({
+                data: {
+                    ingredient_id: ingredientId,
+                    user_id: metadata.account_id,
+                    stock_type_id: stockTypeIn.stock_type_id,
+                    qty: body.qty,
+                    current_stock: newSemiStock,
+                    notes: `[Hasil Produksi] ${body.notes || ''}`.trim(),
+                },
+            });
+
+            // c. Recalculate avg_cost bahan semi dengan target_yield = qty (jumlah unit yang diproduksi)
+            const recipeItems = ingredient.child_compositions.map((c: any) => ({
+                ingredient_id: c.child_id,
+                qty_needed: Number(c.qty_needed),
+                avg_cost: Number(c.child_ingredient.avg_cost),
+            }));
+
+            const totalHPP = calculateHPP(recipeItems);
+            const newAvgCost = roundCurrency(totalHPP / body.qty);
+
+            await semiIngredientRepository.updateAvgCost(ingredientId, newAvgCost, transaction);
+        });
+
+        // 8. Ambil data terbaru bahan semi setelah transaksi
+        const updatedIngredient = await semiIngredientRepository.findById(ingredientId);
+
+        return {
+            ingredient_id: updatedIngredient!.ingredient_id,
+            name: updatedIngredient!.name,
+            type: updatedIngredient!.type,
+            stock_qty: Number(updatedIngredient!.stock_qty),
+            min_stock: Number(updatedIngredient!.min_stock),
+            avg_cost: Number(updatedIngredient!.avg_cost),
+            unit: updatedIngredient!.unit,
+            produced_qty: body.qty,
+            deducted_ingredients: deductedIngredients,
+        };
+    } catch (error) {
+        console.error(`--- Semi Ingredient Service Error: ${(error as Error).message}`);
+        throw error;
+    }
+};
+
 export const semiIngredientService = {
     getAll,
     getDetail,
@@ -302,6 +476,7 @@ export const semiIngredientService = {
     softDelete,
     getHPPCalculation,
     recalculateAvgCost,
+    produce,
 };
 
 export default semiIngredientService;

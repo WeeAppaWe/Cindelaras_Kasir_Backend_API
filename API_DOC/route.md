@@ -19,7 +19,7 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **134 endpoint**.
+Total endpoint dari folder `route`: **135 endpoint**.
 
 ## Auth
 
@@ -103,6 +103,7 @@ Source: `route/ingredient.route.ts`
 | `DELETE` | `/api/ingredient/semi/:ingredient_id` | ADMIN | Soft delete bahan setengah jadi. |
 | `GET` | `/api/ingredient/semi/:ingredient_id/hpp` | ADMIN | Ambil perhitungan HPP bahan setengah jadi. |
 | `POST` | `/api/ingredient/semi/:ingredient_id/recalculate-hpp` | ADMIN | Hitung ulang HPP bahan setengah jadi. |
+| `POST` | `/api/ingredient/semi/:ingredient_id/produce` | ADMIN | Produksi bahan setengah jadi (potong stok bahan penyusun, tambah stok hasil). |
 
 ## Ingredient Semi Composition
 

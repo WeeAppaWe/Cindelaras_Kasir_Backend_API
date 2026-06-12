@@ -107,6 +107,33 @@ export interface UnitMeasureReference {
     name: string;
 }
 
+// Produce semi ingredient request
+export interface ProduceSemiIngredientRequest {
+    qty: number;
+    notes?: string;
+}
+
+// Deducted ingredient info in produce result
+export interface ProduceDeductedIngredient {
+    ingredient_id: string;
+    ingredient_name: string;
+    qty_deducted: number;
+    remaining_stock: number;
+}
+
+// Result for produce semi ingredient
+export interface ProduceSemiIngredientResult {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    stock_qty: number;
+    min_stock: number;
+    avg_cost: number;
+    unit: { unit_measure_id: string; name: string };
+    produced_qty: number;
+    deducted_ingredients: ProduceDeductedIngredient[];
+}
+
 // HPP calculation result for semi ingredient
 export interface SemiIngredientHPPResult {
     total_hpp: number;

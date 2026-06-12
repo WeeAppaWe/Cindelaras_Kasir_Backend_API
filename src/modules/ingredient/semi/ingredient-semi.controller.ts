@@ -114,6 +114,19 @@ export const recalculateHPP = async (req: AuthenticatedRequest, res: Response, n
     }
 };
 
+/**
+ * Produce Semi Ingredient — deduct child stock, increment semi stock
+ * POST /api/ingredient/semi/:ingredient_id/produce
+ */
+export const produce = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await semiIngredientService.produce(req);
+        res.status(200).json(responseApi({ code: 200, message: 'Produksi berhasil dicatat' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const semiIngredientController = {
     showAll,
     detail,
@@ -123,6 +136,7 @@ export const semiIngredientController = {
     getUnitMeasures,
     getHPPCalculation,
     recalculateHPP,
+    produce,
 };
 
 export default semiIngredientController;

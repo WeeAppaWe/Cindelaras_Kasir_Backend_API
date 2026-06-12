@@ -238,6 +238,72 @@
  *               subtotal:
  *                 type: number
  *
+ *     ProduceSemiIngredientInput:
+ *       type: object
+ *       required:
+ *         - qty
+ *       properties:
+ *         qty:
+ *           type: number
+ *           minimum: 0.01
+ *           example: 5
+ *           description: Jumlah unit bahan semi yang diproduksi
+ *         notes:
+ *           type: string
+ *           maxLength: 500
+ *           example: "Produksi siang"
+ *
+ *     ProduceSemiIngredientResult:
+ *       type: object
+ *       properties:
+ *         ingredient_id:
+ *           type: string
+ *           format: uuid
+ *         name:
+ *           type: string
+ *           example: "Bumbu Dasar"
+ *         type:
+ *           type: string
+ *           example: "SEMI"
+ *         stock_qty:
+ *           type: number
+ *           example: 55
+ *         min_stock:
+ *           type: number
+ *           example: 10
+ *         avg_cost:
+ *           type: number
+ *           example: 13000
+ *         unit:
+ *           type: object
+ *           properties:
+ *             unit_measure_id:
+ *               type: string
+ *               format: uuid
+ *             name:
+ *               type: string
+ *               example: "Porsi"
+ *         produced_qty:
+ *           type: number
+ *           example: 5
+ *         deducted_ingredients:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               ingredient_id:
+ *                 type: string
+ *                 format: uuid
+ *               ingredient_name:
+ *                 type: string
+ *                 example: "Bawang Merah"
+ *               qty_deducted:
+ *                 type: number
+ *                 example: 10
+ *               remaining_stock:
+ *                 type: number
+ *                 example: 90
+ *
  *     LowStockAlertResponse:
  *       type: object
  *       properties:
@@ -771,4 +837,58 @@
  *                       example: 5000
  *       404:
  *         description: Ingredient not found
+ *
+ * /ingredient/semi/{ingredient_id}/produce:
+ *   post:
+ *     summary: Produksi bahan setengah jadi
+ *     description: Memotong stok bahan penyusun dan menambah stok bahan setengah jadi, lalu menghitung ulang avg_cost berdasarkan produksi ini.
+ *     tags: [Ingredient Semi]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: ingredient_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProduceSemiIngredientInput'
+ *           example:
+ *             qty: 5
+ *             notes: "Produksi siang"
+ *     responses:
+ *       200:
+ *         description: Produksi berhasil dicatat
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 response:
+ *                   $ref: '#/components/schemas/ProduceSemiIngredientResult'
+ *                 metaData:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/MetaData'
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           example: "Produksi berhasil dicatat"
+ *       400:
+ *         description: Stok bahan penyusun tidak mencukupi atau bahan belum memiliki komposisi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Bahan setengah jadi tidak ditemukan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */

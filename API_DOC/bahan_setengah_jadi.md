@@ -470,3 +470,99 @@ Jika harga beli bahan mentah naik atau ada perubahan *avg_cost* secara mendadak 
   }
 }
 ```
+
+---
+
+## BAGIAN D: Produksi Bahan Setengah Jadi
+
+### Konsep Produksi
+
+Produksi adalah proses mengolah bahan baku (RAW) menjadi bahan setengah jadi (SEMI). Ketika produksi dicatat:
+
+1. **Stok bahan penyusun** (RAW) akan **berkurang** sesuai `qty_needed` masing-masing dikalikan jumlah produksi (`qty`).
+2. **Stok bahan setengah jadi** (SEMI) akan **bertambah** sebesar `qty`.
+3. **`avg_cost`** bahan setengah jadi dihitung ulang berdasarkan komposisi aktif dan `target_yield = qty` dari produksi ini.
+4. Setiap perubahan stok dicatat di tabel `stock_movements`:
+   - Bahan penyusun → tipe `OUT_PRODUCTION` (qty negatif)
+   - Bahan setengah jadi → tipe `IN_PRODUCTION` (qty positif)
+
+Seluruh operasi dieksekusi dalam satu transaksi database untuk menjamin atomicity.
+
+### Endpoint: Produksi Bahan Setengah Jadi
+
+- **Endpoint:** `POST /:ingredient_id/produce`
+- **Akses:** Protected (ADMIN)
+
+**Request Body (JSON):**
+```json
+{
+  "qty": 5,
+  "notes": "Produksi siang"
+}
+```
+
+| Field | Tipe | Wajib | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `qty` | number | Ya | Jumlah unit bahan semi yang diproduksi. Minimum `0.01`. |
+| `notes` | string | Tidak | Catatan produksi. Maksimal 500 karakter. |
+
+**Response Berhasil (200 OK):**
+```json
+{
+  "code": 200,
+  "message": "Produksi berhasil dicatat",
+  "data": {
+    "ingredient_id": "uuid-semi-1",
+    "name": "Bumbu Dasar",
+    "type": "SEMI",
+    "stock_qty": 55,
+    "min_stock": 10,
+    "avg_cost": 13000,
+    "unit": {
+      "unit_measure_id": "uuid-unit-porsi",
+      "name": "Porsi"
+    },
+    "produced_qty": 5,
+    "deducted_ingredients": [
+      {
+        "ingredient_id": "uuid-bawang-merah",
+        "ingredient_name": "Bawang Merah",
+        "qty_deducted": 10,
+        "remaining_stock": 90
+      },
+      {
+        "ingredient_id": "uuid-bawang-putih",
+        "ingredient_name": "Bawang Putih",
+        "qty_deducted": 5,
+        "remaining_stock": 495
+      }
+    ]
+  }
+}
+```
+
+### Error Cases
+
+| Kondisi | HTTP Status | Pesan |
+| :--- | :--- | :--- |
+| `ingredient_id` tidak ditemukan atau sudah dihapus | `404 Not Found` | `Bahan setengah jadi tidak ditemukan` |
+| Bahan setengah jadi belum memiliki komposisi | `400 Bad Request` | `Bahan setengah jadi belum memiliki komposisi` |
+| Satu atau lebih stok bahan penyusun tidak mencukupi | `400 Bad Request` | `Stok bahan penyusun tidak mencukupi` (disertai detail bahan yang kurang) |
+
+**Contoh Response Error Stok Kurang (400):**
+```json
+{
+  "code": 400,
+  "message": "Stok bahan penyusun tidak mencukupi",
+  "errors": [
+    {
+      "field": "qty",
+      "message": "Stok bahan penyusun tidak mencukupi"
+    },
+    {
+      "field": "Bawang Merah",
+      "message": "Dibutuhkan: 10, tersedia: 5"
+    }
+  ]
+}
+```

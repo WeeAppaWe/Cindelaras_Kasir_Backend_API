@@ -1,6 +1,7 @@
 import semiIngredientService from './ingredient-semi.service';
 import semiIngredientRepository from './ingredient-semi.repository';
 import unitMeasureService from '../../unit-measure/unit-measure.service';
+import stockTypeRepository from '../../stock-type/stock-type.repository';
 import { ErrorNotFoundException } from '../../../../exception/error-not-found.exception';
 import { ErrorDataAlreadyExistException } from '../../../../exception/error-data-already-exist.exception';
 import { ErrorValidationException } from '../../../../exception/error-validation.exception';
@@ -8,13 +9,18 @@ import { ErrorValidationException } from '../../../../exception/error-validation
 import {
     mockSemiIngredient,
     mockSemiIngredient2,
-    mockIngredientWithCompositions
+    mockIngredientWithCompositions,
+    mockComposition1,
+    mockComposition2,
+    mockChildIngredient1,
+    mockChildIngredient2,
 } from '../../../tests/mocks/ingredient.mock';
 import { mockUnitMeasure } from '../../../tests/mocks/unit-measure.mock';
 
 // Mock dependencies
 jest.mock('./ingredient-semi.repository');
 jest.mock('../../unit-measure/unit-measure.service');
+jest.mock('../../stock-type/stock-type.repository');
 jest.mock('../../../../database/postgres.connection', () => ({
     __esModule: true,
     default: jest.fn(() => ({
@@ -24,12 +30,18 @@ jest.mock('../../../../database/postgres.connection', () => ({
                     create: jest.fn(),
                     update: jest.fn(),
                 },
+                stockMovement: {
+                    create: jest.fn(),
+                },
             };
             return await callback(mockTransactionClient);
         }),
         ingredient: {
             create: jest.fn(),
             update: jest.fn(),
+        },
+        stockMovement: {
+            create: jest.fn(),
         },
     })),
 }));
@@ -370,6 +382,133 @@ describe('Semi Ingredient Service', () => {
             await expect(semiIngredientService.getHPPCalculation('nonexistent-id'))
                 .rejects
                 .toThrow(ErrorNotFoundException);
+        });
+    });
+
+    describe('produce', () => {
+        const mockStockTypeOut = {
+            stock_type_id: 'st-out-production',
+            name: 'OUT_PRODUCTION',
+        };
+
+        const mockStockTypeIn = {
+            stock_type_id: 'st-in-production',
+            name: 'IN_PRODUCTION',
+        };
+
+        // mockIngredientWithCompositions extended with stock_qty on child_ingredient
+        const mockIngredientWithCompositionsAndStock = {
+            ...mockIngredientWithCompositions,
+            child_compositions: [
+                {
+                    ...mockComposition1,
+                    child_ingredient: { ...mockChildIngredient1, stock_qty: 1000 },
+                },
+                {
+                    ...mockComposition2,
+                    child_ingredient: { ...mockChildIngredient2, stock_qty: 500 },
+                },
+            ],
+        };
+
+        it('should produce successfully', async () => {
+            // Arrange
+            const mockRequest = {
+                params: { ingredient_id: mockSemiIngredient.ingredient_id },
+                body: { qty: 5, notes: 'Produksi siang' },
+                user: { user_id: 'user-123' },
+            } as any;
+
+            (semiIngredientRepository.findByIdWithCompositionsAndStock as jest.Mock).mockResolvedValue(
+                mockIngredientWithCompositionsAndStock
+            );
+            (stockTypeRepository.findByName as jest.Mock)
+                .mockResolvedValueOnce(mockStockTypeOut)
+                .mockResolvedValueOnce(mockStockTypeIn);
+            (semiIngredientRepository.findById as jest.Mock).mockResolvedValue({
+                ...mockSemiIngredient,
+                stock_qty: 55,
+                avg_cost: 13000,
+            });
+            (semiIngredientRepository.updateAvgCost as jest.Mock).mockResolvedValue(undefined);
+
+            // Act
+            const result = await semiIngredientService.produce(mockRequest);
+
+            // Assert
+            expect(result).toBeDefined();
+            expect(result.produced_qty).toBe(5);
+            expect(result.deducted_ingredients).toHaveLength(2);
+            expect(semiIngredientRepository.findByIdWithCompositionsAndStock).toHaveBeenCalledWith(
+                mockSemiIngredient.ingredient_id
+            );
+        });
+
+        it('should throw ErrorNotFoundException when ingredient not found', async () => {
+            // Arrange
+            const mockRequest = {
+                params: { ingredient_id: 'nonexistent-id' },
+                body: { qty: 5 },
+                user: { user_id: 'user-123' },
+            } as any;
+
+            (semiIngredientRepository.findByIdWithCompositionsAndStock as jest.Mock).mockResolvedValue(null);
+
+            // Act & Assert
+            await expect(semiIngredientService.produce(mockRequest))
+                .rejects
+                .toThrow(ErrorNotFoundException);
+        });
+
+        it('should throw ErrorValidationException when ingredient has no compositions', async () => {
+            // Arrange
+            const mockRequest = {
+                params: { ingredient_id: mockSemiIngredient.ingredient_id },
+                body: { qty: 5 },
+                user: { user_id: 'user-123' },
+            } as any;
+
+            (semiIngredientRepository.findByIdWithCompositionsAndStock as jest.Mock).mockResolvedValue({
+                ...mockSemiIngredient,
+                child_compositions: [],
+            });
+
+            // Act & Assert
+            await expect(semiIngredientService.produce(mockRequest))
+                .rejects
+                .toThrow(ErrorValidationException);
+        });
+
+        it('should throw ErrorValidationException when stock is insufficient', async () => {
+            // Arrange — child1 stock_qty = 5, tapi butuh 2 * 5 = 10
+            const mockRequest = {
+                params: { ingredient_id: mockSemiIngredient.ingredient_id },
+                body: { qty: 5 },
+                user: { user_id: 'user-123' },
+            } as any;
+
+            const insufficientStock = {
+                ...mockIngredientWithCompositions,
+                child_compositions: [
+                    {
+                        ...mockComposition1,
+                        child_ingredient: { ...mockChildIngredient1, stock_qty: 5 }, // butuh 2*5=10, tersedia 5
+                    },
+                    {
+                        ...mockComposition2,
+                        child_ingredient: { ...mockChildIngredient2, stock_qty: 500 },
+                    },
+                ],
+            };
+
+            (semiIngredientRepository.findByIdWithCompositionsAndStock as jest.Mock).mockResolvedValue(
+                insufficientStock
+            );
+
+            // Act & Assert
+            await expect(semiIngredientService.produce(mockRequest))
+                .rejects
+                .toThrow(ErrorValidationException);
         });
     });
 });

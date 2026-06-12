@@ -55,6 +55,33 @@ const semiIngredientWithCompositionsSelect = {
     },
 };
 
+// Select fields with compositions AND stock_qty on child ingredient
+const semiIngredientWithCompositionsAndStockSelect = {
+    ...semiIngredientSelectFields,
+    child_compositions: {
+        where: { deleted_at: null },
+        select: {
+            ingredient_composition_id: true,
+            child_id: true,
+            qty_needed: true,
+            child_ingredient: {
+                select: {
+                    ingredient_id: true,
+                    name: true,
+                    avg_cost: true,
+                    stock_qty: true,
+                    unit: {
+                        select: {
+                            unit_measure_id: true,
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
+    },
+};
+
 /**
  * Find all semi ingredients with pagination and filters
  */
@@ -157,6 +184,27 @@ export const findByIdWithCompositions = async (ingredientId: string): Promise<Se
         });
 
         return ingredient as SemiIngredientWithCompositions | null;
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
+/**
+ * Find semi ingredient by ID with compositions and child stock_qty
+ */
+export const findByIdWithCompositionsAndStock = async (ingredientId: string): Promise<any | null> => {
+    try {
+        const ingredient = await prisma.ingredient.findUnique({
+            where: {
+                ingredient_id: ingredientId,
+                deleted_at: null,
+                type: IngredientType.SEMI,
+            },
+            select: semiIngredientWithCompositionsAndStockSelect,
+        });
+
+        return ingredient ?? null;
     } catch (error) {
         console.error('--- Repository Error:', error);
         handlePrismaError(error);
@@ -328,6 +376,7 @@ export const semiIngredientRepository = {
     count,
     findById,
     findByIdWithCompositions,
+    findByIdWithCompositionsAndStock,
     findByName,
     create,
     update,

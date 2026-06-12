@@ -79,11 +79,20 @@ export const semiIngredientListQuerySchema = z.object({
     unit_id: z.string().uuid('Format unit_id tidak valid').optional(),
 });
 
+/**
+ * Produce semi ingredient schema
+ */
+export const produceSemiIngredientSchema = z.object({
+    qty: z.number().min(0.01, 'Qty produksi harus lebih dari 0'),
+    notes: z.string().max(500, 'Catatan maksimal 500 karakter').optional(),
+});
+
 // Infer types from schemas
 export type CreateSemiIngredientInput = z.infer<typeof createSemiIngredientSchema>;
 export type UpdateSemiIngredientInput = z.infer<typeof updateSemiIngredientSchema>;
 export type SemiIngredientIdParam = z.infer<typeof semiIngredientIdParamSchema>;
 export type SemiIngredientListQuery = z.infer<typeof semiIngredientListQuerySchema>;
+export type ProduceSemiIngredientInput = z.infer<typeof produceSemiIngredientSchema>;
 
 // Export schemas
 export const semiIngredientSchemas = {
@@ -91,6 +100,7 @@ export const semiIngredientSchemas = {
     update: updateSemiIngredientSchema,
     ingredientIdParam: semiIngredientIdParamSchema,
     listQuery: semiIngredientListQuerySchema,
+    produce: produceSemiIngredientSchema,
 };
 
 export default semiIngredientSchemas;

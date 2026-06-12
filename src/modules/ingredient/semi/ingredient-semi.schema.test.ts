@@ -3,6 +3,7 @@ import {
     updateSemiIngredientSchema,
     semiIngredientIdParamSchema,
     semiIngredientListQuerySchema,
+    produceSemiIngredientSchema,
 } from './ingredient-semi.schema';
 
 // Mock semi ingredient request data
@@ -319,6 +320,66 @@ describe('Semi Ingredient Schema Validation', () => {
             });
 
             expect(result.success).toBe(false);
+        });
+    });
+
+    describe('produceSemiIngredientSchema', () => {
+        it('should pass validation with valid qty only', () => {
+            const result = produceSemiIngredientSchema.safeParse({ qty: 5 });
+
+            expect(result.success).toBe(true);
+            if (result.success) {
+                expect(result.data.qty).toBe(5);
+            }
+        });
+
+        it('should pass validation with qty and notes', () => {
+            const result = produceSemiIngredientSchema.safeParse({ qty: 3, notes: 'Produksi siang' });
+
+            expect(result.success).toBe(true);
+            if (result.success) {
+                expect(result.data.qty).toBe(3);
+                expect(result.data.notes).toBe('Produksi siang');
+            }
+        });
+
+        it('should fail validation with zero qty', () => {
+            const result = produceSemiIngredientSchema.safeParse({ qty: 0 });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const qtyError = result.error.issues.find((issue) => issue.path.includes('qty'));
+                expect(qtyError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with negative qty', () => {
+            const result = produceSemiIngredientSchema.safeParse({ qty: -1 });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const qtyError = result.error.issues.find((issue) => issue.path.includes('qty'));
+                expect(qtyError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with missing qty', () => {
+            const result = produceSemiIngredientSchema.safeParse({});
+
+            expect(result.success).toBe(false);
+        });
+
+        it('should fail validation with notes exceeding 500 characters', () => {
+            const result = produceSemiIngredientSchema.safeParse({
+                qty: 5,
+                notes: 'a'.repeat(501),
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const notesError = result.error.issues.find((issue) => issue.path.includes('notes'));
+                expect(notesError).toBeDefined();
+            }
         });
     });
 });
