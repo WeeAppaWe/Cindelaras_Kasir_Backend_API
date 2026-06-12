@@ -46,7 +46,8 @@ const calculatePriceFromMargin = (cost, marginPercent) => {
     if (marginPercent >= 100) {
         throw new Error('Margin tidak boleh >= 100%');
     }
-    return cost / (1 - marginPercent / 100);
+    const price = cost / (1 - marginPercent / 100);
+    return Math.round(price * 100) / 100;
 };
 exports.calculatePriceFromMargin = calculatePriceFromMargin;
 /**

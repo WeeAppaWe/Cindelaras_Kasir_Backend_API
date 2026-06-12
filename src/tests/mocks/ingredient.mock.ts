@@ -157,3 +157,87 @@ export const mockIngredientCosts = [
         unit_name: mockChildIngredient2.unit.name,
     },
 ];
+
+// Ingredient Costs with stock_qty (for create-and-produce tests)
+export const mockIngredientCostsWithStock = [
+    {
+        ingredient_id: mockChildIngredient1.ingredient_id,
+        name: mockChildIngredient1.name,
+        avg_cost: mockChildIngredient1.avg_cost,
+        stock_qty: mockChildIngredient1.stock_qty,
+        unit_name: mockChildIngredient1.unit.name,
+    },
+    {
+        ingredient_id: mockChildIngredient2.ingredient_id,
+        name: mockChildIngredient2.name,
+        avg_cost: mockChildIngredient2.avg_cost,
+        stock_qty: mockChildIngredient2.stock_qty,
+        unit_name: mockChildIngredient2.unit.name,
+    },
+];
+
+// Semi ingredient with compositions and stock_qty on child (for produce tests)
+export const mockIngredientWithCompositionsAndStock = {
+    ...mockIngredientWithCompositions,
+    child_compositions: [
+        {
+            ...mockComposition1,
+            child_ingredient: { ...mockChildIngredient1, stock_qty: 1000 },
+        },
+        {
+            ...mockComposition2,
+            child_ingredient: { ...mockChildIngredient2, stock_qty: 500 },
+        },
+    ],
+};
+
+// Mock schema request data for raw ingredient (used in schema tests)
+export const mockRawIngredientCreateRequest = {
+    valid: {
+        name: 'Tepung Terigu',
+        unit_id: '550e8400-e29b-41d4-a716-446655440000',
+        stock_qty: 100,
+        min_stock: 10,
+        avg_cost: 15000,
+    },
+    validMinimal: {
+        name: 'Gula Pasir',
+        unit_id: '550e8400-e29b-41d4-a716-446655440001',
+        min_stock: 5,
+    },
+};
+
+export const mockRawIngredientUpdateRequest = {
+    valid: {
+        name: 'Tepung Terigu Premium',
+        min_stock: 20,
+    },
+    validPartial: {
+        avg_cost: 18000,
+    },
+};
+
+// Mock schema request data for semi ingredient (used in schema tests)
+export const mockSemiIngredientCreateRequest = {
+    valid: {
+        name: 'Bumbu Dasar',
+        unit_id: '550e8400-e29b-41d4-a716-446655440000',
+        min_stock: 10,
+        target_yield: 1,
+    },
+    validMinimal: {
+        name: 'Sambal Goreng',
+        unit_id: '550e8400-e29b-41d4-a716-446655440001',
+        min_stock: 5,
+    },
+};
+
+export const mockSemiIngredientUpdateRequest = {
+    valid: {
+        name: 'Bumbu Dasar Merah',
+        min_stock: 20,
+    },
+    validPartial: {
+        min_stock: 15,
+    },
+};

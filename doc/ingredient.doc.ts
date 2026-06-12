@@ -304,6 +304,137 @@
  *                 type: number
  *                 example: 90
  *
+ *     CreateAndProduceSemiIngredientInput:
+ *       type: object
+ *       required:
+ *         - name
+ *         - unit_id
+ *         - min_stock
+ *         - qty
+ *         - compositions
+ *       properties:
+ *         name:
+ *           type: string
+ *           minLength: 2
+ *           maxLength: 100
+ *           example: "Saus Tomat"
+ *         unit_id:
+ *           type: string
+ *           format: uuid
+ *           example: "660e8400-e29b-41d4-a716-446655440001"
+ *         min_stock:
+ *           type: number
+ *           minimum: 0
+ *           example: 5
+ *         qty:
+ *           type: number
+ *           minimum: 0.01
+ *           example: 3
+ *           description: Jumlah unit bahan semi yang diproduksi (juga dipakai sebagai target_yield untuk HPP)
+ *         notes:
+ *           type: string
+ *           maxLength: 500
+ *           example: "Batch pertama"
+ *         compositions:
+ *           type: array
+ *           minItems: 1
+ *           items:
+ *             type: object
+ *             required:
+ *               - child_id
+ *               - qty_needed
+ *             properties:
+ *               child_id:
+ *                 type: string
+ *                 format: uuid
+ *                 example: "880e8400-e29b-41d4-a716-446655440001"
+ *               qty_needed:
+ *                 type: number
+ *                 minimum: 0.01
+ *                 example: 2
+ *
+ *     CreateAndProduceSemiIngredientResult:
+ *       type: object
+ *       properties:
+ *         ingredient_id:
+ *           type: string
+ *           format: uuid
+ *         name:
+ *           type: string
+ *           example: "Saus Tomat"
+ *         type:
+ *           type: string
+ *           example: "SEMI"
+ *         stock_qty:
+ *           type: number
+ *           example: 3
+ *         min_stock:
+ *           type: number
+ *           example: 5
+ *         avg_cost:
+ *           type: number
+ *           example: 12000
+ *         unit:
+ *           type: object
+ *           properties:
+ *             unit_measure_id:
+ *               type: string
+ *               format: uuid
+ *             name:
+ *               type: string
+ *               example: "Porsi"
+ *         produced_qty:
+ *           type: number
+ *           example: 3
+ *         compositions:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               ingredient_composition_id:
+ *                 type: string
+ *                 format: uuid
+ *               child_id:
+ *                 type: string
+ *                 format: uuid
+ *               qty_needed:
+ *                 type: number
+ *               child_ingredient:
+ *                 type: object
+ *                 properties:
+ *                   ingredient_id:
+ *                     type: string
+ *                     format: uuid
+ *                   name:
+ *                     type: string
+ *                   avg_cost:
+ *                     type: number
+ *                   unit:
+ *                     type: object
+ *                     properties:
+ *                       unit_measure_id:
+ *                         type: string
+ *                         format: uuid
+ *                       name:
+ *                         type: string
+ *         deducted_ingredients:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               ingredient_id:
+ *                 type: string
+ *                 format: uuid
+ *               ingredient_name:
+ *                 type: string
+ *                 example: "Bawang Merah"
+ *               qty_deducted:
+ *                 type: number
+ *                 example: 6
+ *               remaining_stock:
+ *                 type: number
+ *                 example: 994
+ *
  *     LowStockAlertResponse:
  *       type: object
  *       properties:
@@ -637,6 +768,61 @@
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/UnitMeasureReferenceListResponse'
+ *
+ * /ingredient/semi/create-and-produce:
+ *   post:
+ *     summary: Buat bahan setengah jadi baru dan langsung catat produksi
+ *     description: Membuat data master bahan semi, menyimpan komposisi/resep, memotong stok bahan penyusun, dan menambah stok hasil produksi — semua dalam satu request atomik.
+ *     tags: [Ingredient Semi]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateAndProduceSemiIngredientInput'
+ *           example:
+ *             name: "Saus Tomat"
+ *             unit_id: "660e8400-e29b-41d4-a716-446655440001"
+ *             min_stock: 5
+ *             qty: 3
+ *             notes: "Batch pertama"
+ *             compositions:
+ *               - child_id: "880e8400-e29b-41d4-a716-446655440001"
+ *                 qty_needed: 2
+ *               - child_id: "880e8400-e29b-41d4-a716-446655440002"
+ *                 qty_needed: 0.5
+ *     responses:
+ *       201:
+ *         description: Bahan setengah jadi berhasil dibuat dan diproduksi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 response:
+ *                   $ref: '#/components/schemas/CreateAndProduceSemiIngredientResult'
+ *                 metaData:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/MetaData'
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           example: "Bahan setengah jadi berhasil dibuat dan diproduksi"
+ *       400:
+ *         description: Stok bahan penyusun tidak mencukupi atau validasi gagal
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       409:
+ *         description: Nama bahan setengah jadi sudah digunakan
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  * /ingredient/semi:
  *   get:

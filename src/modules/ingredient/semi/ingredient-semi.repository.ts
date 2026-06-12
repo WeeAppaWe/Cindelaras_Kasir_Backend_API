@@ -371,6 +371,48 @@ export const findUnitMeasureById = async (unitMeasureId: string) => {
     }
 };
 
+/**
+ * Find ingredients by IDs — returns stock_qty, avg_cost, unit name
+ * Used for create-and-produce validation
+ */
+export const findIngredientsByIds = async (
+    ingredientIds: string[],
+    transaction?: Prisma.TransactionClient
+): Promise<{ ingredient_id: string; name: string; avg_cost: number; stock_qty: number; unit_name: string }[]> => {
+    try {
+        const client = transaction || prisma;
+
+        const ingredients = await client.ingredient.findMany({
+            where: {
+                ingredient_id: { in: ingredientIds },
+                deleted_at: null,
+            },
+            select: {
+                ingredient_id: true,
+                name: true,
+                avg_cost: true,
+                stock_qty: true,
+                unit: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
+
+        return ingredients.map((i) => ({
+            ingredient_id: i.ingredient_id,
+            name: i.name,
+            avg_cost: Number(i.avg_cost),
+            stock_qty: Number(i.stock_qty),
+            unit_name: i.unit.name,
+        }));
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
 export const semiIngredientRepository = {
     findAll,
     count,
@@ -384,6 +426,7 @@ export const semiIngredientRepository = {
     softDelete,
     findAllUnitMeasures,
     findUnitMeasureById,
+    findIngredientsByIds,
 };
 
 export default semiIngredientRepository;

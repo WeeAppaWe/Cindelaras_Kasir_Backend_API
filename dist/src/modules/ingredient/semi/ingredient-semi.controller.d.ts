@@ -40,6 +40,16 @@ export declare const getHPPCalculation: (req: AuthenticatedRequest, res: Respons
  * POST /api/ingredient/semi/:ingredient_id/recalculate-hpp
  */
 export declare const recalculateHPP: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
+ * Produce Semi Ingredient — deduct child stock, increment semi stock
+ * POST /api/ingredient/semi/:ingredient_id/produce
+ */
+export declare const produce: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
+ * Create and Produce Semi Ingredient (all-in-one)
+ * POST /api/ingredient/semi/create-and-produce
+ */
+export declare const createAndProduce: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const semiIngredientController: {
     showAll: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     detail: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
@@ -49,6 +59,8 @@ export declare const semiIngredientController: {
     getUnitMeasures: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     getHPPCalculation: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     recalculateHPP: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+    produce: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+    createAndProduce: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 };
 export default semiIngredientController;
 //# sourceMappingURL=ingredient-semi.controller.d.ts.map

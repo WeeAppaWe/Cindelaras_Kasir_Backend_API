@@ -566,3 +566,140 @@ Seluruh operasi dieksekusi dalam satu transaksi database untuk menjamin atomicit
   ]
 }
 ```
+
+---
+
+### D.2. Buat Bahan Setengah Jadi + Produksi Sekaligus (All-in-One)
+
+#### Kapan Digunakan
+
+Endpoint ini digunakan ketika admin ingin **mendaftarkan bahan semi baru sekaligus langsung mencatat hasil produksi pertama** dalam satu request. Berbeda dengan alur biasa (create → tambah komposisi → produce terpisah), endpoint ini menggabungkan seluruh langkah menjadi satu operasi atomik.
+
+Gunakan endpoint ini saat:
+- Mendaftarkan bahan semi baru yang sudah memiliki resep pasti dan langsung diproduksi.
+- Ingin memastikan data bahan, komposisi, dan stok tersimpan konsisten dalam satu transaksi.
+
+#### Endpoint
+
+- **Endpoint:** `POST /create-and-produce`
+- **Akses:** Protected (ADMIN)
+
+#### Request Body
+
+```json
+{
+  "name": "Saus Tomat",
+  "unit_id": "uuid-satuan",
+  "min_stock": 5,
+  "qty": 3,
+  "notes": "Batch pertama",
+  "compositions": [
+    { "child_id": "uuid-bahan-1", "qty_needed": 2 },
+    { "child_id": "uuid-bahan-2", "qty_needed": 0.5 }
+  ]
+}
+```
+
+| Field | Tipe | Wajib | Keterangan |
+| :--- | :--- | :--- | :--- |
+| `name` | string | Ya | Nama bahan setengah jadi baru. Minimal 2, maksimal 100 karakter. Harus unik. |
+| `unit_id` | string (UUID) | Ya | ID satuan ukur bahan setengah jadi. |
+| `min_stock` | number | Ya | Batas minimum stok. Minimum `0`. |
+| `qty` | number | Ya | Jumlah unit yang diproduksi. Minimum `0.01`. Juga dipakai sebagai `target_yield` untuk kalkulasi HPP. |
+| `notes` | string | Tidak | Catatan produksi. Maksimal 500 karakter. |
+| `compositions` | array | Ya | Daftar bahan penyusun. Minimal 1 item. |
+| `compositions[].child_id` | string (UUID) | Ya | ID bahan penyusun (harus ada di database). |
+| `compositions[].qty_needed` | number | Ya | Jumlah bahan penyusun per unit hasil produksi. Minimum `0.01`. |
+
+#### Response Berhasil (201 Created)
+
+```json
+{
+  "code": 201,
+  "message": "Bahan setengah jadi berhasil dibuat dan diproduksi",
+  "data": {
+    "ingredient_id": "uuid-semi-baru",
+    "name": "Saus Tomat",
+    "type": "SEMI",
+    "stock_qty": 3,
+    "min_stock": 5,
+    "avg_cost": 12000,
+    "unit": {
+      "unit_measure_id": "uuid-satuan",
+      "name": "Porsi"
+    },
+    "produced_qty": 3,
+    "compositions": [
+      {
+        "ingredient_composition_id": "uuid-comp-1",
+        "child_id": "uuid-bahan-1",
+        "qty_needed": 2,
+        "child_ingredient": {
+          "ingredient_id": "uuid-bahan-1",
+          "name": "Bawang Merah",
+          "avg_cost": 5000,
+          "unit": {
+            "unit_measure_id": "uuid-unit-gr",
+            "name": "Gram"
+          }
+        }
+      },
+      {
+        "ingredient_composition_id": "uuid-comp-2",
+        "child_id": "uuid-bahan-2",
+        "qty_needed": 0.5,
+        "child_ingredient": {
+          "ingredient_id": "uuid-bahan-2",
+          "name": "Bawang Putih",
+          "avg_cost": 3000,
+          "unit": {
+            "unit_measure_id": "uuid-unit-gr",
+            "name": "Gram"
+          }
+        }
+      }
+    ],
+    "deducted_ingredients": [
+      {
+        "ingredient_id": "uuid-bahan-1",
+        "ingredient_name": "Bawang Merah",
+        "qty_deducted": 6,
+        "remaining_stock": 994
+      },
+      {
+        "ingredient_id": "uuid-bahan-2",
+        "ingredient_name": "Bawang Putih",
+        "qty_deducted": 1.5,
+        "remaining_stock": 498.5
+      }
+    ]
+  }
+}
+```
+
+#### Error Cases
+
+| Kondisi | HTTP Status | Pesan |
+| :--- | :--- | :--- |
+| Nama bahan setengah jadi sudah digunakan | `409 Conflict` | `Nama bahan setengah jadi sudah digunakan` |
+| `unit_id` tidak ditemukan | `400 Bad Request` | `Satuan tidak ditemukan` |
+| Satu atau lebih `child_id` tidak ditemukan | `400 Bad Request` | `Beberapa bahan penyusun tidak ditemukan` (disertai ID yang tidak ada) |
+| Satu atau lebih stok bahan penyusun tidak mencukupi | `400 Bad Request` | `Stok bahan penyusun tidak mencukupi` (disertai detail semua bahan yang kurang) |
+
+**Contoh Response Error Stok Kurang (400):**
+```json
+{
+  "code": 400,
+  "message": "Stok bahan penyusun tidak mencukupi",
+  "errors": [
+    {
+      "field": "qty",
+      "message": "Stok bahan penyusun tidak mencukupi"
+    },
+    {
+      "field": "Bawang Merah",
+      "message": "Dibutuhkan: 6, tersedia: 2"
+    }
+  ]
+}
+```

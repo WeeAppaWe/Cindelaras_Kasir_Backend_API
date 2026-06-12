@@ -7,20 +7,13 @@ import {
     rawIngredientSchemas,
 } from './ingredient-raw.schema';
 
-// Mock raw ingredient request data
-const mockCreateRequest = {
-    valid: {
-        name: 'Tepung Terigu',
-        unit_id: '550e8400-e29b-41d4-a716-446655440000',
-        stock_qty: 100,
-        min_stock: 10,
-        avg_cost: 15000,
-    },
-    validMinimal: {
-        name: 'Gula Pasir',
-        unit_id: '550e8400-e29b-41d4-a716-446655440001',
-        min_stock: 5,
-    },
+import {
+    mockRawIngredientCreateRequest,
+    mockRawIngredientUpdateRequest,
+} from '../../../tests/mocks/ingredient.mock';
+
+// Local invalid-only fixtures (not worth exporting to shared mocks)
+const mockInvalidCreate = {
     emptyName: {
         name: '',
         unit_id: '550e8400-e29b-41d4-a716-446655440000',
@@ -49,14 +42,7 @@ const mockCreateRequest = {
     },
 };
 
-const mockUpdateRequest = {
-    valid: {
-        name: 'Tepung Terigu Premium',
-        min_stock: 20,
-    },
-    validPartial: {
-        avg_cost: 18000,
-    },
+const mockInvalidUpdate = {
     invalidUnitId: {
         unit_id: 'invalid-uuid',
     },
@@ -68,7 +54,7 @@ const mockUpdateRequest = {
 describe('Raw Ingredient Schema Validation', () => {
     describe('createRawIngredientSchema', () => {
         it('should pass validation with valid complete data', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.valid);
+            const result = createRawIngredientSchema.safeParse(mockRawIngredientCreateRequest.valid);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -81,7 +67,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should pass validation with minimal required data', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.validMinimal);
+            const result = createRawIngredientSchema.safeParse(mockRawIngredientCreateRequest.validMinimal);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -91,7 +77,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with empty name', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.emptyName);
+            const result = createRawIngredientSchema.safeParse(mockInvalidCreate.emptyName);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -104,7 +90,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with short name (less than 2 chars)', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.shortName);
+            const result = createRawIngredientSchema.safeParse(mockInvalidCreate.shortName);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -134,7 +120,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with invalid unit_id format', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.invalidUnitId);
+            const result = createRawIngredientSchema.safeParse(mockInvalidCreate.invalidUnitId);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -147,7 +133,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with negative stock_qty', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.negativeStock);
+            const result = createRawIngredientSchema.safeParse(mockInvalidCreate.negativeStock);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -160,7 +146,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with negative min_stock', () => {
-            const result = createRawIngredientSchema.safeParse(mockCreateRequest.negativeMinStock);
+            const result = createRawIngredientSchema.safeParse(mockInvalidCreate.negativeMinStock);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -210,7 +196,7 @@ describe('Raw Ingredient Schema Validation', () => {
 
     describe('updateRawIngredientSchema', () => {
         it('should pass validation with valid update data', () => {
-            const result = updateRawIngredientSchema.safeParse(mockUpdateRequest.valid);
+            const result = updateRawIngredientSchema.safeParse(mockRawIngredientUpdateRequest.valid);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -220,7 +206,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should pass validation with partial update data', () => {
-            const result = updateRawIngredientSchema.safeParse(mockUpdateRequest.validPartial);
+            const result = updateRawIngredientSchema.safeParse(mockRawIngredientUpdateRequest.validPartial);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -235,7 +221,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with invalid unit_id format', () => {
-            const result = updateRawIngredientSchema.safeParse(mockUpdateRequest.invalidUnitId);
+            const result = updateRawIngredientSchema.safeParse(mockInvalidUpdate.invalidUnitId);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -247,7 +233,7 @@ describe('Raw Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with negative min_stock', () => {
-            const result = updateRawIngredientSchema.safeParse(mockUpdateRequest.negativeMinStock);
+            const result = updateRawIngredientSchema.safeParse(mockInvalidUpdate.negativeMinStock);
 
             expect(result.success).toBe(false);
         });

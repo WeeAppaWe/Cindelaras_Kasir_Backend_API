@@ -26,13 +26,15 @@ describe('Order Schemas', () => {
 
         it('should reject invalid phone format', () => {
             const result = createOrderSchema.safeParse({
+                customer_name: 'Test Customer',
                 payment_type: 'CASH',
                 items: [{ menu_id: '550e8400-e29b-41d4-a716-446655440000', qty: 1, price: 1000 }],
                 customer_phone: 'abcde'
             });
             expect(result.success).toBe(false);
             if (!result.success) {
-                expect(result.error.issues[0].message).toContain('Format nomor telepon');
+                const phoneIssue = result.error.issues.find(i => i.path.includes('customer_phone'));
+                expect(phoneIssue?.message).toContain('Format nomor telepon');
             }
         });
 

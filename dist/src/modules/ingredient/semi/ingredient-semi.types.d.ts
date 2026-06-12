@@ -77,6 +77,30 @@ export interface UnitMeasureReference {
     unit_measure_id: string;
     name: string;
 }
+export interface ProduceSemiIngredientRequest {
+    qty: number;
+    notes?: string;
+}
+export interface ProduceDeductedIngredient {
+    ingredient_id: string;
+    ingredient_name: string;
+    qty_deducted: number;
+    remaining_stock: number;
+}
+export interface ProduceSemiIngredientResult {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    stock_qty: number;
+    min_stock: number;
+    avg_cost: number;
+    unit: {
+        unit_measure_id: string;
+        name: string;
+    };
+    produced_qty: number;
+    deducted_ingredients: ProduceDeductedIngredient[];
+}
 export interface SemiIngredientHPPResult {
     total_hpp: number;
     target_yield: number;
@@ -89,5 +113,31 @@ export interface SemiIngredientHPPResult {
         unit_cost: number;
         subtotal: number;
     }[];
+}
+export interface CreateAndProduceSemiIngredientRequest {
+    name: string;
+    unit_id: string;
+    min_stock: number;
+    qty: number;
+    notes?: string;
+    compositions: {
+        child_id: string;
+        qty_needed: number;
+    }[];
+}
+export interface CreateAndProduceSemiIngredientResult {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    stock_qty: number;
+    min_stock: number;
+    avg_cost: number;
+    unit: {
+        unit_measure_id: string;
+        name: string;
+    };
+    produced_qty: number;
+    compositions: any[];
+    deducted_ingredients: ProduceDeductedIngredient[];
 }
 //# sourceMappingURL=ingredient-semi.types.d.ts.map

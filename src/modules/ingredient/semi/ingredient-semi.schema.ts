@@ -87,12 +87,44 @@ export const produceSemiIngredientSchema = z.object({
     notes: z.string().max(500, 'Catatan maksimal 500 karakter').optional(),
 });
 
+/**
+ * Create and produce semi ingredient schema (all-in-one)
+ */
+export const createAndProduceSemiIngredientSchema = z.object({
+    name: z
+        .string()
+        .min(2, 'Nama bahan setengah jadi minimal 2 karakter')
+        .max(100, 'Nama bahan setengah jadi maksimal 100 karakter'),
+    unit_id: z
+        .string()
+        .uuid('Format unit_id tidak valid'),
+    min_stock: z
+        .number()
+        .min(0, 'Stok minimal tidak boleh negatif'),
+    qty: z
+        .number()
+        .min(0.01, 'Qty produksi harus lebih dari 0'),
+    notes: z
+        .string()
+        .max(500, 'Catatan maksimal 500 karakter')
+        .optional(),
+    compositions: z
+        .array(
+            z.object({
+                child_id: z.string().uuid('Format child_id tidak valid'),
+                qty_needed: z.number().min(0.01, 'Qty bahan harus lebih dari 0'),
+            })
+        )
+        .min(1, 'Minimal satu komposisi diperlukan'),
+});
+
 // Infer types from schemas
 export type CreateSemiIngredientInput = z.infer<typeof createSemiIngredientSchema>;
 export type UpdateSemiIngredientInput = z.infer<typeof updateSemiIngredientSchema>;
 export type SemiIngredientIdParam = z.infer<typeof semiIngredientIdParamSchema>;
 export type SemiIngredientListQuery = z.infer<typeof semiIngredientListQuerySchema>;
 export type ProduceSemiIngredientInput = z.infer<typeof produceSemiIngredientSchema>;
+export type CreateAndProduceSemiIngredientInput = z.infer<typeof createAndProduceSemiIngredientSchema>;
 
 // Export schemas
 export const semiIngredientSchemas = {
@@ -101,6 +133,7 @@ export const semiIngredientSchemas = {
     ingredientIdParam: semiIngredientIdParamSchema,
     listQuery: semiIngredientListQuerySchema,
     produce: produceSemiIngredientSchema,
+    createAndProduce: createAndProduceSemiIngredientSchema,
 };
 
 export default semiIngredientSchemas;

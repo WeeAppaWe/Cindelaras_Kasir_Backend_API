@@ -148,3 +148,27 @@ export interface SemiIngredientHPPResult {
         subtotal: number;
     }[];
 }
+
+// Create and produce semi ingredient request (all-in-one)
+export interface CreateAndProduceSemiIngredientRequest {
+    name: string;
+    unit_id: string;
+    min_stock: number;
+    qty: number;
+    notes?: string;
+    compositions: { child_id: string; qty_needed: number }[];
+}
+
+// Result for create-and-produce semi ingredient
+export interface CreateAndProduceSemiIngredientResult {
+    ingredient_id: string;
+    name: string;
+    type: string;
+    stock_qty: number;
+    min_stock: number;
+    avg_cost: number;
+    unit: { unit_measure_id: string; name: string };
+    produced_qty: number;
+    compositions: any[]; // CompositionWithDetails[]
+    deducted_ingredients: ProduceDeductedIngredient[];
+}

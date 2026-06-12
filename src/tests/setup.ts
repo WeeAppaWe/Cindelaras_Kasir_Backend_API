@@ -5,6 +5,18 @@ import dotenvExpand from 'dotenv-expand';
 const myEnv = dotenv.config();
 dotenvExpand.expand(myEnv);
 
+// Global mock for Prisma generated client to prevent import.meta.url errors in Jest (CJS)
+jest.mock('../generated/prisma/client', () => ({
+    PrismaClient: class PrismaClient { },
+    Prisma: {
+        PrismaClientKnownRequestError: class PrismaClientKnownRequestError extends Error { },
+        PrismaClientUnknownRequestError: class PrismaClientUnknownRequestError extends Error { },
+        PrismaClientRustPanicError: class PrismaClientRustPanicError extends Error { },
+        PrismaClientInitializationError: class PrismaClientInitializationError extends Error { },
+        PrismaClientValidationError: class PrismaClientValidationError extends Error { },
+    },
+}));
+
 // Set test environment variables
 process.env.NODE_ENV = 'test';
 

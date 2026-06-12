@@ -127,6 +127,19 @@ export const produce = async (req: AuthenticatedRequest, res: Response, next: Ne
     }
 };
 
+/**
+ * Create and Produce Semi Ingredient (all-in-one)
+ * POST /api/ingredient/semi/create-and-produce
+ */
+export const createAndProduce = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await semiIngredientService.createAndProduce(req);
+        res.status(201).json(responseApi({ code: 201, message: 'Bahan setengah jadi berhasil dibuat dan diproduksi' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const semiIngredientController = {
     showAll,
     detail,
@@ -137,6 +150,7 @@ export const semiIngredientController = {
     getHPPCalculation,
     recalculateHPP,
     produce,
+    createAndProduce,
 };
 
 export default semiIngredientController;

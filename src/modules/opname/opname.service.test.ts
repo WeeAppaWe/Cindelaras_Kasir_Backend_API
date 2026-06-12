@@ -24,21 +24,17 @@ import {
 // Mock dependencies
 jest.mock('./opname.repository');
 jest.mock('../stock-type/stock-type.repository');
-jest.mock('../../../database/postgres.connection', () => ({
-    __esModule: true,
-    default: jest.fn(() => ({
-        $transaction: jest.fn(async (callback) => {
-            const mockTransactionClient = {
-                stockOpname: { create: jest.fn(), update: jest.fn() },
-                stockOpnameItem: { createMany: jest.fn(), updateMany: jest.fn() },
-                ingredient: { update: jest.fn(), findUnique: jest.fn() },
-                stockMovement: { create: jest.fn() },
-                stockType: { findFirst: jest.fn() },
-            };
-            return await callback(mockTransactionClient);
-        }),
-    })),
-}));
+jest.mock('../../../database/postgres.connection', () => {
+    // Singleton mock client — the service captures this at module-load via `const prisma = getPrismaClient()`
+    const mockClient = {
+        $transaction: jest.fn(),
+    };
+    return {
+        __esModule: true,
+        default: jest.fn(() => mockClient),
+        __mockClient: mockClient,
+    };
+});
 
 // ============================================
 // TEST SUITES
@@ -47,6 +43,18 @@ jest.mock('../../../database/postgres.connection', () => ({
 describe('Opname Service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
+        // Re-establish $transaction implementation on the SAME object the service holds
+        const { __mockClient } = require('../../../database/postgres.connection');
+        __mockClient.$transaction.mockImplementation(async (callback: Function) => {
+            const mockTransactionClient = {
+                stockOpname: { create: jest.fn(), update: jest.fn() },
+                stockOpnameItem: { createMany: jest.fn(), updateMany: jest.fn() },
+                ingredient: { update: jest.fn(), findUnique: jest.fn() },
+                stockMovement: { create: jest.fn() },
+                stockType: { findFirst: jest.fn() },
+            };
+            return await callback(mockTransactionClient);
+        });
     });
 
     // ============================================

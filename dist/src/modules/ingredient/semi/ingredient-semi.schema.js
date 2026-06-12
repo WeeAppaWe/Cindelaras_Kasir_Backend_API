@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientSchemas = exports.semiIngredientListQuerySchema = exports.semiIngredientIdParamSchema = exports.updateSemiIngredientSchema = exports.createSemiIngredientSchema = exports.IngredientType = void 0;
+exports.semiIngredientSchemas = exports.createAndProduceSemiIngredientSchema = exports.produceSemiIngredientSchema = exports.semiIngredientListQuerySchema = exports.semiIngredientIdParamSchema = exports.updateSemiIngredientSchema = exports.createSemiIngredientSchema = exports.IngredientType = void 0;
 const zod_1 = require("zod");
 // ============================================
 // CONSTANTS
@@ -75,12 +75,49 @@ exports.semiIngredientListQuerySchema = zod_1.z.object({
     search: zod_1.z.string().optional(),
     unit_id: zod_1.z.string().uuid('Format unit_id tidak valid').optional(),
 });
+/**
+ * Produce semi ingredient schema
+ */
+exports.produceSemiIngredientSchema = zod_1.z.object({
+    qty: zod_1.z.number().min(0.01, 'Qty produksi harus lebih dari 0'),
+    notes: zod_1.z.string().max(500, 'Catatan maksimal 500 karakter').optional(),
+});
+/**
+ * Create and produce semi ingredient schema (all-in-one)
+ */
+exports.createAndProduceSemiIngredientSchema = zod_1.z.object({
+    name: zod_1.z
+        .string()
+        .min(2, 'Nama bahan setengah jadi minimal 2 karakter')
+        .max(100, 'Nama bahan setengah jadi maksimal 100 karakter'),
+    unit_id: zod_1.z
+        .string()
+        .uuid('Format unit_id tidak valid'),
+    min_stock: zod_1.z
+        .number()
+        .min(0, 'Stok minimal tidak boleh negatif'),
+    qty: zod_1.z
+        .number()
+        .min(0.01, 'Qty produksi harus lebih dari 0'),
+    notes: zod_1.z
+        .string()
+        .max(500, 'Catatan maksimal 500 karakter')
+        .optional(),
+    compositions: zod_1.z
+        .array(zod_1.z.object({
+        child_id: zod_1.z.string().uuid('Format child_id tidak valid'),
+        qty_needed: zod_1.z.number().min(0.01, 'Qty bahan harus lebih dari 0'),
+    }))
+        .min(1, 'Minimal satu komposisi diperlukan'),
+});
 // Export schemas
 exports.semiIngredientSchemas = {
     create: exports.createSemiIngredientSchema,
     update: exports.updateSemiIngredientSchema,
     ingredientIdParam: exports.semiIngredientIdParamSchema,
     listQuery: exports.semiIngredientListQuerySchema,
+    produce: exports.produceSemiIngredientSchema,
+    createAndProduce: exports.createAndProduceSemiIngredientSchema,
 };
 exports.default = exports.semiIngredientSchemas;
 //# sourceMappingURL=ingredient-semi.schema.js.map

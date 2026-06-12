@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientController = exports.recalculateHPP = exports.getHPPCalculation = exports.getUnitMeasures = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = void 0;
+exports.semiIngredientController = exports.createAndProduce = exports.produce = exports.recalculateHPP = exports.getHPPCalculation = exports.getUnitMeasures = exports.softDelete = exports.update = exports.create = exports.detail = exports.showAll = void 0;
 const ingredient_semi_service_1 = __importDefault(require("./ingredient-semi.service"));
 const unit_measure_service_1 = __importDefault(require("../../unit-measure/unit-measure.service"));
 const response_api_1 = __importDefault(require("../../../../utility/response-api"));
@@ -123,6 +123,34 @@ const recalculateHPP = async (req, res, next) => {
     }
 };
 exports.recalculateHPP = recalculateHPP;
+/**
+ * Produce Semi Ingredient — deduct child stock, increment semi stock
+ * POST /api/ingredient/semi/:ingredient_id/produce
+ */
+const produce = async (req, res, next) => {
+    try {
+        const data = await ingredient_semi_service_1.default.produce(req);
+        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'Produksi berhasil dicatat' }, data));
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.produce = produce;
+/**
+ * Create and Produce Semi Ingredient (all-in-one)
+ * POST /api/ingredient/semi/create-and-produce
+ */
+const createAndProduce = async (req, res, next) => {
+    try {
+        const data = await ingredient_semi_service_1.default.createAndProduce(req);
+        res.status(201).json((0, response_api_1.default)({ code: 201, message: 'Bahan setengah jadi berhasil dibuat dan diproduksi' }, data));
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.createAndProduce = createAndProduce;
 exports.semiIngredientController = {
     showAll: exports.showAll,
     detail: exports.detail,
@@ -132,6 +160,8 @@ exports.semiIngredientController = {
     getUnitMeasures: exports.getUnitMeasures,
     getHPPCalculation: exports.getHPPCalculation,
     recalculateHPP: exports.recalculateHPP,
+    produce: exports.produce,
+    createAndProduce: exports.createAndProduce,
 };
 exports.default = exports.semiIngredientController;
 //# sourceMappingURL=ingredient-semi.controller.js.map

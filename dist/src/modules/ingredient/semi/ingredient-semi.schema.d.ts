@@ -39,10 +39,33 @@ export declare const semiIngredientListQuerySchema: z.ZodObject<{
     search: z.ZodOptional<z.ZodString>;
     unit_id: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
+/**
+ * Produce semi ingredient schema
+ */
+export declare const produceSemiIngredientSchema: z.ZodObject<{
+    qty: z.ZodNumber;
+    notes: z.ZodOptional<z.ZodString>;
+}, z.core.$strip>;
+/**
+ * Create and produce semi ingredient schema (all-in-one)
+ */
+export declare const createAndProduceSemiIngredientSchema: z.ZodObject<{
+    name: z.ZodString;
+    unit_id: z.ZodString;
+    min_stock: z.ZodNumber;
+    qty: z.ZodNumber;
+    notes: z.ZodOptional<z.ZodString>;
+    compositions: z.ZodArray<z.ZodObject<{
+        child_id: z.ZodString;
+        qty_needed: z.ZodNumber;
+    }, z.core.$strip>>;
+}, z.core.$strip>;
 export type CreateSemiIngredientInput = z.infer<typeof createSemiIngredientSchema>;
 export type UpdateSemiIngredientInput = z.infer<typeof updateSemiIngredientSchema>;
 export type SemiIngredientIdParam = z.infer<typeof semiIngredientIdParamSchema>;
 export type SemiIngredientListQuery = z.infer<typeof semiIngredientListQuerySchema>;
+export type ProduceSemiIngredientInput = z.infer<typeof produceSemiIngredientSchema>;
+export type CreateAndProduceSemiIngredientInput = z.infer<typeof createAndProduceSemiIngredientSchema>;
 export declare const semiIngredientSchemas: {
     create: z.ZodObject<{
         name: z.ZodString;
@@ -64,6 +87,21 @@ export declare const semiIngredientSchemas: {
         size: z.ZodOptional<z.ZodDefault<z.ZodCoercedNumber<unknown>>>;
         search: z.ZodOptional<z.ZodString>;
         unit_id: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>;
+    produce: z.ZodObject<{
+        qty: z.ZodNumber;
+        notes: z.ZodOptional<z.ZodString>;
+    }, z.core.$strip>;
+    createAndProduce: z.ZodObject<{
+        name: z.ZodString;
+        unit_id: z.ZodString;
+        min_stock: z.ZodNumber;
+        qty: z.ZodNumber;
+        notes: z.ZodOptional<z.ZodString>;
+        compositions: z.ZodArray<z.ZodObject<{
+            child_id: z.ZodString;
+            qty_needed: z.ZodNumber;
+        }, z.core.$strip>>;
     }, z.core.$strip>;
 };
 export default semiIngredientSchemas;

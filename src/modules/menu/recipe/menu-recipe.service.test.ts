@@ -29,21 +29,24 @@ jest.mock('../../../../database/postgres.connection', () => {
     const mockIngredientFindMany = jest.fn();
     const mockTransaction = jest.fn();
 
+    // Singleton mock client — the service captures this at module-load via `const prisma = getPrismaClient()`
+    const mockClient = {
+        ingredient: {
+            findUnique: mockIngredientFindUnique,
+            findMany: mockIngredientFindMany,
+        },
+        $transaction: mockTransaction,
+    };
+
     return {
         __esModule: true,
-        default: jest.fn(() => ({
-            ingredient: {
-                findUnique: mockIngredientFindUnique,
-                findMany: mockIngredientFindMany,
-            },
-            $transaction: mockTransaction,
-        })),
-        // Helper to expose mocks to test suite
+        default: jest.fn(() => mockClient),
         __getMocks: () => ({
             mockIngredientFindUnique,
             mockIngredientFindMany,
             mockTransaction
         }),
+        __mockClient: mockClient,
     };
 });
 
@@ -64,12 +67,24 @@ describe('Recipe Service', () => {
     beforeEach(() => {
         jest.clearAllMocks();
 
+        // Re-establish implementations on the SAME objects the service holds
+        const { __mockClient } = require('../../../../database/postgres.connection');
         const { mockTransaction, mockIngredientFindUnique, mockIngredientFindMany } = getMocks();
 
-        // Default implementation for transaction: exec callback
+        // Default implementation for transaction: exec callback with full mock client
         mockTransaction.mockImplementation(async (callback: Function) => {
-            return await callback({}); // Pass empty mock transaction client
+            return await callback({
+                menuRecipe: {
+                    createMany: jest.fn(),
+                    deleteMany: jest.fn(),
+                },
+            });
         });
+
+        // Re-set $transaction on the singleton (it's the same ref as mockTransaction)
+        __mockClient.$transaction = mockTransaction;
+        __mockClient.ingredient.findUnique = mockIngredientFindUnique;
+        __mockClient.ingredient.findMany = mockIngredientFindMany;
 
         // Default implementation for ingredient checks
         mockIngredientFindUnique.mockResolvedValue(mockIngredient);

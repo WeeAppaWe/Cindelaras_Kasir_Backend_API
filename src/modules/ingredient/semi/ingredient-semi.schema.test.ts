@@ -4,21 +4,16 @@ import {
     semiIngredientIdParamSchema,
     semiIngredientListQuerySchema,
     produceSemiIngredientSchema,
+    createAndProduceSemiIngredientSchema,
 } from './ingredient-semi.schema';
 
-// Mock semi ingredient request data
-const mockCreateRequest = {
-    valid: {
-        name: 'Bumbu Dasar',
-        unit_id: '550e8400-e29b-41d4-a716-446655440000',
-        min_stock: 10,
-        target_yield: 1,
-    },
-    validMinimal: {
-        name: 'Sambal Goreng',
-        unit_id: '550e8400-e29b-41d4-a716-446655440001',
-        min_stock: 5,
-    },
+import {
+    mockSemiIngredientCreateRequest,
+    mockSemiIngredientUpdateRequest,
+} from '../../../tests/mocks/ingredient.mock';
+
+// Local invalid-only fixtures (not worth exporting to shared mocks)
+const mockInvalidCreate = {
     emptyName: {
         name: '',
         unit_id: '550e8400-e29b-41d4-a716-446655440000',
@@ -47,14 +42,7 @@ const mockCreateRequest = {
     },
 };
 
-const mockUpdateRequest = {
-    valid: {
-        name: 'Bumbu Dasar Merah',
-        min_stock: 20,
-    },
-    validPartial: {
-        min_stock: 15,
-    },
+const mockInvalidUpdate = {
     invalidUnitId: {
         unit_id: 'invalid-uuid',
     },
@@ -66,7 +54,7 @@ const mockUpdateRequest = {
 describe('Semi Ingredient Schema Validation', () => {
     describe('createSemiIngredientSchema', () => {
         it('should pass validation with valid complete data', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.valid);
+            const result = createSemiIngredientSchema.safeParse(mockSemiIngredientCreateRequest.valid);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -78,7 +66,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should pass validation with minimal required data', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.validMinimal);
+            const result = createSemiIngredientSchema.safeParse(mockSemiIngredientCreateRequest.validMinimal);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -88,7 +76,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with empty name', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.emptyName);
+            const result = createSemiIngredientSchema.safeParse(mockInvalidCreate.emptyName);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -100,7 +88,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with short name (less than 2 chars)', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.shortName);
+            const result = createSemiIngredientSchema.safeParse(mockInvalidCreate.shortName);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -130,7 +118,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with invalid unit_id format', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.invalidUnitId);
+            const result = createSemiIngredientSchema.safeParse(mockInvalidCreate.invalidUnitId);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -143,7 +131,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with negative min_stock', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.negativeMinStock);
+            const result = createSemiIngredientSchema.safeParse(mockInvalidCreate.negativeMinStock);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -155,7 +143,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with zero target_yield', () => {
-            const result = createSemiIngredientSchema.safeParse(mockCreateRequest.invalidTargetYield);
+            const result = createSemiIngredientSchema.safeParse(mockInvalidCreate.invalidTargetYield);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -205,7 +193,7 @@ describe('Semi Ingredient Schema Validation', () => {
 
     describe('updateSemiIngredientSchema', () => {
         it('should pass validation with valid update data', () => {
-            const result = updateSemiIngredientSchema.safeParse(mockUpdateRequest.valid);
+            const result = updateSemiIngredientSchema.safeParse(mockSemiIngredientUpdateRequest.valid);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -215,7 +203,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should pass validation with partial update data', () => {
-            const result = updateSemiIngredientSchema.safeParse(mockUpdateRequest.validPartial);
+            const result = updateSemiIngredientSchema.safeParse(mockSemiIngredientUpdateRequest.validPartial);
 
             expect(result.success).toBe(true);
             if (result.success) {
@@ -230,7 +218,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with invalid unit_id format', () => {
-            const result = updateSemiIngredientSchema.safeParse(mockUpdateRequest.invalidUnitId);
+            const result = updateSemiIngredientSchema.safeParse(mockInvalidUpdate.invalidUnitId);
 
             expect(result.success).toBe(false);
             if (!result.success) {
@@ -242,7 +230,7 @@ describe('Semi Ingredient Schema Validation', () => {
         });
 
         it('should fail validation with negative min_stock', () => {
-            const result = updateSemiIngredientSchema.safeParse(mockUpdateRequest.negativeMinStock);
+            const result = updateSemiIngredientSchema.safeParse(mockInvalidUpdate.negativeMinStock);
 
             expect(result.success).toBe(false);
         });
@@ -380,6 +368,180 @@ describe('Semi Ingredient Schema Validation', () => {
                 const notesError = result.error.issues.find((issue) => issue.path.includes('notes'));
                 expect(notesError).toBeDefined();
             }
+        });
+    });
+
+    describe('createAndProduceSemiIngredientSchema', () => {
+        const validCompositions = [
+            { child_id: '550e8400-e29b-41d4-a716-446655440001', qty_needed: 2 },
+            { child_id: '550e8400-e29b-41d4-a716-446655440002', qty_needed: 0.5 },
+        ];
+
+        it('should pass validation with full valid request', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                notes: 'Batch pertama',
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(true);
+            if (result.success) {
+                expect(result.data.name).toBe('Saus Tomat');
+                expect(result.data.qty).toBe(3);
+                expect(result.data.compositions).toHaveLength(2);
+            }
+        });
+
+        it('should pass validation with minimal data (no notes)', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(true);
+        });
+
+        it('should fail validation with empty name', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: '',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const nameError = result.error.issues.find((i) => i.path.includes('name'));
+                expect(nameError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with invalid unit_id', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: 'invalid-uuid',
+                min_stock: 5,
+                qty: 3,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const unitError = result.error.issues.find((i) => i.path.includes('unit_id'));
+                expect(unitError).toBeDefined();
+                expect(unitError?.message).toContain('tidak valid');
+            }
+        });
+
+        it('should fail validation with negative min_stock', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: -1,
+                qty: 3,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const minStockError = result.error.issues.find((i) => i.path.includes('min_stock'));
+                expect(minStockError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with zero qty', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 0,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const qtyError = result.error.issues.find((i) => i.path.includes('qty'));
+                expect(qtyError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with negative qty', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: -1,
+                compositions: validCompositions,
+            });
+
+            expect(result.success).toBe(false);
+        });
+
+        it('should fail validation with empty compositions array', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                compositions: [],
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const compositionsError = result.error.issues.find((i) => i.path.includes('compositions'));
+                expect(compositionsError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with invalid child_id UUID in composition', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                compositions: [{ child_id: 'invalid-uuid', qty_needed: 2 }],
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const childError = result.error.issues.find((i) => i.path.includes('child_id'));
+                expect(childError).toBeDefined();
+                expect(childError?.message).toContain('tidak valid');
+            }
+        });
+
+        it('should fail validation with zero qty_needed in composition', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+                compositions: [{ child_id: '550e8400-e29b-41d4-a716-446655440001', qty_needed: 0 }],
+            });
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                const qtyNeededError = result.error.issues.find((i) => i.path.includes('qty_needed'));
+                expect(qtyNeededError).toBeDefined();
+            }
+        });
+
+        it('should fail validation with missing compositions field', () => {
+            const result = createAndProduceSemiIngredientSchema.safeParse({
+                name: 'Saus Tomat',
+                unit_id: '550e8400-e29b-41d4-a716-446655440000',
+                min_stock: 5,
+                qty: 3,
+            });
+
+            expect(result.success).toBe(false);
         });
     });
 });

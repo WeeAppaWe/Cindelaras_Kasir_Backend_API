@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientRepository = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.updateAvgCost = exports.update = exports.create = exports.findByName = exports.findByIdWithCompositions = exports.findById = exports.count = exports.findAll = void 0;
+exports.semiIngredientRepository = exports.findIngredientsByIds = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.updateAvgCost = exports.update = exports.create = exports.findByName = exports.findByIdWithCompositionsAndStock = exports.findByIdWithCompositions = exports.findById = exports.count = exports.findAll = void 0;
 const postgres_connection_1 = __importDefault(require("../../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../../utility/prisma-error-handler.utility");
 const ingredient_semi_types_1 = require("./ingredient-semi.types");
@@ -39,6 +39,32 @@ const semiIngredientWithCompositionsSelect = {
                     ingredient_id: true,
                     name: true,
                     avg_cost: true,
+                    unit: {
+                        select: {
+                            unit_measure_id: true,
+                            name: true,
+                        },
+                    },
+                },
+            },
+        },
+    },
+};
+// Select fields with compositions AND stock_qty on child ingredient
+const semiIngredientWithCompositionsAndStockSelect = {
+    ...semiIngredientSelectFields,
+    child_compositions: {
+        where: { deleted_at: null },
+        select: {
+            ingredient_composition_id: true,
+            child_id: true,
+            qty_needed: true,
+            child_ingredient: {
+                select: {
+                    ingredient_id: true,
+                    name: true,
+                    avg_cost: true,
+                    stock_qty: true,
                     unit: {
                         select: {
                             unit_measure_id: true,
@@ -148,6 +174,27 @@ const findByIdWithCompositions = async (ingredientId) => {
     }
 };
 exports.findByIdWithCompositions = findByIdWithCompositions;
+/**
+ * Find semi ingredient by ID with compositions and child stock_qty
+ */
+const findByIdWithCompositionsAndStock = async (ingredientId) => {
+    try {
+        const ingredient = await prisma.ingredient.findUnique({
+            where: {
+                ingredient_id: ingredientId,
+                deleted_at: null,
+                type: ingredient_semi_types_1.IngredientType.SEMI,
+            },
+            select: semiIngredientWithCompositionsAndStockSelect,
+        });
+        return ingredient ?? null;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.findByIdWithCompositionsAndStock = findByIdWithCompositionsAndStock;
 /**
  * Find semi ingredient by name (for validation - check duplicate)
  */
@@ -289,11 +336,50 @@ const findUnitMeasureById = async (unitMeasureId) => {
     }
 };
 exports.findUnitMeasureById = findUnitMeasureById;
+/**
+ * Find ingredients by IDs — returns stock_qty, avg_cost, unit name
+ * Used for create-and-produce validation
+ */
+const findIngredientsByIds = async (ingredientIds, transaction) => {
+    try {
+        const client = transaction || prisma;
+        const ingredients = await client.ingredient.findMany({
+            where: {
+                ingredient_id: { in: ingredientIds },
+                deleted_at: null,
+            },
+            select: {
+                ingredient_id: true,
+                name: true,
+                avg_cost: true,
+                stock_qty: true,
+                unit: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
+        return ingredients.map((i) => ({
+            ingredient_id: i.ingredient_id,
+            name: i.name,
+            avg_cost: Number(i.avg_cost),
+            stock_qty: Number(i.stock_qty),
+            unit_name: i.unit.name,
+        }));
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.findIngredientsByIds = findIngredientsByIds;
 exports.semiIngredientRepository = {
     findAll: exports.findAll,
     count: exports.count,
     findById: exports.findById,
     findByIdWithCompositions: exports.findByIdWithCompositions,
+    findByIdWithCompositionsAndStock: exports.findByIdWithCompositionsAndStock,
     findByName: exports.findByName,
     create: exports.create,
     update: exports.update,
@@ -301,6 +387,7 @@ exports.semiIngredientRepository = {
     softDelete: exports.softDelete,
     findAllUnitMeasures: exports.findAllUnitMeasures,
     findUnitMeasureById: exports.findUnitMeasureById,
+    findIngredientsByIds: exports.findIngredientsByIds,
 };
 exports.default = exports.semiIngredientRepository;
 //# sourceMappingURL=ingredient-semi.repository.js.map
