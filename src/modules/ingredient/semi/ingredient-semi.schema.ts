@@ -80,6 +80,11 @@ export const semiIngredientListQuerySchema = z.object({
 });
 
 /**
+ * Query params schema for semi ingredient references
+ */
+export const semiIngredientReferenceQuerySchema = z.object({});
+
+/**
  * Produce semi ingredient schema
  */
 export const produceSemiIngredientSchema = z.object({
@@ -125,6 +130,7 @@ export type SemiIngredientIdParam = z.infer<typeof semiIngredientIdParamSchema>;
 export type SemiIngredientListQuery = z.infer<typeof semiIngredientListQuerySchema>;
 export type ProduceSemiIngredientInput = z.infer<typeof produceSemiIngredientSchema>;
 export type CreateAndProduceSemiIngredientInput = z.infer<typeof createAndProduceSemiIngredientSchema>;
+export type SemiIngredientReferenceQuery = z.infer<typeof semiIngredientReferenceQuerySchema>;
 
 // Export schemas
 export const semiIngredientSchemas = {
@@ -134,6 +140,7 @@ export const semiIngredientSchemas = {
     listQuery: semiIngredientListQuerySchema,
     produce: produceSemiIngredientSchema,
     createAndProduce: createAndProduceSemiIngredientSchema,
+    referenceQuery: semiIngredientReferenceQuerySchema,
 };
 
 export default semiIngredientSchemas;

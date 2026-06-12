@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientRepository = exports.findIngredientsByIds = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.updateAvgCost = exports.update = exports.create = exports.findByName = exports.findByIdWithCompositionsAndStock = exports.findByIdWithCompositions = exports.findById = exports.count = exports.findAll = void 0;
+exports.semiIngredientRepository = exports.findIngredientsByIds = exports.findUnitMeasureById = exports.findAllUnitMeasures = exports.softDelete = exports.updateAvgCost = exports.update = exports.create = exports.findByName = exports.findByIdWithCompositionsAndStock = exports.findByIdWithCompositions = exports.findById = exports.count = exports.findAll = exports.findAllReferences = void 0;
 const postgres_connection_1 = __importDefault(require("../../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../../utility/prisma-error-handler.utility");
 const ingredient_semi_types_1 = require("./ingredient-semi.types");
@@ -76,6 +76,27 @@ const semiIngredientWithCompositionsAndStockSelect = {
         },
     },
 };
+/**
+ * Find all semi ingredients (for dropdown/selection)
+ */
+const findAllReferences = async () => {
+    try {
+        const ingredients = await prisma.ingredient.findMany({
+            where: {
+                deleted_at: null,
+                type: ingredient_semi_types_1.IngredientType.SEMI,
+            },
+            select: semiIngredientSelectFields,
+            orderBy: { name: 'asc' },
+        });
+        return ingredients;
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.findAllReferences = findAllReferences;
 /**
  * Find all semi ingredients with pagination and filters
  */
@@ -375,6 +396,7 @@ const findIngredientsByIds = async (ingredientIds, transaction) => {
 };
 exports.findIngredientsByIds = findIngredientsByIds;
 exports.semiIngredientRepository = {
+    findAllReferences: exports.findAllReferences,
     findAll: exports.findAll,
     count: exports.count,
     findById: exports.findById,

@@ -1,6 +1,10 @@
 import { SemiIngredientFilter, SemiIngredientPaginationOptions, SemiIngredientWithRelations, SemiIngredientWithCompositions } from './ingredient-semi.types';
 import { Prisma } from '../../../generated/prisma/client';
 /**
+ * Find all semi ingredients (for dropdown/selection)
+ */
+export declare const findAllReferences: () => Promise<SemiIngredientWithRelations[]>;
+/**
  * Find all semi ingredients with pagination and filters
  */
 export declare const findAll: (options: SemiIngredientPaginationOptions, filter: SemiIngredientFilter) => Promise<SemiIngredientWithRelations[]>;
@@ -66,6 +70,7 @@ export declare const findIngredientsByIds: (ingredientIds: string[], transaction
     unit_name: string;
 }[]>;
 export declare const semiIngredientRepository: {
+    findAllReferences: () => Promise<SemiIngredientWithRelations[]>;
     findAll: (options: SemiIngredientPaginationOptions, filter: SemiIngredientFilter) => Promise<SemiIngredientWithRelations[]>;
     count: (filter: SemiIngredientFilter) => Promise<number>;
     findById: (ingredientId: string) => Promise<SemiIngredientWithRelations | null>;

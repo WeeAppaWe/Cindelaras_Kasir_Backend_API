@@ -1,6 +1,11 @@
 import { Response, NextFunction } from 'express';
 import { AuthenticatedRequest } from '../../../../types';
 /**
+ * Get Semi Ingredient References (for dropdown)
+ * GET /api/ingredient/semi/options
+ */
+export declare const getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+/**
  * Get All Semi Ingredients
  * GET /api/ingredient/semi
  */
@@ -51,6 +56,7 @@ export declare const produce: (req: AuthenticatedRequest, res: Response, next: N
  */
 export declare const createAndProduce: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 export declare const semiIngredientController: {
+    getReferences: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     showAll: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     detail: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     create: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;

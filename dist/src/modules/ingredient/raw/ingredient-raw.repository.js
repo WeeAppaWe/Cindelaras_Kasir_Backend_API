@@ -30,6 +30,7 @@ const rawIngredientReferenceSelectFields = {
     ingredient_id: true,
     name: true,
     type: true,
+    avg_cost: true,
     unit: {
         select: {
             unit_measure_id: true,

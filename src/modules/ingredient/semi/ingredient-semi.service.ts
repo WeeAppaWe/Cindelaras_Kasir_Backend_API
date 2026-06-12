@@ -29,6 +29,18 @@ import { StockTypeName } from '../../stock-type/stock-type.schema';
 const prisma = getPrismaClient();
 
 /**
+ * Get all semi ingredients (for dropdown/selection)
+ */
+export const getAllReferences = async (): Promise<SemiIngredientWithRelations[]> => {
+    try {
+        return await semiIngredientRepository.findAllReferences();
+    } catch (error) {
+        console.error(`--- Semi Ingredient Service Error: ${(error as Error).message}`);
+        throw error;
+    }
+};
+
+/**
  * Get all semi ingredients with pagination and filters
  */
 export const getAll = async (req: AuthenticatedRequest): Promise<SemiIngredientListResponse> => {
@@ -693,6 +705,7 @@ export const createAndProduce = async (req: AuthenticatedRequest): Promise<Creat
 };
 
 export const semiIngredientService = {
+    getAllReferences,
     getAll,
     getDetail,
     create,

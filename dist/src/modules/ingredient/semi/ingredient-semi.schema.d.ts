@@ -40,6 +40,10 @@ export declare const semiIngredientListQuerySchema: z.ZodObject<{
     unit_id: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 /**
+ * Query params schema for semi ingredient references
+ */
+export declare const semiIngredientReferenceQuerySchema: z.ZodObject<{}, z.core.$strip>;
+/**
  * Produce semi ingredient schema
  */
 export declare const produceSemiIngredientSchema: z.ZodObject<{
@@ -66,6 +70,7 @@ export type SemiIngredientIdParam = z.infer<typeof semiIngredientIdParamSchema>;
 export type SemiIngredientListQuery = z.infer<typeof semiIngredientListQuerySchema>;
 export type ProduceSemiIngredientInput = z.infer<typeof produceSemiIngredientSchema>;
 export type CreateAndProduceSemiIngredientInput = z.infer<typeof createAndProduceSemiIngredientSchema>;
+export type SemiIngredientReferenceQuery = z.infer<typeof semiIngredientReferenceQuerySchema>;
 export declare const semiIngredientSchemas: {
     create: z.ZodObject<{
         name: z.ZodString;
@@ -103,6 +108,7 @@ export declare const semiIngredientSchemas: {
             qty_needed: z.ZodNumber;
         }, z.core.$strip>>;
     }, z.core.$strip>;
+    referenceQuery: z.ZodObject<{}, z.core.$strip>;
 };
 export default semiIngredientSchemas;
 //# sourceMappingURL=ingredient-semi.schema.d.ts.map

@@ -16,6 +16,7 @@ import {
     mockComposition2,
     mockChildIngredient1,
     mockChildIngredient2,
+    mockSemiIngredientReferences,
 } from '../../../tests/mocks/ingredient.mock';
 import { mockUnitMeasure } from '../../../tests/mocks/unit-measure.mock';
 
@@ -59,6 +60,44 @@ describe('Semi Ingredient Service', () => {
                 },
             };
             return await callback(mockTransactionClient);
+        });
+    });
+
+    describe('getAllReferences', () => {
+        it('should return semi ingredient references for dropdown', async () => {
+            // Arrange
+            (semiIngredientRepository.findAllReferences as jest.Mock).mockResolvedValue(mockSemiIngredientReferences);
+
+            // Act
+            const result = await semiIngredientService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(1);
+            expect(result[0].type).toBe('SEMI');
+            expect(semiIngredientRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should return empty array when no semi ingredient references exist', async () => {
+            // Arrange
+            (semiIngredientRepository.findAllReferences as jest.Mock).mockResolvedValue([]);
+
+            // Act
+            const result = await semiIngredientService.getAllReferences();
+
+            // Assert
+            expect(result).toHaveLength(0);
+            expect(semiIngredientRepository.findAllReferences).toHaveBeenCalledTimes(1);
+        });
+
+        it('should propagate error from repository', async () => {
+            // Arrange
+            const mockError = new Error('Database connection failed');
+            (semiIngredientRepository.findAllReferences as jest.Mock).mockRejectedValue(mockError);
+
+            // Act & Assert
+            await expect(semiIngredientService.getAllReferences())
+                .rejects
+                .toThrow('Database connection failed');
         });
     });
 

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientSchemas = exports.createAndProduceSemiIngredientSchema = exports.produceSemiIngredientSchema = exports.semiIngredientListQuerySchema = exports.semiIngredientIdParamSchema = exports.updateSemiIngredientSchema = exports.createSemiIngredientSchema = exports.IngredientType = void 0;
+exports.semiIngredientSchemas = exports.createAndProduceSemiIngredientSchema = exports.produceSemiIngredientSchema = exports.semiIngredientReferenceQuerySchema = exports.semiIngredientListQuerySchema = exports.semiIngredientIdParamSchema = exports.updateSemiIngredientSchema = exports.createSemiIngredientSchema = exports.IngredientType = void 0;
 const zod_1 = require("zod");
 // ============================================
 // CONSTANTS
@@ -76,6 +76,10 @@ exports.semiIngredientListQuerySchema = zod_1.z.object({
     unit_id: zod_1.z.string().uuid('Format unit_id tidak valid').optional(),
 });
 /**
+ * Query params schema for semi ingredient references
+ */
+exports.semiIngredientReferenceQuerySchema = zod_1.z.object({});
+/**
  * Produce semi ingredient schema
  */
 exports.produceSemiIngredientSchema = zod_1.z.object({
@@ -118,6 +122,7 @@ exports.semiIngredientSchemas = {
     listQuery: exports.semiIngredientListQuerySchema,
     produce: exports.produceSemiIngredientSchema,
     createAndProduce: exports.createAndProduceSemiIngredientSchema,
+    referenceQuery: exports.semiIngredientReferenceQuerySchema,
 };
 exports.default = exports.semiIngredientSchemas;
 //# sourceMappingURL=ingredient-semi.schema.js.map

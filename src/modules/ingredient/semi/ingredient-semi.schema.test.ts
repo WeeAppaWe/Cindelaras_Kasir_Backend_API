@@ -5,6 +5,7 @@ import {
     semiIngredientListQuerySchema,
     produceSemiIngredientSchema,
     createAndProduceSemiIngredientSchema,
+    semiIngredientReferenceQuerySchema,
 } from './ingredient-semi.schema';
 
 import {
@@ -542,6 +543,19 @@ describe('Semi Ingredient Schema Validation', () => {
             });
 
             expect(result.success).toBe(false);
+        });
+    });
+
+    describe('semiIngredientReferenceQuerySchema', () => {
+        it('should pass validation with empty query', () => {
+            const result = semiIngredientReferenceQuerySchema.safeParse({});
+
+            expect(result.success).toBe(true);
+        });
+
+        it('should be exported in semiIngredientSchemas', () => {
+            const { semiIngredientSchemas } = require('./ingredient-semi.schema');
+            expect(semiIngredientSchemas.referenceQuery).toBe(semiIngredientReferenceQuerySchema);
         });
     });
 });

@@ -62,6 +62,7 @@ export const mockRawIngredientReference = {
     ingredient_id: mockIngredient.ingredient_id,
     name: mockIngredient.name,
     type: mockIngredient.type,
+    avg_cost: mockIngredient.avg_cost,
     unit: mockIngredient.unit,
 };
 
@@ -69,6 +70,7 @@ export const mockRawIngredientReference2 = {
     ingredient_id: mockIngredient2.ingredient_id,
     name: mockIngredient2.name,
     type: mockIngredient2.type,
+    avg_cost: mockIngredient2.avg_cost,
     unit: mockIngredient2.unit,
 };
 
@@ -81,8 +83,13 @@ export const mockSemiIngredientReference = {
     ingredient_id: '550e8400-e29b-41d4-a716-446655440003',
     name: mockSemiIngredient.name,
     type: mockSemiIngredient.type,
+    avg_cost: mockSemiIngredient.avg_cost,
     unit: mockSemiIngredient.unit,
 };
+
+export const mockSemiIngredientReferences = [
+    mockSemiIngredientReference,
+];
 
 export const mockAllIngredientReferences = [
     mockRawIngredientReference,

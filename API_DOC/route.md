@@ -19,7 +19,7 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **136 endpoint**.
+Total endpoint dari folder `route`: **137 endpoint**.
 
 ## Auth
 
@@ -96,6 +96,7 @@ Source: `route/ingredient.route.ts`
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/api/ingredient/semi/units` | ADMIN | Ambil daftar satuan untuk bahan setengah jadi. |
+| `GET` | `/api/ingredient/semi/options` | ADMIN | Ambil daftar bahan setengah jadi untuk dropdown. |
 | `POST` | `/api/ingredient/semi/create-and-produce` | ADMIN | Buat bahan setengah jadi baru sekaligus catat hasil produksi pertama (all-in-one). |
 | `GET` | `/api/ingredient/semi` | ADMIN | Ambil daftar bahan setengah jadi. |
 | `GET` | `/api/ingredient/semi/:ingredient_id` | ADMIN | Ambil detail bahan setengah jadi. |

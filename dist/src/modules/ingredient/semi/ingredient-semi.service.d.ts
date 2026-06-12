@@ -1,6 +1,10 @@
 import { AuthenticatedRequest } from '../../../../types';
 import { SemiIngredientListResponse, SemiIngredientWithRelations, SemiIngredientWithCompositions, DeleteSemiIngredientResponse, SemiIngredientHPPResult, ProduceSemiIngredientResult, CreateAndProduceSemiIngredientResult } from './ingredient-semi.types';
 /**
+ * Get all semi ingredients (for dropdown/selection)
+ */
+export declare const getAllReferences: () => Promise<SemiIngredientWithRelations[]>;
+/**
  * Get all semi ingredients with pagination and filters
  */
 export declare const getAll: (req: AuthenticatedRequest) => Promise<SemiIngredientListResponse>;
@@ -37,6 +41,7 @@ export declare const produce: (req: AuthenticatedRequest) => Promise<ProduceSemi
  */
 export declare const createAndProduce: (req: AuthenticatedRequest) => Promise<CreateAndProduceSemiIngredientResult>;
 export declare const semiIngredientService: {
+    getAllReferences: () => Promise<SemiIngredientWithRelations[]>;
     getAll: (req: AuthenticatedRequest) => Promise<SemiIngredientListResponse>;
     getDetail: (req: AuthenticatedRequest) => Promise<SemiIngredientWithCompositions>;
     create: (req: AuthenticatedRequest) => Promise<SemiIngredientWithRelations>;

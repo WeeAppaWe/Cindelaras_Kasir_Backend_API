@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.semiIngredientService = exports.createAndProduce = exports.produce = exports.recalculateAvgCost = exports.getHPPCalculation = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = void 0;
+exports.semiIngredientService = exports.createAndProduce = exports.produce = exports.recalculateAvgCost = exports.getHPPCalculation = exports.softDelete = exports.update = exports.create = exports.getDetail = exports.getAll = exports.getAllReferences = void 0;
 const error_not_found_exception_1 = require("../../../../exception/error-not-found.exception");
 const error_data_already_exist_exception_1 = require("../../../../exception/error-data-already-exist.exception");
 const error_validation_exception_1 = require("../../../../exception/error-validation.exception");
@@ -18,6 +18,19 @@ const ingredient_semi_composition_repository_1 = __importDefault(require("../sem
 const ingredient_semi_types_1 = require("./ingredient-semi.types");
 const stock_type_schema_1 = require("../../stock-type/stock-type.schema");
 const prisma = (0, postgres_connection_1.default)();
+/**
+ * Get all semi ingredients (for dropdown/selection)
+ */
+const getAllReferences = async () => {
+    try {
+        return await ingredient_semi_repository_1.default.findAllReferences();
+    }
+    catch (error) {
+        console.error(`--- Semi Ingredient Service Error: ${error.message}`);
+        throw error;
+    }
+};
+exports.getAllReferences = getAllReferences;
 /**
  * Get all semi ingredients with pagination and filters
  */
@@ -594,6 +607,7 @@ const createAndProduce = async (req) => {
 };
 exports.createAndProduce = createAndProduce;
 exports.semiIngredientService = {
+    getAllReferences: exports.getAllReferences,
     getAll: exports.getAll,
     getDetail: exports.getDetail,
     create: exports.create,

@@ -769,6 +769,49 @@
  *             schema:
  *               $ref: '#/components/schemas/UnitMeasureReferenceListResponse'
  *
+ * /ingredient/semi/options:
+ *   get:
+ *     summary: Get semi ingredient references for dropdown
+ *     description: Mengambil semua bahan setengah jadi aktif tanpa pagination untuk kebutuhan dropdown (misalnya form resep menu).
+ *     tags: [Ingredient Semi]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Semi ingredient references retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 response:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/IngredientData'
+ *                 metaData:
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/MetaData'
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           example: "Berhasil mengambil data pilihan bahan setengah jadi"
+ *             example:
+ *               response:
+ *                 - ingredient_id: "550e8400-e29b-41d4-a716-446655440003"
+ *                   name: "Bumbu Dasar"
+ *                   type: "SEMI"
+ *                   stock_qty: 50
+ *                   min_stock: 10
+ *                   avg_cost: 13000
+ *                   unit:
+ *                     unit_measure_id: "660e8400-e29b-41d4-a716-446655440001"
+ *                     name: "Porsi"
+ *               metaData:
+ *                 message: "Berhasil mengambil data pilihan bahan setengah jadi"
+ *                 code: 200
+ *                 response_code: "0000"
+ *
  * /ingredient/semi/create-and-produce:
  *   post:
  *     summary: Buat bahan setengah jadi baru dan langsung catat produksi

@@ -12,6 +12,41 @@ Base URL Utama: `/api/ingredient/semi`
 
 ---
 
+## BAGIAN A: Dropdown / Referensi
+
+### Daftar Bahan Setengah Jadi untuk Dropdown
+
+Endpoint tanpa pagination untuk mengisi pilihan di form yang membutuhkan daftar bahan setengah jadi (misalnya form resep menu).
+
+- **Endpoint:** `GET /options`
+- **Akses:** Protected (ADMIN)
+
+**Response Berhasil (200 OK):**
+```json
+{
+  "code": 200,
+  "message": "Berhasil mengambil data pilihan bahan setengah jadi",
+  "data": [
+    {
+      "ingredient_id": "uuid-semi-1",
+      "name": "Bumbu Dasar",
+      "type": "SEMI",
+      "stock_qty": 50,
+      "min_stock": 10,
+      "avg_cost": 13000,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": null,
+      "unit": {
+        "unit_measure_id": "uuid-unit-porsi",
+        "name": "Porsi"
+      }
+    }
+  ]
+}
+```
+
+---
+
 ## Tabel dan Field yang Dipakai
 
 Modul bahan setengah jadi memakai tabel utama `ingredients` dengan nilai `type = SEMI`. Untuk resep/komposisi, modul ini memakai tabel `ingredient_compositions` yang menghubungkan bahan setengah jadi sebagai parent dengan bahan baku sebagai child. Tabel `unit_measures` dipakai untuk relasi satuan bahan dan dropdown satuan.
@@ -274,9 +309,7 @@ Base URL Tambahan: `/api/ingredient/semi/composition` dan `/api/ingredient/semi/
 ### 1. Daftar Bahan Baku Mentah Tersedia (Dropdown)
 Endpoint utilitas untuk form UI ketika pengguna ingin memilih bahan baku mentah (RAW) untuk ditambahkan sebagai resep.
 - **Endpoint:** `GET /composition/available-ingredients`
-- **Akses:** Protected (ADMIN)
-
-**Response Berhasil (200 OK):**
+- **Akses:** Protected (ADMIN)**Response Berhasil (200 OK):**
 ```json
 {
   "code": 200,

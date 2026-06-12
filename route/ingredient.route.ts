@@ -26,6 +26,7 @@ import {
     semiIngredientListQuerySchema,
     produceSemiIngredientSchema,
     createAndProduceSemiIngredientSchema,
+    semiIngredientReferenceQuerySchema,
 } from '../src/modules/ingredient/semi/ingredient-semi.schema';
 import semiIngredientController from '../src/modules/ingredient/semi/ingredient-semi.controller';
 
@@ -106,6 +107,14 @@ const semiPath = 'ingredient/semi';
 
 // Reference/Dropdown Routes (must be before :ingredient_id routes)
 router.get(`/${semiPath}/units`, ...adminMiddleware, semiIngredientController.getUnitMeasures);
+
+// Options/Reference dropdown route (must be before :ingredient_id routes)
+router.get(
+    `/${semiPath}/options`,
+    ...adminMiddleware,
+    zodValidation(semiIngredientReferenceQuerySchema, 'query'),
+    semiIngredientController.getReferences
+);
 
 // Create and produce (all-in-one) — must be before POST /${semiPath} to avoid ambiguity
 router.post(

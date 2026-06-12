@@ -83,6 +83,27 @@ const semiIngredientWithCompositionsAndStockSelect = {
 };
 
 /**
+ * Find all semi ingredients (for dropdown/selection)
+ */
+export const findAllReferences = async (): Promise<SemiIngredientWithRelations[]> => {
+    try {
+        const ingredients = await prisma.ingredient.findMany({
+            where: {
+                deleted_at: null,
+                type: IngredientType.SEMI,
+            },
+            select: semiIngredientSelectFields,
+            orderBy: { name: 'asc' },
+        });
+
+        return ingredients as SemiIngredientWithRelations[];
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
+/**
  * Find all semi ingredients with pagination and filters
  */
 export const findAll = async (
@@ -414,6 +435,7 @@ export const findIngredientsByIds = async (
 };
 
 export const semiIngredientRepository = {
+    findAllReferences,
     findAll,
     count,
     findById,

@@ -5,6 +5,19 @@ import responseApi from '../../../../utility/response-api';
 import { AuthenticatedRequest } from '../../../../types';
 
 /**
+ * Get Semi Ingredient References (for dropdown)
+ * GET /api/ingredient/semi/options
+ */
+export const getReferences = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
+    try {
+        const data = await semiIngredientService.getAllReferences();
+        res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil data pilihan bahan setengah jadi' }, data));
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
  * Get All Semi Ingredients
  * GET /api/ingredient/semi
  */
@@ -141,6 +154,7 @@ export const createAndProduce = async (req: AuthenticatedRequest, res: Response,
 };
 
 export const semiIngredientController = {
+    getReferences,
     showAll,
     detail,
     create,

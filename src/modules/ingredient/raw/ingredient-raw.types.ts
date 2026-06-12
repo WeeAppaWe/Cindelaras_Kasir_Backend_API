@@ -59,6 +59,7 @@ export interface RawIngredientReference {
     ingredient_id: string;
     name: string;
     type: string;
+    avg_cost: any; // Prisma Decimal — harga per unit untuk kalkulasi subtotal di frontend
     unit: {
         unit_measure_id: string;
         name: string;

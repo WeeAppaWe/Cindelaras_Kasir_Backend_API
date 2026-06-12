@@ -46,6 +46,8 @@ router.delete(`/${rawPath}/:ingredient_id`, ...adminMiddleware, (0, zod_validati
 const semiPath = 'ingredient/semi';
 // Reference/Dropdown Routes (must be before :ingredient_id routes)
 router.get(`/${semiPath}/units`, ...adminMiddleware, ingredient_semi_controller_1.default.getUnitMeasures);
+// Options/Reference dropdown route (must be before :ingredient_id routes)
+router.get(`/${semiPath}/options`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(ingredient_semi_schema_1.semiIngredientReferenceQuerySchema, 'query'), ingredient_semi_controller_1.default.getReferences);
 // Create and produce (all-in-one) — must be before POST /${semiPath} to avoid ambiguity
 router.post(`/${semiPath}/create-and-produce`, ...adminMiddleware, (0, zod_validation_middleware_1.zodValidation)(ingredient_semi_schema_1.createAndProduceSemiIngredientSchema), ingredient_semi_controller_1.default.createAndProduce);
 // Production route (must be before :ingredient_id routes)
