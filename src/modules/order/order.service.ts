@@ -7,6 +7,7 @@ import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { generateReceiptNumber } from '../../../utility/receipt-number.utility';
 import { AuthenticatedRequest } from '../../../types';
 import orderRepository from './order.repository';
+import stockTypeRepository from '../stock-type/stock-type.repository';
 import receiptUtility from '../../../utility/receipt.utility';
 import {
     CreateOrderRequest,
@@ -280,7 +281,7 @@ export const confirmPayment = async (req: AuthenticatedRequest): Promise<Confirm
         }
 
         // Get stock type for sales (OUT_SALES)
-        const stockType = await orderRepository.findStockTypeByName('OUT_SALES');
+        const stockType = await stockTypeRepository.findByName('OUT_SALES');
         if (!stockType) {
             throw new ErrorValidationException('Konfigurasi tipe stok tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Tipe stok OUT_SALES tidak ditemukan' },

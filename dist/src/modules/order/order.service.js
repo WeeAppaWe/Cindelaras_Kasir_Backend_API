@@ -12,6 +12,7 @@ const format_money_utility_1 = require("../../../utility/format-money.utility");
 const metadata_info_utility_1 = require("../../../utility/metadata-info.utility");
 const receipt_number_utility_1 = require("../../../utility/receipt-number.utility");
 const order_repository_1 = __importDefault(require("./order.repository"));
+const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
 const receipt_utility_1 = __importDefault(require("../../../utility/receipt.utility"));
 const order_schema_1 = require("./order.schema");
 const store_setting_repository_1 = __importDefault(require("../store-setting/store-setting.repository"));
@@ -234,7 +235,7 @@ const confirmPayment = async (req) => {
             }
         }
         // Get stock type for sales (OUT_SALES)
-        const stockType = await order_repository_1.default.findStockTypeByName('OUT_SALES');
+        const stockType = await stock_type_repository_1.default.findByName('OUT_SALES');
         if (!stockType) {
             throw new error_validation_exception_1.ErrorValidationException('Konfigurasi tipe stok tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Tipe stok OUT_SALES tidak ditemukan' },

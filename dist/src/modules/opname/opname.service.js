@@ -7,10 +7,12 @@ exports.opnameService = exports.getIngredients = exports.softDelete = exports.ap
 const error_not_found_exception_1 = require("../../../exception/error-not-found.exception");
 const error_validation_exception_1 = require("../../../exception/error-validation.exception");
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
-const pagination_utility_1 = require("../../../utility/pagination.utility");
 const metadata_info_utility_1 = require("../../../utility/metadata-info.utility");
 const opname_repository_1 = __importDefault(require("./opname.repository"));
+const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
 const opname_schema_1 = require("./opname.schema");
+const stock_type_schema_1 = require("../stock-type/stock-type.schema");
+const pagination_utility_1 = require("../../../utility/pagination.utility");
 const prisma = (0, postgres_connection_1.default)();
 /**
  * Get all stock opnames with pagination and filters
@@ -213,26 +215,48 @@ exports.changeStatus = changeStatus;
 const applyAdjustment = async (req) => {
     try {
         const opnameId = req.params.stock_opname_id;
-        // Check if opname exists
+        const metadata = (0, metadata_info_utility_1.getMetadataInfo)(req);
+        if (!metadata.account_id) {
+            throw new error_validation_exception_1.ErrorValidationException('User tidak terautentikasi', [
+                { location: 'auth', field: 'user_id', message: 'User ID tidak ditemukan' },
+            ]);
+        }
         const existingOpname = await opname_repository_1.default.findById(opnameId);
         if (!existingOpname) {
             throw new error_not_found_exception_1.ErrorNotFoundException('Stock opname tidak ditemukan');
         }
-        // Only allow apply on COMPLETED status
         if (existingOpname.status !== opname_schema_1.OpnameStatus.COMPLETED) {
             throw new error_validation_exception_1.ErrorValidationException('Hanya opname dengan status COMPLETED yang dapat diaplikasikan', [
                 { location: 'params', field: 'stock_opname_id', message: 'Opname harus dalam status COMPLETED untuk dapat diaplikasikan' },
             ]);
         }
-        // Apply adjustment in transaction
+        // Get ADJUSTMENT_OPNAME stock type — required before entering transaction
+        const stockType = await stock_type_repository_1.default.findByName(stock_type_schema_1.StockTypeName.ADJUSTMENT_OPNAME);
+        if (!stockType) {
+            throw new error_validation_exception_1.ErrorValidationException('Tipe stok ADJUSTMENT_OPNAME tidak ditemukan', [
+                { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
+            ]);
+        }
         const result = await prisma.$transaction(async (transaction) => {
-            // Get all opname items
             const items = await opname_repository_1.default.getOpnameItems(opnameId, transaction);
-            // Update each ingredient's stock to the physical_qty
             for (const item of items) {
+                // Update ingredient stock to physical count
                 await opname_repository_1.default.updateIngredientStock(item.ingredient_id, item.physical_qty, transaction);
+                // Skip recording stock movement if there is no difference
+                if (item.difference === 0) {
+                    continue;
+                }
+                // Record stock movement for audit trail
+                // qty stored as difference (positive = surplus, negative = shrinkage)
+                await opname_repository_1.default.createStockMovement({
+                    ingredient_id: item.ingredient_id,
+                    user_id: metadata.account_id,
+                    stock_type_id: stockType.stock_type_id,
+                    qty: item.difference,
+                    current_stock: item.physical_qty,
+                    notes: `Penyesuaian stock opname #${opnameId.slice(-8).toUpperCase()}`,
+                }, transaction);
             }
-            // Update opname status to APPLIED
             await opname_repository_1.default.updateStatus(opnameId, opname_schema_1.OpnameStatus.APPLIED, transaction);
             return items.length;
         });

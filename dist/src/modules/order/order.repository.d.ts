@@ -35,10 +35,6 @@ export declare const findMenuById: (menuId: string) => Promise<{
     }>;
 } | null>;
 export declare const updateIngredientStock: (ingredientId: string, deductAmount: number, userId: string, stockTypeId: string, transaction: Prisma.TransactionClient) => Promise<void>;
-export declare const findStockTypeByName: (name: string) => Promise<{
-    stock_type_id: string;
-    name: string;
-} | null>;
 export declare const getOrdersByShift: (shiftId: string) => Promise<{
     total_orders: number;
     total_sales: number;
@@ -87,10 +83,6 @@ export declare const orderRepository: {
         total_cash: number;
         total_qris: number;
     }>;
-    findStockTypeByName: (name: string) => Promise<{
-        stock_type_id: string;
-        name: string;
-    } | null>;
 };
 export default orderRepository;
 //# sourceMappingURL=order.repository.d.ts.map

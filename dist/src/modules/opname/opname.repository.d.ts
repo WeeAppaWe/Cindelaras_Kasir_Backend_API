@@ -77,6 +77,17 @@ export declare const getOpnameItems: (opnameId: string, transaction?: Prisma.Tra
     physical_qty: number;
     difference: number;
 }>>;
+/**
+ * Create stock movement record (for adjustment audit trail)
+ */
+export declare const createStockMovement: (data: {
+    ingredient_id: string;
+    user_id: string;
+    stock_type_id: string;
+    qty: number;
+    current_stock: number;
+    notes?: string | null;
+}, transaction?: Prisma.TransactionClient) => Promise<void>;
 export declare const opnameRepository: {
     findAll: (options: OpnamePaginationOptions, filter: OpnameFilter) => Promise<OpnameWithUser[]>;
     count: (filter: OpnameFilter) => Promise<number>;
@@ -113,6 +124,14 @@ export declare const opnameRepository: {
         physical_qty: number;
         difference: number;
     }>>;
+    createStockMovement: (data: {
+        ingredient_id: string;
+        user_id: string;
+        stock_type_id: string;
+        qty: number;
+        current_stock: number;
+        notes?: string | null;
+    }, transaction?: Prisma.TransactionClient) => Promise<void>;
 };
 export default opnameRepository;
 //# sourceMappingURL=opname.repository.d.ts.map

@@ -11,6 +11,7 @@ const pagination_utility_1 = require("../../../utility/pagination.utility");
 const cost_calculation_utility_1 = require("../../../utility/cost-calculation.utility");
 const metadata_info_utility_1 = require("../../../utility/metadata-info.utility");
 const inventory_repository_1 = __importDefault(require("./inventory.repository"));
+const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
 const stock_type_schema_1 = require("../stock-type/stock-type.schema");
 const prisma = (0, postgres_connection_1.default)();
 /**
@@ -100,7 +101,7 @@ const stockIn = async (req) => {
             ]);
         }
         // Get stock type IN_PURCHASE
-        const stockType = await inventory_repository_1.default.findStockTypeByName(stock_type_schema_1.StockTypeName.IN_PURCHASE);
+        const stockType = await stock_type_repository_1.default.findByName(stock_type_schema_1.StockTypeName.IN_PURCHASE);
         if (!stockType) {
             throw new error_validation_exception_1.ErrorValidationException('Tipe stok IN tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
@@ -179,7 +180,7 @@ const stockOut = async (req) => {
         const stockTypeName = body.reason === 'EXPIRED'
             ? stock_type_schema_1.StockTypeName.OUT_EXPIRED
             : stock_type_schema_1.StockTypeName.OUT_DAMAGED;
-        const stockType = await inventory_repository_1.default.findStockTypeByName(stockTypeName);
+        const stockType = await stock_type_repository_1.default.findByName(stockTypeName);
         if (!stockType) {
             throw new error_validation_exception_1.ErrorValidationException('Tipe stok OUT tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },

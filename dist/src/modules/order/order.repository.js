@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.orderRepository = exports.getOrdersByShift = exports.findStockTypeByName = exports.updateIngredientStock = exports.findMenuById = exports.getActiveShift = exports.softDelete = exports.confirmOrder = exports.updateStatus = exports.create = exports.findByIdWithDetails = exports.findById = exports.count = exports.findAll = void 0;
+exports.orderRepository = exports.getOrdersByShift = exports.updateIngredientStock = exports.findMenuById = exports.getActiveShift = exports.softDelete = exports.confirmOrder = exports.updateStatus = exports.create = exports.findByIdWithDetails = exports.findById = exports.count = exports.findAll = void 0;
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -486,29 +486,6 @@ const updateIngredientStock = async (ingredientId, deductAmount, userId, stockTy
 };
 exports.updateIngredientStock = updateIngredientStock;
 // ============================================
-// FIND STOCK TYPE BY NAME
-// ============================================
-const findStockTypeByName = async (name) => {
-    try {
-        const stockType = await prisma.stockType.findFirst({
-            where: {
-                name: { equals: name, mode: 'insensitive' },
-                deleted_at: null,
-            },
-            select: {
-                stock_type_id: true,
-                name: true,
-            },
-        });
-        return stockType;
-    }
-    catch (error) {
-        console.error('--- Repository Error:', error);
-        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
-    }
-};
-exports.findStockTypeByName = findStockTypeByName;
-// ============================================
 // GET ORDERS BY SHIFT (for shift summary)
 // ============================================
 const getOrdersByShift = async (shiftId) => {
@@ -558,7 +535,6 @@ exports.orderRepository = {
     findMenuById: exports.findMenuById,
     updateIngredientStock: exports.updateIngredientStock,
     getOrdersByShift: exports.getOrdersByShift,
-    findStockTypeByName: exports.findStockTypeByName,
 };
 exports.default = exports.orderRepository;
 //# sourceMappingURL=order.repository.js.map

@@ -1,10 +1,10 @@
 import { ErrorNotFoundException } from '../../../exception/error-not-found.exception';
 import { ErrorValidationException } from '../../../exception/error-validation.exception';
 import getPrismaClient from '../../../database/postgres.connection';
-import { getPagination } from '../../../utility/pagination.utility';
 import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { AuthenticatedRequest } from '../../../types';
 import opnameRepository from './opname.repository';
+import stockTypeRepository from '../stock-type/stock-type.repository';
 import {
     CreateOpnameRequest,
     UpdateOpnameRequest,
@@ -15,6 +15,8 @@ import {
     IngredientForOpname,
 } from './opname.types';
 import { OpnameStatus } from './opname.schema';
+import { StockTypeName } from '../stock-type/stock-type.schema';
+import { getPagination } from '../../../utility/pagination.utility';
 
 const prisma = getPrismaClient();
 
@@ -263,35 +265,66 @@ export const changeStatus = async (req: AuthenticatedRequest): Promise<OpnameWit
 export const applyAdjustment = async (req: AuthenticatedRequest): Promise<ApplyAdjustmentResponse> => {
     try {
         const opnameId = req.params.stock_opname_id;
+        const metadata = getMetadataInfo(req);
 
-        // Check if opname exists
+        if (!metadata.account_id) {
+            throw new ErrorValidationException('User tidak terautentikasi', [
+                { location: 'auth', field: 'user_id', message: 'User ID tidak ditemukan' },
+            ]);
+        }
+
         const existingOpname = await opnameRepository.findById(opnameId);
+
         if (!existingOpname) {
             throw new ErrorNotFoundException('Stock opname tidak ditemukan');
         }
 
-        // Only allow apply on COMPLETED status
         if (existingOpname.status !== OpnameStatus.COMPLETED) {
             throw new ErrorValidationException('Hanya opname dengan status COMPLETED yang dapat diaplikasikan', [
                 { location: 'params', field: 'stock_opname_id', message: 'Opname harus dalam status COMPLETED untuk dapat diaplikasikan' },
             ]);
         }
 
-        // Apply adjustment in transaction
+        // Get ADJUSTMENT_OPNAME stock type — required before entering transaction
+        const stockType = await stockTypeRepository.findByName(StockTypeName.ADJUSTMENT_OPNAME);
+
+        if (!stockType) {
+            throw new ErrorValidationException('Tipe stok ADJUSTMENT_OPNAME tidak ditemukan', [
+                { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
+            ]);
+        }
+
         const result = await prisma.$transaction(async (transaction) => {
-            // Get all opname items
             const items = await opnameRepository.getOpnameItems(opnameId, transaction);
 
-            // Update each ingredient's stock to the physical_qty
             for (const item of items) {
+                // Update ingredient stock to physical count
                 await opnameRepository.updateIngredientStock(
                     item.ingredient_id,
                     item.physical_qty,
                     transaction
                 );
+
+                // Skip recording stock movement if there is no difference
+                if (item.difference === 0) {
+                    continue;
+                }
+
+                // Record stock movement for audit trail
+                // qty stored as difference (positive = surplus, negative = shrinkage)
+                await opnameRepository.createStockMovement(
+                    {
+                        ingredient_id: item.ingredient_id,
+                        user_id: metadata.account_id,
+                        stock_type_id: stockType.stock_type_id,
+                        qty: item.difference,
+                        current_stock: item.physical_qty,
+                        notes: `Penyesuaian stock opname #${opnameId.slice(-8).toUpperCase()}`,
+                    },
+                    transaction
+                );
             }
 
-            // Update opname status to APPLIED
             await opnameRepository.updateStatus(opnameId, OpnameStatus.APPLIED, transaction);
 
             return items.length;

@@ -2,6 +2,7 @@
 import getPrismaClient from '../../../database/postgres.connection';
 import { getAll, getDetail, create, confirmPayment, cancelOrder } from './order.service';
 import orderRepository from './order.repository';
+import stockTypeRepository from '../stock-type/stock-type.repository';
 import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { formatMoney } from '../../../utility/format-money.utility';
 import { generateReceiptNumber } from '../../../utility/receipt-number.utility';
@@ -23,6 +24,7 @@ import {
 
 // Mock dependencies
 jest.mock('./order.repository');
+jest.mock('../stock-type/stock-type.repository');
 jest.mock('../../../utility/metadata-info.utility');
 jest.mock('../../../utility/format-money.utility', () => ({
     formatMoney: jest.fn((val) => `Rp${val}`),
@@ -206,7 +208,7 @@ describe('Order Service', () => {
 
             // Mock findMenuById for stock calculation
             (orderRepository.findMenuById as jest.Mock).mockResolvedValue(mockMenu);
-            (orderRepository.findStockTypeByName as jest.Mock).mockResolvedValue({
+            (stockTypeRepository.findByName as jest.Mock).mockResolvedValue({
                 stock_type_id: 'stock-type-1',
                 name: 'OUT_SALES',
             });
@@ -243,7 +245,7 @@ describe('Order Service', () => {
 
             // Mock findMenuById for stock calculation
             (orderRepository.findMenuById as jest.Mock).mockResolvedValue(mockMenu);
-            (orderRepository.findStockTypeByName as jest.Mock).mockResolvedValue({
+            (stockTypeRepository.findByName as jest.Mock).mockResolvedValue({
                 stock_type_id: 'stock-type-1',
                 name: 'OUT_SALES',
             });

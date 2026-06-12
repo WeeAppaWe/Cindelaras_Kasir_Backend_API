@@ -576,33 +576,6 @@ export const updateIngredientStock = async (
 };
 
 // ============================================
-// FIND STOCK TYPE BY NAME
-// ============================================
-
-export const findStockTypeByName = async (name: string): Promise<{
-    stock_type_id: string;
-    name: string;
-} | null> => {
-    try {
-        const stockType = await prisma.stockType.findFirst({
-            where: {
-                name: { equals: name, mode: 'insensitive' },
-                deleted_at: null,
-            },
-            select: {
-                stock_type_id: true,
-                name: true,
-            },
-        });
-
-        return stockType;
-    } catch (error) {
-        console.error('--- Repository Error:', error);
-        handlePrismaError(error);
-    }
-};
-
-// ============================================
 // GET ORDERS BY SHIFT (for shift summary)
 // ============================================
 
@@ -659,7 +632,6 @@ export const orderRepository = {
     findMenuById,
     updateIngredientStock,
     getOrdersByShift,
-    findStockTypeByName,
 };
 
 export default orderRepository;

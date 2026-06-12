@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.opnameRepository = exports.getOpnameItems = exports.updateIngredientStock = exports.getIngredientsForOpname = exports.getIngredientStock = exports.softDelete = exports.addItems = exports.deleteItems = exports.updateStatus = exports.update = exports.create = exports.findByIdWithDetails = exports.findById = exports.count = exports.findAll = void 0;
+exports.opnameRepository = exports.createStockMovement = exports.getOpnameItems = exports.updateIngredientStock = exports.getIngredientsForOpname = exports.getIngredientStock = exports.softDelete = exports.addItems = exports.deleteItems = exports.updateStatus = exports.update = exports.create = exports.findByIdWithDetails = exports.findById = exports.count = exports.findAll = void 0;
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -448,6 +448,29 @@ const getOpnameItems = async (opnameId, transaction) => {
     }
 };
 exports.getOpnameItems = getOpnameItems;
+/**
+ * Create stock movement record (for adjustment audit trail)
+ */
+const createStockMovement = async (data, transaction) => {
+    try {
+        const client = transaction || prisma;
+        await client.stockMovement.create({
+            data: {
+                ingredient_id: data.ingredient_id,
+                user_id: data.user_id,
+                stock_type_id: data.stock_type_id,
+                qty: data.qty,
+                current_stock: data.current_stock,
+                notes: data.notes ?? null,
+            },
+        });
+    }
+    catch (error) {
+        console.error('--- Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.createStockMovement = createStockMovement;
 exports.opnameRepository = {
     findAll: exports.findAll,
     count: exports.count,
@@ -463,6 +486,7 @@ exports.opnameRepository = {
     getIngredientsForOpname: exports.getIngredientsForOpname,
     updateIngredientStock: exports.updateIngredientStock,
     getOpnameItems: exports.getOpnameItems,
+    createStockMovement: exports.createStockMovement,
 };
 exports.default = exports.opnameRepository;
 //# sourceMappingURL=opname.repository.js.map

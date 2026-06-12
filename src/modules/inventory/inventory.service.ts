@@ -6,6 +6,7 @@ import { roundCurrency } from '../../../utility/cost-calculation.utility';
 import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { AuthenticatedRequest } from '../../../types';
 import inventoryRepository from './inventory.repository';
+import stockTypeRepository from '../stock-type/stock-type.repository';
 import {
     StockInRequest,
     StockOutRequest,
@@ -113,7 +114,7 @@ export const stockIn = async (req: AuthenticatedRequest): Promise<StockMovementW
         }
 
         // Get stock type IN_PURCHASE
-        const stockType = await inventoryRepository.findStockTypeByName(StockTypeName.IN_PURCHASE);
+        const stockType = await stockTypeRepository.findByName(StockTypeName.IN_PURCHASE);
         if (!stockType) {
             throw new ErrorValidationException('Tipe stok IN tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },
@@ -211,7 +212,7 @@ export const stockOut = async (req: AuthenticatedRequest): Promise<StockMovement
         const stockTypeName = body.reason === 'EXPIRED'
             ? StockTypeName.OUT_EXPIRED
             : StockTypeName.OUT_DAMAGED;
-        const stockType = await inventoryRepository.findStockTypeByName(stockTypeName);
+        const stockType = await stockTypeRepository.findByName(stockTypeName);
         if (!stockType) {
             throw new ErrorValidationException('Tipe stok OUT tidak ditemukan', [
                 { location: 'system', field: 'stock_type', message: 'Konfigurasi tipe stok tidak valid' },

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.inventoryRepository = exports.findByIngredientId = exports.updateIngredientStock = exports.findSupplierById = exports.findIngredientById = exports.findStockTypeByName = exports.findAllStockTypes = exports.create = exports.findById = exports.count = exports.findAll = void 0;
+exports.inventoryRepository = exports.findByIngredientId = exports.updateIngredientStock = exports.findSupplierById = exports.findIngredientById = exports.findAllStockTypes = exports.create = exports.findById = exports.count = exports.findAll = void 0;
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -204,29 +204,6 @@ const findAllStockTypes = async () => {
 };
 exports.findAllStockTypes = findAllStockTypes;
 /**
- * Find stock type by name
- */
-const findStockTypeByName = async (name) => {
-    try {
-        const stockType = await prisma.stockType.findFirst({
-            where: {
-                name: { equals: name, mode: 'insensitive' },
-                deleted_at: null,
-            },
-            select: {
-                stock_type_id: true,
-                name: true,
-            },
-        });
-        return stockType;
-    }
-    catch (error) {
-        console.error('--- Inventory Repository Error:', error);
-        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
-    }
-};
-exports.findStockTypeByName = findStockTypeByName;
-/**
  * Find ingredient by ID
  */
 const findIngredientById = async (ingredientId) => {
@@ -332,7 +309,6 @@ exports.inventoryRepository = {
     findById: exports.findById,
     create: exports.create,
     findAllStockTypes: exports.findAllStockTypes,
-    findStockTypeByName: exports.findStockTypeByName,
     findIngredientById: exports.findIngredientById,
     findSupplierById: exports.findSupplierById,
     updateIngredientStock: exports.updateIngredientStock,

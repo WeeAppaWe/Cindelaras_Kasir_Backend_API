@@ -228,29 +228,6 @@ export const findAllStockTypes = async (): Promise<StockTypeData[]> => {
 };
 
 /**
- * Find stock type by name
- */
-export const findStockTypeByName = async (name: string): Promise<StockTypeData | null> => {
-    try {
-        const stockType = await prisma.stockType.findFirst({
-            where: {
-                name: { equals: name, mode: 'insensitive' },
-                deleted_at: null,
-            },
-            select: {
-                stock_type_id: true,
-                name: true,
-            },
-        });
-
-        return stockType;
-    } catch (error) {
-        console.error('--- Inventory Repository Error:', error);
-        handlePrismaError(error);
-    }
-};
-
-/**
  * Find ingredient by ID
  */
 export const findIngredientById = async (ingredientId: string) => {
@@ -366,7 +343,6 @@ export const inventoryRepository = {
     findById,
     create,
     findAllStockTypes,
-    findStockTypeByName,
     findIngredientById,
     findSupplierById,
     updateIngredientStock,

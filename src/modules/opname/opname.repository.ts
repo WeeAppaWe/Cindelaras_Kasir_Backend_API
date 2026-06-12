@@ -522,6 +522,39 @@ export const getOpnameItems = async (
     }
 };
 
+/**
+ * Create stock movement record (for adjustment audit trail)
+ */
+export const createStockMovement = async (
+    data: {
+        ingredient_id: string;
+        user_id: string;
+        stock_type_id: string;
+        qty: number;
+        current_stock: number;
+        notes?: string | null;
+    },
+    transaction?: Prisma.TransactionClient
+): Promise<void> => {
+    try {
+        const client = transaction || prisma;
+
+        await client.stockMovement.create({
+            data: {
+                ingredient_id: data.ingredient_id,
+                user_id: data.user_id,
+                stock_type_id: data.stock_type_id,
+                qty: data.qty,
+                current_stock: data.current_stock,
+                notes: data.notes ?? null,
+            },
+        });
+    } catch (error) {
+        console.error('--- Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
 export const opnameRepository = {
     findAll,
     count,
@@ -537,6 +570,7 @@ export const opnameRepository = {
     getIngredientsForOpname,
     updateIngredientStock,
     getOpnameItems,
+    createStockMovement,
 };
 
 export default opnameRepository;

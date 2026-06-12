@@ -21,10 +21,6 @@ export declare const create: (data: Prisma.StockMovementUncheckedCreateInput, tr
  */
 export declare const findAllStockTypes: () => Promise<StockTypeData[]>;
 /**
- * Find stock type by name
- */
-export declare const findStockTypeByName: (name: string) => Promise<StockTypeData | null>;
-/**
  * Find ingredient by ID
  */
 export declare const findIngredientById: (ingredientId: string) => Promise<{
@@ -58,7 +54,6 @@ export declare const inventoryRepository: {
     findById: (stockMovementId: string) => Promise<StockMovementWithDetails | null>;
     create: (data: Prisma.StockMovementUncheckedCreateInput, transaction?: Prisma.TransactionClient) => Promise<StockMovementWithDetails>;
     findAllStockTypes: () => Promise<StockTypeData[]>;
-    findStockTypeByName: (name: string) => Promise<StockTypeData | null>;
     findIngredientById: (ingredientId: string) => Promise<{
         name: string;
         ingredient_id: string;
