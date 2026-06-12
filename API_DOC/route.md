@@ -19,7 +19,19 @@ Endpoint non-route seperti `/health`, `/api-docs`, dan `/api-docs.json` tidak di
 | `ADMIN` | Membutuhkan token dan role `ADMIN`. |
 | `ADMIN, CASHIER` | Membutuhkan token dan role `ADMIN` atau `CASHIER`. |
 
-Total endpoint dari folder `route`: **137 endpoint**.
+Total endpoint dari folder `route`: **143 endpoint**.
+
+## Dashboard
+
+Source: `route/dashboard.route.ts`
+
+| Method | Endpoint | Akses | Keterangan |
+| --- | --- | --- | --- |
+| `GET` | `/api/dashboard/kpi` | ADMIN | Ambil 4 KPI card dashboard (omset, transaksi, estimasi profit, stok menipis). |
+| `GET` | `/api/dashboard/sales-trend` | ADMIN | Ambil data tren penjualan harian untuk chart (7, 14, atau 30 hari terakhir). |
+| `GET` | `/api/dashboard/top-menus` | ADMIN | Ambil 5 menu terlaris berdasarkan jumlah porsi terjual hari ini. |
+| `GET` | `/api/dashboard/stock-status` | ADMIN | Ambil distribusi status persediaan (AMAN / MENIPIS / KRITIS) untuk radial chart. |
+| `GET` | `/api/dashboard/recent-stock-movements` | ADMIN | Ambil 10 mutasi stok terbaru untuk tabel aktivitas (waktu, bahan, tipe, qty, saldo). |
 
 ## Auth
 
@@ -54,7 +66,7 @@ Source: `route/category.route.ts`
 | Method | Endpoint | Akses | Keterangan |
 | --- | --- | --- | --- |
 | `GET` | `/api/category/options` | ADMIN, CASHIER | Ambil daftar kategori untuk dropdown. |
-| `GET` | `/api/category` | ADMIN, CASHIER | Ambil daftar kategori. |
+| `GET` | `/api/category` | ADMIN | Ambil daftar kategori. |
 | `GET` | `/api/category/:category_id` | ADMIN | Ambil detail kategori. |
 | `POST` | `/api/category` | ADMIN | Buat kategori baru. |
 | `PATCH` | `/api/category/:category_id` | ADMIN | Update kategori. |
