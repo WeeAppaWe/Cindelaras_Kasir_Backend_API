@@ -147,18 +147,23 @@ export const bulkAddCompositions = async (req: AuthenticatedRequest): Promise<Co
 
         // Create compositions in transaction and return updated data
         const result = await prisma.$transaction(async (transaction) => {
-            // Hard delete existing compositions first to avoid unique constraint conflict
-            // (soft delete keeps records in DB and @@unique([parent_id, child_id]) would conflict on re-insert)
-            await compositionRepository.hardDeleteByParentId(parentId, transaction);
+            // 1. Soft delete items that are no longer in the payload
+            await compositionRepository.softDeleteMissing(parentId, childIds, transaction);
 
-            // Create new compositions
-            const compositionsData = body.compositions.map((c) => ({
-                parent_id: parentId,
-                child_id: c.child_id,
-                qty_needed: c.qty_needed,
-            }));
-
-            await compositionRepository.createMany(compositionsData, transaction);
+            // 2. Upsert (Update or Insert) the items from the payload
+            // Using Promise.all since Prisma doesn't have an upsertMany yet
+            await Promise.all(
+                body.compositions.map((c) =>
+                    compositionRepository.upsert(
+                        {
+                            parent_id: parentId,
+                            child_id: c.child_id,
+                            qty_needed: c.qty_needed,
+                        },
+                        transaction
+                    )
+                )
+            );
 
             // Recalculate parent's avg_cost
             await recalculateParentAvgCost(parentId, transaction, body.target_yield);

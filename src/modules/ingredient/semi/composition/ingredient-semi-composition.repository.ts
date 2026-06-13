@@ -229,6 +229,69 @@ export const softDeleteByParentId = async (
 };
 
 /**
+ * Upsert composition (Update if exists, Create if not)
+ */
+export const upsert = async (
+    data: { parent_id: string; child_id: string; qty_needed: number },
+    transaction?: Prisma.TransactionClient
+): Promise<CompositionWithDetails> => {
+    try {
+        const client = transaction || prisma;
+
+        const composition = await client.ingredientComposition.upsert({
+            where: {
+                parent_id_child_id: {
+                    parent_id: data.parent_id,
+                    child_id: data.child_id,
+                },
+            },
+            update: {
+                qty_needed: data.qty_needed,
+                deleted_at: null, // Restore from soft delete if necessary
+            },
+            create: {
+                parent_id: data.parent_id,
+                child_id: data.child_id,
+                qty_needed: data.qty_needed,
+            },
+            select: compositionSelectFields,
+        });
+
+        return composition as CompositionWithDetails;
+    } catch (error) {
+        console.error('--- Composition Repository Error:', error);
+        handlePrismaError(error);
+        throw error;
+    }
+};
+
+/**
+ * Soft delete compositions that are missing from the kept child IDs list
+ */
+export const softDeleteMissing = async (
+    parentId: string,
+    keptChildIds: string[],
+    transaction?: Prisma.TransactionClient
+): Promise<void> => {
+    try {
+        const client = transaction || prisma;
+
+        await client.ingredientComposition.updateMany({
+            where: {
+                parent_id: parentId,
+                child_id: { notIn: keptChildIds },
+                deleted_at: null,
+            },
+            data: { deleted_at: new Date() },
+        });
+    } catch (error) {
+        console.error('--- Composition Repository Error:', error);
+        handlePrismaError(error);
+        throw error;
+    }
+};
+
+/**
  * Find all available RAW ingredients (for composition selection)
  */
 export const findAvailableRawIngredients = async (): Promise<AvailableRawIngredient[]> => {
@@ -305,6 +368,8 @@ export const compositionRepository = {
     update,
     softDelete,
     softDeleteByParentId,
+    upsert,
+    softDeleteMissing,
     findAvailableRawIngredients,
     findIngredientCostsByIds,
 };
