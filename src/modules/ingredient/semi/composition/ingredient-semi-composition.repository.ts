@@ -292,18 +292,26 @@ export const softDeleteMissing = async (
 };
 
 /**
- * Find all available RAW ingredients (for composition selection)
+ * Find all available ingredients (RAW + SEMI) for composition selection
+ * Optionally exclude a specific ingredient ID (to prevent self-reference)
  */
-export const findAvailableRawIngredients = async (): Promise<AvailableRawIngredient[]> => {
+export const findAvailableRawIngredients = async (excludeIngredientId?: string): Promise<AvailableRawIngredient[]> => {
     try {
+        const where: any = {
+            type: { in: ['RAW', 'SEMI'] },
+            deleted_at: null,
+        };
+
+        if (excludeIngredientId) {
+            where.ingredient_id = { not: excludeIngredientId };
+        }
+
         const ingredients = await prisma.ingredient.findMany({
-            where: {
-                type: 'RAW',
-                deleted_at: null,
-            },
+            where,
             select: {
                 ingredient_id: true,
                 name: true,
+                type: true,
                 avg_cost: true,
                 stock_qty: true,
                 unit: {
@@ -313,7 +321,10 @@ export const findAvailableRawIngredients = async (): Promise<AvailableRawIngredi
                     },
                 },
             },
-            orderBy: { name: 'asc' },
+            orderBy: [
+                { type: 'asc' },
+                { name: 'asc' },
+            ],
         });
 
         return ingredients as AvailableRawIngredient[];

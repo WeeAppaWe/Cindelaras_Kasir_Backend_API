@@ -69,13 +69,13 @@ export const deleteComposition = async (req: AuthenticatedRequest, res: Response
 };
 
 /**
- * Get Available Raw Ingredients for Composition
- * GET /api/ingredient/semi/composition/available-ingredients
+ * Get Available Ingredients for Composition (RAW + SEMI, exclude self)
+ * GET /api/ingredient/semi/composition/available-ingredients?exclude_id=:ingredient_id
  */
 export const getAvailableIngredients = async (req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> => {
     try {
-        const data = await compositionService.getAvailableIngredients();
-        res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil daftar bahan baku' }, data));
+        const data = await compositionService.getAvailableIngredients(req);
+        res.status(200).json(responseApi({ code: 200, message: 'Berhasil mengambil daftar bahan tersedia' }, data));
     } catch (error) {
         next(error);
     }

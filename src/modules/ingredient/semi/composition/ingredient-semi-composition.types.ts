@@ -63,6 +63,7 @@ export interface DeleteCompositionResponse {
 export interface AvailableRawIngredient {
     ingredient_id: string;
     name: string;
+    type: string; // RAW or SEMI
     avg_cost: any;
     stock_qty: any;
     unit: {

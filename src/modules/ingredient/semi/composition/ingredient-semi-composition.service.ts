@@ -286,11 +286,13 @@ export const deleteComposition = async (req: AuthenticatedRequest): Promise<Dele
 };
 
 /**
- * Get available raw ingredients for composition
+ * Get available ingredients (RAW + SEMI) for composition
+ * Exclude the parent ingredient itself to prevent self-reference
  */
-export const getAvailableIngredients = async (): Promise<AvailableRawIngredient[]> => {
+export const getAvailableIngredients = async (req: AuthenticatedRequest): Promise<AvailableRawIngredient[]> => {
     try {
-        return await compositionRepository.findAvailableRawIngredients();
+        const excludeId = (req.query.exclude_id as string) || undefined;
+        return await compositionRepository.findAvailableRawIngredients(excludeId);
     } catch (error) {
         console.error(`--- Composition Service Error: ${(error as Error).message}`);
         throw error;
