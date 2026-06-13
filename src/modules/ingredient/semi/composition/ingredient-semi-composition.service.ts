@@ -147,8 +147,9 @@ export const bulkAddCompositions = async (req: AuthenticatedRequest): Promise<Co
 
         // Create compositions in transaction and return updated data
         const result = await prisma.$transaction(async (transaction) => {
-            // Delete existing compositions first
-            await compositionRepository.softDeleteByParentId(parentId, transaction);
+            // Hard delete existing compositions first to avoid unique constraint conflict
+            // (soft delete keeps records in DB and @@unique([parent_id, child_id]) would conflict on re-insert)
+            await compositionRepository.hardDeleteByParentId(parentId, transaction);
 
             // Create new compositions
             const compositionsData = body.compositions.map((c) => ({
