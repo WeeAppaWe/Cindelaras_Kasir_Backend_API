@@ -74,6 +74,7 @@ export declare const getCompletedOrdersForPeriod: (filter: ReportFilter) => Prom
     paid_amount: import("@prisma/client/runtime/client").Decimal;
     change_amount: import("@prisma/client/runtime/client").Decimal;
     payment_type: string;
+    order_type: string;
 })[]>;
 export declare const getCashMovementsForPeriod: (filter: ReportFilter) => Promise<{
     type: string;
@@ -216,6 +217,7 @@ export declare const reportFinancialRepository: {
         paid_amount: import("@prisma/client/runtime/client").Decimal;
         change_amount: import("@prisma/client/runtime/client").Decimal;
         payment_type: string;
+        order_type: string;
     })[]>;
     getOrdersForFullReport: (filter: ReportFilter) => Promise<{
         created_at: Date;

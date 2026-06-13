@@ -23,6 +23,7 @@ export const findOrderForReceipt = async (orderId: string): Promise<ReceiptOrder
         paid_amount: true,
         change_amount: true,
         payment_type: true,
+        order_type: true,
         status: true,
         created_at: true,
         user: {

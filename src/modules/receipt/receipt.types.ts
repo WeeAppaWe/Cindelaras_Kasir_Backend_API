@@ -23,6 +23,7 @@ export interface ReceiptOrderData {
   paid_amount: number;
   change_amount: number;
   payment_type: string;
+  order_type: string;
   status: string;
   created_at: Date;
   user: {

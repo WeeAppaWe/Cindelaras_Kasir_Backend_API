@@ -59,6 +59,7 @@ export declare const getReceipt: (req: AuthenticatedRequest) => Promise<{
         subtotal: number;
         total: number;
         payment_type: string;
+        order_type: string;
         paid_amount: number;
         change_amount: number;
         status: string;
@@ -96,6 +97,7 @@ export declare const orderService: {
             subtotal: number;
             total: number;
             payment_type: string;
+            order_type: string;
             paid_amount: number;
             change_amount: number;
             status: string;

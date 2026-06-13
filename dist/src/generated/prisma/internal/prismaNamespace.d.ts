@@ -1900,6 +1900,7 @@ export declare const OrderScalarFieldEnum: {
     readonly change_amount: "change_amount";
     readonly payment_type: "payment_type";
     readonly status: "status";
+    readonly order_type: "order_type";
     readonly created_at: "created_at";
     readonly updated_at: "updated_at";
     readonly deleted_at: "deleted_at";

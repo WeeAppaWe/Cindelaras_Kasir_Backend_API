@@ -286,7 +286,8 @@ describe('Composition Service', () => {
             (compositionRepository.findAvailableRawIngredients as jest.Mock).mockResolvedValue(mockRawIngredients);
 
             // Act
-            const result = await compositionService.getAvailableIngredients();
+            const mockRequest = { query: {} } as any;
+            const result = await compositionService.getAvailableIngredients(mockRequest);
 
             // Assert
             expect(result).toHaveLength(2);

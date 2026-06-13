@@ -13,6 +13,7 @@ export declare const create: (data: {
     paid_amount: number;
     change_amount: number;
     payment_type: string;
+    order_type: string;
     status: string;
 }, items: Array<{
     menu_id: string;
@@ -55,6 +56,7 @@ export declare const orderRepository: {
         paid_amount: number;
         change_amount: number;
         payment_type: string;
+        order_type: string;
         status: string;
     }, items: Array<{
         menu_id: string;

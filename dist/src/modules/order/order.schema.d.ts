@@ -8,6 +8,10 @@ export declare const OrderStatus: {
     readonly COMPLETED: "COMPLETED";
     readonly CANCELLED: "CANCELLED";
 };
+export declare const OrderType: {
+    readonly DINE_IN: "DINE_IN";
+    readonly TAKE_AWAY: "TAKE_AWAY";
+};
 export declare const orderItemSchema: z.ZodObject<{
     menu_id: z.ZodString;
     qty: z.ZodNumber;
@@ -20,6 +24,10 @@ export declare const createOrderSchema: z.ZodObject<{
         CASH: "CASH";
         QRIS: "QRIS";
     }>;
+    order_type: z.ZodDefault<z.ZodEnum<{
+        DINE_IN: "DINE_IN";
+        TAKE_AWAY: "TAKE_AWAY";
+    }>>;
     items: z.ZodArray<z.ZodObject<{
         menu_id: z.ZodString;
         qty: z.ZodNumber;
@@ -44,6 +52,10 @@ export declare const orderListQuerySchema: z.ZodObject<{
     payment_type: z.ZodOptional<z.ZodEnum<{
         CASH: "CASH";
         QRIS: "QRIS";
+    }>>;
+    order_type: z.ZodOptional<z.ZodEnum<{
+        DINE_IN: "DINE_IN";
+        TAKE_AWAY: "TAKE_AWAY";
     }>>;
     shift_id: z.ZodOptional<z.ZodString>;
     start_date: z.ZodOptional<z.ZodString>;

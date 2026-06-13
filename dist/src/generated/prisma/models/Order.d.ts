@@ -34,6 +34,7 @@ export type OrderMinAggregateOutputType = {
     change_amount: runtime.Decimal | null;
     payment_type: string | null;
     status: string | null;
+    order_type: string | null;
     created_at: Date | null;
     updated_at: Date | null;
     deleted_at: Date | null;
@@ -50,6 +51,7 @@ export type OrderMaxAggregateOutputType = {
     change_amount: runtime.Decimal | null;
     payment_type: string | null;
     status: string | null;
+    order_type: string | null;
     created_at: Date | null;
     updated_at: Date | null;
     deleted_at: Date | null;
@@ -66,6 +68,7 @@ export type OrderCountAggregateOutputType = {
     change_amount: number;
     payment_type: number;
     status: number;
+    order_type: number;
     created_at: number;
     updated_at: number;
     deleted_at: number;
@@ -93,6 +96,7 @@ export type OrderMinAggregateInputType = {
     change_amount?: true;
     payment_type?: true;
     status?: true;
+    order_type?: true;
     created_at?: true;
     updated_at?: true;
     deleted_at?: true;
@@ -109,6 +113,7 @@ export type OrderMaxAggregateInputType = {
     change_amount?: true;
     payment_type?: true;
     status?: true;
+    order_type?: true;
     created_at?: true;
     updated_at?: true;
     deleted_at?: true;
@@ -125,6 +130,7 @@ export type OrderCountAggregateInputType = {
     change_amount?: true;
     payment_type?: true;
     status?: true;
+    order_type?: true;
     created_at?: true;
     updated_at?: true;
     deleted_at?: true;
@@ -218,6 +224,7 @@ export type OrderGroupByOutputType = {
     change_amount: runtime.Decimal;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
@@ -245,6 +252,7 @@ export type OrderWhereInput = {
     change_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFilter<"Order"> | string;
     status?: Prisma.StringFilter<"Order"> | string;
+    order_type?: Prisma.StringFilter<"Order"> | string;
     created_at?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updated_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
     deleted_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
@@ -264,6 +272,7 @@ export type OrderOrderByWithRelationInput = {
     change_amount?: Prisma.SortOrder;
     payment_type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    order_type?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     updated_at?: Prisma.SortOrderInput | Prisma.SortOrder;
     deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -286,6 +295,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
     change_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFilter<"Order"> | string;
     status?: Prisma.StringFilter<"Order"> | string;
+    order_type?: Prisma.StringFilter<"Order"> | string;
     created_at?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updated_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
     deleted_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
@@ -305,6 +315,7 @@ export type OrderOrderByWithAggregationInput = {
     change_amount?: Prisma.SortOrder;
     payment_type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    order_type?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     updated_at?: Prisma.SortOrderInput | Prisma.SortOrder;
     deleted_at?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -329,6 +340,7 @@ export type OrderScalarWhereWithAggregatesInput = {
     change_amount?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringWithAggregatesFilter<"Order"> | string;
     status?: Prisma.StringWithAggregatesFilter<"Order"> | string;
+    order_type?: Prisma.StringWithAggregatesFilter<"Order"> | string;
     created_at?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string;
     updated_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null;
     deleted_at?: Prisma.DateTimeNullableWithAggregatesFilter<"Order"> | Date | string | null;
@@ -343,6 +355,7 @@ export type OrderCreateInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -362,6 +375,7 @@ export type OrderUncheckedCreateInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -377,6 +391,7 @@ export type OrderUpdateInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -396,6 +411,7 @@ export type OrderUncheckedUpdateInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -413,6 +429,7 @@ export type OrderCreateManyInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -427,6 +444,7 @@ export type OrderUpdateManyMutationInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -443,6 +461,7 @@ export type OrderUncheckedUpdateManyInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -467,6 +486,7 @@ export type OrderCountOrderByAggregateInput = {
     change_amount?: Prisma.SortOrder;
     payment_type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    order_type?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     updated_at?: Prisma.SortOrder;
     deleted_at?: Prisma.SortOrder;
@@ -488,6 +508,7 @@ export type OrderMaxOrderByAggregateInput = {
     change_amount?: Prisma.SortOrder;
     payment_type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    order_type?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     updated_at?: Prisma.SortOrder;
     deleted_at?: Prisma.SortOrder;
@@ -504,6 +525,7 @@ export type OrderMinOrderByAggregateInput = {
     change_amount?: Prisma.SortOrder;
     payment_type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    order_type?: Prisma.SortOrder;
     created_at?: Prisma.SortOrder;
     updated_at?: Prisma.SortOrder;
     deleted_at?: Prisma.SortOrder;
@@ -615,6 +637,7 @@ export type OrderCreateWithoutUserInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -632,6 +655,7 @@ export type OrderUncheckedCreateWithoutUserInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -673,6 +697,7 @@ export type OrderScalarWhereInput = {
     change_amount?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFilter<"Order"> | string;
     status?: Prisma.StringFilter<"Order"> | string;
+    order_type?: Prisma.StringFilter<"Order"> | string;
     created_at?: Prisma.DateTimeFilter<"Order"> | Date | string;
     updated_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
     deleted_at?: Prisma.DateTimeNullableFilter<"Order"> | Date | string | null;
@@ -687,6 +712,7 @@ export type OrderCreateWithoutShiftInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -704,6 +730,7 @@ export type OrderUncheckedCreateWithoutShiftInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -740,6 +767,7 @@ export type OrderCreateWithoutOrder_itemsInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -758,6 +786,7 @@ export type OrderUncheckedCreateWithoutOrder_itemsInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -785,6 +814,7 @@ export type OrderUpdateWithoutOrder_itemsInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -803,6 +833,7 @@ export type OrderUncheckedUpdateWithoutOrder_itemsInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -818,6 +849,7 @@ export type OrderCreateManyUserInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -832,6 +864,7 @@ export type OrderUpdateWithoutUserInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -849,6 +882,7 @@ export type OrderUncheckedUpdateWithoutUserInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -865,6 +899,7 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -880,6 +915,7 @@ export type OrderCreateManyShiftInput = {
     change_amount: runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type: string;
     status: string;
+    order_type: string;
     created_at?: Date | string;
     updated_at?: Date | string | null;
     deleted_at?: Date | string | null;
@@ -894,6 +930,7 @@ export type OrderUpdateWithoutShiftInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -911,6 +948,7 @@ export type OrderUncheckedUpdateWithoutShiftInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -927,6 +965,7 @@ export type OrderUncheckedUpdateManyWithoutShiftInput = {
     change_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string;
     payment_type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.StringFieldUpdateOperationsInput | string;
+    order_type?: Prisma.StringFieldUpdateOperationsInput | string;
     created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -967,6 +1006,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     change_amount?: boolean;
     payment_type?: boolean;
     status?: boolean;
+    order_type?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
     deleted_at?: boolean;
@@ -987,6 +1027,7 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     change_amount?: boolean;
     payment_type?: boolean;
     status?: boolean;
+    order_type?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
     deleted_at?: boolean;
@@ -1005,6 +1046,7 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
     change_amount?: boolean;
     payment_type?: boolean;
     status?: boolean;
+    order_type?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
     deleted_at?: boolean;
@@ -1023,11 +1065,12 @@ export type OrderSelectScalar = {
     change_amount?: boolean;
     payment_type?: boolean;
     status?: boolean;
+    order_type?: boolean;
     created_at?: boolean;
     updated_at?: boolean;
     deleted_at?: boolean;
 };
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"order_id" | "shift_id" | "user_id" | "customer_name" | "customer_phone" | "receipt" | "total_amount" | "paid_amount" | "change_amount" | "payment_type" | "status" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["order"]>;
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"order_id" | "shift_id" | "user_id" | "customer_name" | "customer_phone" | "receipt" | "total_amount" | "paid_amount" | "change_amount" | "payment_type" | "status" | "order_type" | "created_at" | "updated_at" | "deleted_at", ExtArgs["result"]["order"]>;
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     order_items?: boolean | Prisma.Order$order_itemsArgs<ExtArgs>;
     shift?: boolean | Prisma.ShiftDefaultArgs<ExtArgs>;
@@ -1061,6 +1104,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
         change_amount: runtime.Decimal;
         payment_type: string;
         status: string;
+        order_type: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
@@ -1432,6 +1476,7 @@ export interface OrderFieldRefs {
     readonly change_amount: Prisma.FieldRef<"Order", 'Decimal'>;
     readonly payment_type: Prisma.FieldRef<"Order", 'String'>;
     readonly status: Prisma.FieldRef<"Order", 'String'>;
+    readonly order_type: Prisma.FieldRef<"Order", 'String'>;
     readonly created_at: Prisma.FieldRef<"Order", 'DateTime'>;
     readonly updated_at: Prisma.FieldRef<"Order", 'DateTime'>;
     readonly deleted_at: Prisma.FieldRef<"Order", 'DateTime'>;

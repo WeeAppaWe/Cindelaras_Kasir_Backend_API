@@ -27,6 +27,7 @@ const orderListSelectFields = {
     paid_amount: true,
     change_amount: true,
     payment_type: true,
+    order_type: true,
     status: true,
     created_at: true,
     updated_at: true,
@@ -54,6 +55,7 @@ const orderDetailSelectFields = {
     paid_amount: true,
     change_amount: true,
     payment_type: true,
+    order_type: true,
     status: true,
     created_at: true,
     updated_at: true,
@@ -104,7 +106,7 @@ export const findAll = async (
 ): Promise<OrderWithUser[]> => {
     try {
         const { pagination } = options;
-        const { search, status, payment_type, shift_id, start_date, end_date } = filter;
+        const { search, status, payment_type, order_type, shift_id, start_date, end_date } = filter;
 
         const where: Prisma.OrderWhereInput = {
             deleted_at: null,
@@ -123,6 +125,10 @@ export const findAll = async (
         // Filter by payment type
         if (payment_type) {
             where.payment_type = payment_type;
+        }
+
+        if (order_type) {
+            where.order_type = order_type;
         }
 
         // Filter by shift
@@ -171,7 +177,7 @@ export const findAll = async (
 
 export const count = async (filter: OrderFilter): Promise<number> => {
     try {
-        const { search, status, payment_type, shift_id, start_date, end_date } = filter;
+        const { search, status, payment_type, order_type, shift_id, start_date, end_date } = filter;
 
         const where: Prisma.OrderWhereInput = {
             deleted_at: null,
@@ -187,6 +193,10 @@ export const count = async (filter: OrderFilter): Promise<number> => {
 
         if (payment_type) {
             where.payment_type = payment_type;
+        }
+
+        if (order_type) {
+            where.order_type = order_type;
         }
 
         if (shift_id) {
@@ -287,6 +297,7 @@ export const create = async (
         paid_amount: number;
         change_amount: number;
         payment_type: string;
+        order_type: string;
         status: string;
     },
     items: Array<{
@@ -310,6 +321,7 @@ export const create = async (
                 paid_amount: data.paid_amount,
                 change_amount: data.change_amount,
                 payment_type: data.payment_type,
+                order_type: data.order_type,
                 status: data.status,
                 order_items: {
                     create: items.map((item) => ({
@@ -595,6 +607,7 @@ export const getOrdersByShift = async (shiftId: string): Promise<{
             select: {
                 total_amount: true,
                 payment_type: true,
+                order_type: true,
             },
         });
 

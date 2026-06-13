@@ -21,6 +21,7 @@ const orderListSelectFields = {
     paid_amount: true,
     change_amount: true,
     payment_type: true,
+    order_type: true,
     status: true,
     created_at: true,
     updated_at: true,
@@ -47,6 +48,7 @@ const orderDetailSelectFields = {
     paid_amount: true,
     change_amount: true,
     payment_type: true,
+    order_type: true,
     status: true,
     created_at: true,
     updated_at: true,
@@ -92,7 +94,7 @@ const orderDetailSelectFields = {
 const findAll = async (options, filter) => {
     try {
         const { pagination } = options;
-        const { search, status, payment_type, shift_id, start_date, end_date } = filter;
+        const { search, status, payment_type, order_type, shift_id, start_date, end_date } = filter;
         const where = {
             deleted_at: null,
         };
@@ -107,6 +109,9 @@ const findAll = async (options, filter) => {
         // Filter by payment type
         if (payment_type) {
             where.payment_type = payment_type;
+        }
+        if (order_type) {
+            where.order_type = order_type;
         }
         // Filter by shift
         if (shift_id) {
@@ -151,7 +156,7 @@ exports.findAll = findAll;
 // ============================================
 const count = async (filter) => {
     try {
-        const { search, status, payment_type, shift_id, start_date, end_date } = filter;
+        const { search, status, payment_type, order_type, shift_id, start_date, end_date } = filter;
         const where = {
             deleted_at: null,
         };
@@ -163,6 +168,9 @@ const count = async (filter) => {
         }
         if (payment_type) {
             where.payment_type = payment_type;
+        }
+        if (order_type) {
+            where.order_type = order_type;
         }
         if (shift_id) {
             where.shift_id = shift_id;
@@ -261,6 +269,7 @@ const create = async (data, items, transaction) => {
                 paid_amount: data.paid_amount,
                 change_amount: data.change_amount,
                 payment_type: data.payment_type,
+                order_type: data.order_type,
                 status: data.status,
                 order_items: {
                     create: items.map((item) => ({
@@ -499,6 +508,7 @@ const getOrdersByShift = async (shiftId) => {
             select: {
                 total_amount: true,
                 payment_type: true,
+                order_type: true,
             },
         });
         const total_orders = orders.length;

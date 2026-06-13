@@ -3,6 +3,7 @@ import {
     CreateOrderRequest,
     PaymentType,
     OrderStatus,
+    OrderType,
     OrderWithUser,
     ConfirmPaymentRequest
 } from '../../modules/order/order.types';
@@ -60,6 +61,7 @@ export const mockOrderPending: OrderWithDetails = {
     paid_amount: 0,
     change_amount: 0,
     payment_type: PaymentType.CASH,
+    order_type: OrderType.DINE_IN,
     status: OrderStatus.PENDING,
     created_at: new Date('2024-01-01T10:00:00Z'),
     updated_at: null,
@@ -83,6 +85,7 @@ export const mockOrderList: OrderWithDetails[] = [mockOrderCompleted, mockOrderP
 export const mockCreateOrderRequest: CreateOrderRequest = {
     customer_name: 'Budi',
     payment_type: PaymentType.CASH,
+    order_type: OrderType.DINE_IN,
     items: [
         {
             menu_id: mockMenu.menu_id,

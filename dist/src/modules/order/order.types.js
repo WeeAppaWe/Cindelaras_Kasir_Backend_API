@@ -3,7 +3,10 @@
 // ORDER TYPES
 // ============================================
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReceiptFormat = exports.OrderStatus = exports.PaymentType = void 0;
+exports.ReceiptFormat = exports.OrderType = exports.OrderStatus = exports.PaymentType = void 0;
+// ============================================
+// ORDER TYPES
+// ============================================
 // Enums
 var PaymentType;
 (function (PaymentType) {
@@ -16,6 +19,11 @@ var OrderStatus;
     OrderStatus["COMPLETED"] = "COMPLETED";
     OrderStatus["CANCELLED"] = "CANCELLED";
 })(OrderStatus || (exports.OrderStatus = OrderStatus = {}));
+var OrderType;
+(function (OrderType) {
+    OrderType["DINE_IN"] = "DINE_IN";
+    OrderType["TAKE_AWAY"] = "TAKE_AWAY";
+})(OrderType || (exports.OrderType = OrderType = {}));
 // ============================================
 // RECEIPT TYPES
 // ============================================

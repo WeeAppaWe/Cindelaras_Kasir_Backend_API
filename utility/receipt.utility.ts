@@ -422,6 +422,7 @@ export const generatePdfReceipt = async (data: ReceiptDataForGenerator): Promise
             const metaRows = [
                 { label: 'Tanggal', value: `${data.order_date} ${data.order_time}` },
                 { label: 'Kasir', value: data.cashier_name },
+                { label: 'Tipe', value: data.order_type },
                 ...(data.customer_name ? [{ label: 'Pelanggan', value: data.customer_name }] : []),
             ];
             const metaHeight = 20 + metaRows.reduce((height, row) => {
@@ -575,6 +576,11 @@ export const generateHtmlReceipt = (data: ReceiptDataForGenerator): string => {
     `).join('');
     const receiptNumber = getReceiptDisplayNumber(data);
     const customerRowsHtml = [
+        `
+        <div class="meta-row">
+            <span>Tipe Pesanan</span>
+            <strong>${escapeHtml(data.order_type)}</strong>
+        </div>`,
         data.customer_name ? `
         <div class="meta-row">
             <span>Pelanggan</span>

@@ -17,6 +17,7 @@ describe('Order Schemas', () => {
                 customer_name: 'Budi',
                 customer_phone: '08123456789',
                 payment_type: 'CASH',
+                order_type: 'DINE_IN',
                 items: [
                     { menu_id: '550e8400-e29b-41d4-a716-446655440000', qty: 2, price: 15000 }
                 ]
@@ -28,6 +29,7 @@ describe('Order Schemas', () => {
             const result = createOrderSchema.safeParse({
                 customer_name: 'Test Customer',
                 payment_type: 'CASH',
+                order_type: 'DINE_IN',
                 items: [{ menu_id: '550e8400-e29b-41d4-a716-446655440000', qty: 1, price: 1000 }],
                 customer_phone: 'abcde'
             });
@@ -41,6 +43,7 @@ describe('Order Schemas', () => {
         it('should reject invalid payment type', () => {
             const result = createOrderSchema.safeParse({
                 payment_type: 'PAYLATER',
+                order_type: 'DINE_IN',
                 items: [{ menu_id: '550e8400-e29b-41d4-a716-446655440000', qty: 1, price: 1000 }]
             });
             expect(result.success).toBe(false);
@@ -49,6 +52,7 @@ describe('Order Schemas', () => {
         it('should reject empty items array', () => {
             const result = createOrderSchema.safeParse({
                 payment_type: 'CASH',
+                order_type: 'DINE_IN',
                 items: []
             });
             expect(result.success).toBe(false);
@@ -57,6 +61,7 @@ describe('Order Schemas', () => {
         it('should validate item fields', () => {
             const result = createOrderSchema.safeParse({
                 payment_type: 'CASH',
+                order_type: 'DINE_IN',
                 items: [
                     { menu_id: 'invalid-id', qty: 0, price: -1 }
                 ]
@@ -99,6 +104,7 @@ describe('Order Schemas', () => {
                 size: '10',
                 status: 'PENDING',
                 payment_type: 'CASH',
+                order_type: 'DINE_IN',
                 start_date: '2024-01-01',
                 end_date: '2024-01-02'
             });

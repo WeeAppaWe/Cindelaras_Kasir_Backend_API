@@ -25,6 +25,7 @@ export interface ReceiptDataForGenerator {
     }>;
     total: number;
     payment_type: string;
+    order_type: string;
     paid_amount: number;
     change_amount: number;
 }

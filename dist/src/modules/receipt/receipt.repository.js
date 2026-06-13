@@ -26,6 +26,7 @@ const findOrderForReceipt = async (orderId) => {
                 paid_amount: true,
                 change_amount: true,
                 payment_type: true,
+                order_type: true,
                 status: true,
                 created_at: true,
                 user: {

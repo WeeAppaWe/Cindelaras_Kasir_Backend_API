@@ -2,6 +2,10 @@
 // ORDER TYPES
 // ============================================
 
+// ============================================
+// ORDER TYPES
+// ============================================
+
 // Enums
 export enum PaymentType {
     CASH = 'CASH',
@@ -14,6 +18,11 @@ export enum OrderStatus {
     CANCELLED = 'CANCELLED',
 }
 
+export enum OrderType {
+    DINE_IN = 'DINE_IN',
+    TAKE_AWAY = 'TAKE_AWAY',
+}
+
 // ============================================
 // FILTERS & PAGINATION
 // ============================================
@@ -22,6 +31,7 @@ export interface OrderFilter {
     search?: string | null;
     status?: string | null;
     payment_type?: string | null;
+    order_type?: string | null;
     shift_id?: string | null;
     start_date?: string | null;
     end_date?: string | null;
@@ -48,6 +58,7 @@ export interface CreateOrderRequest {
     customer_name: string;
     customer_phone?: string;
     payment_type: PaymentType;
+    order_type: OrderType;
     items: OrderItemInput[];
 }
 
@@ -114,6 +125,7 @@ export interface OrderWithUser {
     paid_amount: number;
     change_amount: number;
     payment_type: string;
+    order_type: string;
     status: string;
     created_at: Date;
     updated_at: Date | null;
@@ -141,6 +153,7 @@ export interface OrderSummary {
     customer_name: string | null;
     total_amount: number;
     payment_type: string;
+    order_type: string;
     status: string;
     created_at: Date;
     items_count: number;
@@ -191,6 +204,7 @@ export interface ReceiptData {
     subtotal: number;
     total: number;
     payment_type: string;
+    order_type: string;
     paid_amount: number;
     change_amount: number;
     status: string;
@@ -201,4 +215,3 @@ export interface ReceiptResponse {
     content: string;
     data: ReceiptData;
 }
-

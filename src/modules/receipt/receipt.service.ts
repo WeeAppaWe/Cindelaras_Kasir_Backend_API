@@ -88,6 +88,7 @@ const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoFor
     })),
     total: order.total_amount,
     payment_type: order.payment_type,
+    order_type: order.order_type,
     paid_amount: order.paid_amount,
     change_amount: order.change_amount,
   };
@@ -136,6 +137,7 @@ const buildSampleReceiptData = (storeInfo: StoreInfoForReceipt): ReceiptDataForG
     items,
     total,
     payment_type: 'CASH',
+    order_type: 'DINE_IN',
     paid_amount: paidAmount,
     change_amount: paidAmount - total,
   };

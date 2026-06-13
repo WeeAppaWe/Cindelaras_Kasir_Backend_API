@@ -15,6 +15,11 @@ export const OrderStatus = {
     CANCELLED: 'CANCELLED',
 } as const;
 
+export const OrderType = {
+    DINE_IN: 'DINE_IN',
+    TAKE_AWAY: 'TAKE_AWAY',
+} as const;
+
 // ============================================
 // ORDER ITEM SCHEMA
 // ============================================
@@ -40,6 +45,9 @@ export const createOrderSchema = z.object({
     payment_type: z.enum([PaymentType.CASH, PaymentType.QRIS], {
         message: 'Tipe pembayaran harus CASH atau QRIS',
     }),
+    order_type: z.enum([OrderType.DINE_IN, OrderType.TAKE_AWAY], {
+        message: 'Tipe pesanan harus DINE_IN atau TAKE_AWAY',
+    }).default(OrderType.DINE_IN),
     items: z.array(orderItemSchema)
         .min(1, { message: 'Minimal 1 item dalam pesanan' }),
 });
@@ -78,6 +86,7 @@ export const orderListQuerySchema = z.object({
     search: z.string().optional(),
     status: z.enum([OrderStatus.PENDING, OrderStatus.COMPLETED, OrderStatus.CANCELLED]).optional(),
     payment_type: z.enum([PaymentType.CASH, PaymentType.QRIS]).optional(),
+    order_type: z.enum([OrderType.DINE_IN, OrderType.TAKE_AWAY]).optional(),
     shift_id: z.string().uuid({ message: 'Format shift ID tidak valid' }).optional(),
     start_date: z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Format tanggal harus YYYY-MM-DD' })

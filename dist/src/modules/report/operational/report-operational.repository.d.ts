@@ -74,6 +74,7 @@ export declare const getAllOrdersForPeriod: (filter: ReportFilter) => Promise<({
     paid_amount: import("@prisma/client/runtime/client").Decimal;
     change_amount: import("@prisma/client/runtime/client").Decimal;
     payment_type: string;
+    order_type: string;
 })[]>;
 export declare const getShiftsWithOrderCounts: (filter: ReportFilter) => Promise<({
     orders: {
@@ -129,6 +130,7 @@ export declare const getUsersWithOrderStats: (filter: ReportFilter) => Promise<{
         paid_amount: import("@prisma/client/runtime/client").Decimal;
         change_amount: import("@prisma/client/runtime/client").Decimal;
         payment_type: string;
+        order_type: string;
     })[];
     shifts: {
         user_id: string;
@@ -219,6 +221,7 @@ export declare const reportOperationalRepository: {
         paid_amount: import("@prisma/client/runtime/client").Decimal;
         change_amount: import("@prisma/client/runtime/client").Decimal;
         payment_type: string;
+        order_type: string;
     })[]>;
     getShiftsWithOrderCounts: (filter: ReportFilter) => Promise<({
         orders: {
@@ -274,6 +277,7 @@ export declare const reportOperationalRepository: {
             paid_amount: import("@prisma/client/runtime/client").Decimal;
             change_amount: import("@prisma/client/runtime/client").Decimal;
             payment_type: string;
+            order_type: string;
         })[];
         shifts: {
             user_id: string;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.receiptQuerySchema = exports.ReceiptFormat = exports.orderListQuerySchema = exports.orderIdParamSchema = exports.confirmPaymentSchema = exports.createOrderSchema = exports.orderItemSchema = exports.OrderStatus = exports.PaymentType = void 0;
+exports.receiptQuerySchema = exports.ReceiptFormat = exports.orderListQuerySchema = exports.orderIdParamSchema = exports.confirmPaymentSchema = exports.createOrderSchema = exports.orderItemSchema = exports.OrderType = exports.OrderStatus = exports.PaymentType = void 0;
 const zod_1 = require("zod");
 // ============================================
 // ENUMS
@@ -13,6 +13,10 @@ exports.OrderStatus = {
     PENDING: 'PENDING',
     COMPLETED: 'COMPLETED',
     CANCELLED: 'CANCELLED',
+};
+exports.OrderType = {
+    DINE_IN: 'DINE_IN',
+    TAKE_AWAY: 'TAKE_AWAY',
 };
 // ============================================
 // ORDER ITEM SCHEMA
@@ -36,6 +40,9 @@ exports.createOrderSchema = zod_1.z.object({
     payment_type: zod_1.z.enum([exports.PaymentType.CASH, exports.PaymentType.QRIS], {
         message: 'Tipe pembayaran harus CASH atau QRIS',
     }),
+    order_type: zod_1.z.enum([exports.OrderType.DINE_IN, exports.OrderType.TAKE_AWAY], {
+        message: 'Tipe pesanan harus DINE_IN atau TAKE_AWAY',
+    }).default(exports.OrderType.DINE_IN),
     items: zod_1.z.array(exports.orderItemSchema)
         .min(1, { message: 'Minimal 1 item dalam pesanan' }),
 });
@@ -68,6 +75,7 @@ exports.orderListQuerySchema = zod_1.z.object({
     search: zod_1.z.string().optional(),
     status: zod_1.z.enum([exports.OrderStatus.PENDING, exports.OrderStatus.COMPLETED, exports.OrderStatus.CANCELLED]).optional(),
     payment_type: zod_1.z.enum([exports.PaymentType.CASH, exports.PaymentType.QRIS]).optional(),
+    order_type: zod_1.z.enum([exports.OrderType.DINE_IN, exports.OrderType.TAKE_AWAY]).optional(),
     shift_id: zod_1.z.string().uuid({ message: 'Format shift ID tidak valid' }).optional(),
     start_date: zod_1.z.string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Format tanggal harus YYYY-MM-DD' })

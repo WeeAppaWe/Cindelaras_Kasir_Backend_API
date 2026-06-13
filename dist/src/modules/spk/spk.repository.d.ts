@@ -75,6 +75,7 @@ export declare const getOrderItemsWithRecipes: (startDate: Date, endDate: Date) 
     paid_amount: import("@prisma/client/runtime/client").Decimal;
     change_amount: import("@prisma/client/runtime/client").Decimal;
     payment_type: string;
+    order_type: string;
 })[]>;
 /**
  * Ambil semua ingredients untuk analisa
@@ -157,6 +158,7 @@ export declare const spkRepository: {
         paid_amount: import("@prisma/client/runtime/client").Decimal;
         change_amount: import("@prisma/client/runtime/client").Decimal;
         payment_type: string;
+        order_type: string;
     })[]>;
     getAllIngredients: (ingredientType?: "raw" | "semi" | "all" | null) => Promise<IngredientData[] | undefined>;
     getLastSupplierForIngredients: (ingredientIds: string[]) => Promise<IngredientSupplier[] | undefined>;

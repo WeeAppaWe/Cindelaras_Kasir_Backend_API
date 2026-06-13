@@ -281,6 +281,7 @@ exports.OrderScalarFieldEnum = {
     change_amount: 'change_amount',
     payment_type: 'payment_type',
     status: 'status',
+    order_type: 'order_type',
     created_at: 'created_at',
     updated_at: 'updated_at',
     deleted_at: 'deleted_at'

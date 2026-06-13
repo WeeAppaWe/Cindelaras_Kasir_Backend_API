@@ -44,6 +44,7 @@ export const getAll = async (req: AuthenticatedRequest): Promise<OrderListRespon
             search: (req.query.search as string) || null,
             status: (req.query.status as string) || null,
             payment_type: (req.query.payment_type as string) || null,
+            order_type: (req.query.order_type as string) || null,
             shift_id: (req.query.shift_id as string) || null,
             start_date: (req.query.start_date as string) || null,
             end_date: (req.query.end_date as string) || null,
@@ -181,6 +182,7 @@ export const create = async (req: AuthenticatedRequest): Promise<CreateOrderResp
                 paid_amount: paidAmount,
                 change_amount: changeAmount,
                 payment_type: body.payment_type,
+                order_type: body.order_type,
                 status: status,
             },
             orderItems
@@ -441,6 +443,7 @@ export const getReceipt = async (req: AuthenticatedRequest) => {
             subtotal: order.total_amount,
             total: order.total_amount,
             payment_type: order.payment_type,
+            order_type: order.order_type,
             paid_amount: order.paid_amount,
             change_amount: order.change_amount,
             status: order.status,
@@ -493,6 +496,7 @@ const generateTextReceipt = (data: {
     items: Array<{ name: string; qty: number; price: number; subtotal: number }>;
     total: number;
     payment_type: string;
+    order_type: string;
     paid_amount: number;
     change_amount: number;
 }): string => {
@@ -526,6 +530,7 @@ const generateTextReceipt = (data: {
     if (data.customer_name) {
         lines.push(`Pelanggan: ${data.customer_name}`);
     }
+    lines.push(`Tipe Pesanan: ${data.order_type}`);
     lines.push(dashLine);
 
     // Items
@@ -583,6 +588,7 @@ const generateEscPosReceipt = (data: {
     items: Array<{ name: string; qty: number; price: number; subtotal: number }>;
     total: number;
     payment_type: string;
+    order_type: string;
     paid_amount: number;
     change_amount: number;
 }): string => {
@@ -632,6 +638,7 @@ const generateEscPosReceipt = (data: {
     if (data.customer_name) {
         receipt += `Pelanggan: ${data.customer_name}` + LF;
     }
+    receipt += `Tipe Pesanan: ${data.order_type}` + LF;
     receipt += '--------------------------------' + LF;
 
     // Items

@@ -36,6 +36,7 @@ const getAll = async (req) => {
             search: req.query.search || null,
             status: req.query.status || null,
             payment_type: req.query.payment_type || null,
+            order_type: req.query.order_type || null,
             shift_id: req.query.shift_id || null,
             start_date: req.query.start_date || null,
             end_date: req.query.end_date || null,
@@ -151,6 +152,7 @@ const create = async (req) => {
             paid_amount: paidAmount,
             change_amount: changeAmount,
             payment_type: body.payment_type,
+            order_type: body.order_type,
             status: status,
         }, orderItems);
         // Fetch complete order data
@@ -361,6 +363,7 @@ const getReceipt = async (req) => {
             subtotal: order.total_amount,
             total: order.total_amount,
             payment_type: order.payment_type,
+            order_type: order.order_type,
             paid_amount: order.paid_amount,
             change_amount: order.change_amount,
             status: order.status,
@@ -422,6 +425,7 @@ const generateTextReceipt = (data) => {
     if (data.customer_name) {
         lines.push(`Pelanggan: ${data.customer_name}`);
     }
+    lines.push(`Tipe Pesanan: ${data.order_type}`);
     lines.push(dashLine);
     // Items
     data.items.forEach((item) => {
@@ -498,6 +502,7 @@ const generateEscPosReceipt = (data) => {
     if (data.customer_name) {
         receipt += `Pelanggan: ${data.customer_name}` + LF;
     }
+    receipt += `Tipe Pesanan: ${data.order_type}` + LF;
     receipt += '--------------------------------' + LF;
     // Items
     data.items.forEach((item) => {
