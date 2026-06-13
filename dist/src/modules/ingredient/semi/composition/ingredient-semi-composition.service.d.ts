@@ -21,9 +21,10 @@ export declare const updateComposition: (req: AuthenticatedRequest) => Promise<C
  */
 export declare const deleteComposition: (req: AuthenticatedRequest) => Promise<DeleteCompositionResponse>;
 /**
- * Get available raw ingredients for composition
+ * Get available ingredients (RAW + SEMI) for composition
+ * Exclude the parent ingredient itself to prevent self-reference
  */
-export declare const getAvailableIngredients: () => Promise<AvailableRawIngredient[]>;
+export declare const getAvailableIngredients: (req: AuthenticatedRequest) => Promise<AvailableRawIngredient[]>;
 /**
  * Preview HPP calculation before saving
  */
@@ -34,7 +35,7 @@ export declare const compositionService: {
     bulkAddCompositions: (req: AuthenticatedRequest) => Promise<CompositionListResponse>;
     updateComposition: (req: AuthenticatedRequest) => Promise<CompositionWithDetails>;
     deleteComposition: (req: AuthenticatedRequest) => Promise<DeleteCompositionResponse>;
-    getAvailableIngredients: () => Promise<AvailableRawIngredient[]>;
+    getAvailableIngredients: (req: AuthenticatedRequest) => Promise<AvailableRawIngredient[]>;
     previewHPP: (req: AuthenticatedRequest) => Promise<HPPPreviewResponse>;
 };
 export default compositionService;

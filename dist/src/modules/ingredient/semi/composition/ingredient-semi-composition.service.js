@@ -120,15 +120,15 @@ const bulkAddCompositions = async (req) => {
         }
         // Create compositions in transaction and return updated data
         const result = await prisma.$transaction(async (transaction) => {
-            // Delete existing compositions first
-            await ingredient_semi_composition_repository_1.default.softDeleteByParentId(parentId, transaction);
-            // Create new compositions
-            const compositionsData = body.compositions.map((c) => ({
+            // 1. Soft delete items that are no longer in the payload
+            await ingredient_semi_composition_repository_1.default.softDeleteMissing(parentId, childIds, transaction);
+            // 2. Upsert (Update or Insert) the items from the payload
+            // Using Promise.all since Prisma doesn't have an upsertMany yet
+            await Promise.all(body.compositions.map((c) => ingredient_semi_composition_repository_1.default.upsert({
                 parent_id: parentId,
                 child_id: c.child_id,
                 qty_needed: c.qty_needed,
-            }));
-            await ingredient_semi_composition_repository_1.default.createMany(compositionsData, transaction);
+            }, transaction)));
             // Recalculate parent's avg_cost
             await recalculateParentAvgCost(parentId, transaction, body.target_yield);
             // Fetch updated compositions within transaction for read consistency
@@ -233,11 +233,13 @@ const deleteComposition = async (req) => {
 };
 exports.deleteComposition = deleteComposition;
 /**
- * Get available raw ingredients for composition
+ * Get available ingredients (RAW + SEMI) for composition
+ * Exclude the parent ingredient itself to prevent self-reference
  */
-const getAvailableIngredients = async () => {
+const getAvailableIngredients = async (req) => {
     try {
-        return await ingredient_semi_composition_repository_1.default.findAvailableRawIngredients();
+        const excludeId = req.query.exclude_id || undefined;
+        return await ingredient_semi_composition_repository_1.default.findAvailableRawIngredients(excludeId);
     }
     catch (error) {
         console.error(`--- Composition Service Error: ${error.message}`);

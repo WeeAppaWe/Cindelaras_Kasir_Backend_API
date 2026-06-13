@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.compositionRepository = exports.findIngredientCostsByIds = exports.findAvailableRawIngredients = exports.softDeleteByParentId = exports.softDelete = exports.update = exports.createMany = exports.create = exports.findByParentAndChild = exports.findById = exports.findByParentId = void 0;
+exports.compositionRepository = exports.findIngredientCostsByIds = exports.findAvailableRawIngredients = exports.softDeleteMissing = exports.upsert = exports.softDeleteByParentId = exports.softDelete = exports.update = exports.createMany = exports.create = exports.findByParentAndChild = exports.findById = exports.findByParentId = void 0;
 const postgres_connection_1 = __importDefault(require("../../../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -189,18 +189,79 @@ const softDeleteByParentId = async (parentId, transaction) => {
 };
 exports.softDeleteByParentId = softDeleteByParentId;
 /**
- * Find all available RAW ingredients (for composition selection)
+ * Upsert composition (Update if exists, Create if not)
  */
-const findAvailableRawIngredients = async () => {
+const upsert = async (data, transaction) => {
     try {
-        const ingredients = await prisma.ingredient.findMany({
+        const client = transaction || prisma;
+        const composition = await client.ingredientComposition.upsert({
             where: {
-                type: 'RAW',
+                parent_id_child_id: {
+                    parent_id: data.parent_id,
+                    child_id: data.child_id,
+                },
+            },
+            update: {
+                qty_needed: data.qty_needed,
+                deleted_at: null, // Restore from soft delete if necessary
+            },
+            create: {
+                parent_id: data.parent_id,
+                child_id: data.child_id,
+                qty_needed: data.qty_needed,
+            },
+            select: compositionSelectFields,
+        });
+        return composition;
+    }
+    catch (error) {
+        console.error('--- Composition Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+        throw error;
+    }
+};
+exports.upsert = upsert;
+/**
+ * Soft delete compositions that are missing from the kept child IDs list
+ */
+const softDeleteMissing = async (parentId, keptChildIds, transaction) => {
+    try {
+        const client = transaction || prisma;
+        await client.ingredientComposition.updateMany({
+            where: {
+                parent_id: parentId,
+                child_id: { notIn: keptChildIds },
                 deleted_at: null,
             },
+            data: { deleted_at: new Date() },
+        });
+    }
+    catch (error) {
+        console.error('--- Composition Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+        throw error;
+    }
+};
+exports.softDeleteMissing = softDeleteMissing;
+/**
+ * Find all available ingredients (RAW + SEMI) for composition selection
+ * Optionally exclude a specific ingredient ID (to prevent self-reference)
+ */
+const findAvailableRawIngredients = async (excludeIngredientId) => {
+    try {
+        const where = {
+            type: { in: ['RAW', 'SEMI'] },
+            deleted_at: null,
+        };
+        if (excludeIngredientId) {
+            where.ingredient_id = { not: excludeIngredientId };
+        }
+        const ingredients = await prisma.ingredient.findMany({
+            where,
             select: {
                 ingredient_id: true,
                 name: true,
+                type: true,
                 avg_cost: true,
                 stock_qty: true,
                 unit: {
@@ -210,7 +271,10 @@ const findAvailableRawIngredients = async () => {
                     },
                 },
             },
-            orderBy: { name: 'asc' },
+            orderBy: [
+                { type: 'asc' },
+                { name: 'asc' },
+            ],
         });
         return ingredients;
     }
@@ -263,6 +327,8 @@ exports.compositionRepository = {
     update: exports.update,
     softDelete: exports.softDelete,
     softDeleteByParentId: exports.softDeleteByParentId,
+    upsert: exports.upsert,
+    softDeleteMissing: exports.softDeleteMissing,
     findAvailableRawIngredients: exports.findAvailableRawIngredients,
     findIngredientCostsByIds: exports.findIngredientCostsByIds,
 };

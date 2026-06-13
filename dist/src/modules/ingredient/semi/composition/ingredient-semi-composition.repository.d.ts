@@ -43,9 +43,22 @@ export declare const softDelete: (compositionId: string, transaction?: Prisma.Tr
  */
 export declare const softDeleteByParentId: (parentId: string, transaction?: Prisma.TransactionClient) => Promise<void>;
 /**
- * Find all available RAW ingredients (for composition selection)
+ * Upsert composition (Update if exists, Create if not)
  */
-export declare const findAvailableRawIngredients: () => Promise<AvailableRawIngredient[]>;
+export declare const upsert: (data: {
+    parent_id: string;
+    child_id: string;
+    qty_needed: number;
+}, transaction?: Prisma.TransactionClient) => Promise<CompositionWithDetails>;
+/**
+ * Soft delete compositions that are missing from the kept child IDs list
+ */
+export declare const softDeleteMissing: (parentId: string, keptChildIds: string[], transaction?: Prisma.TransactionClient) => Promise<void>;
+/**
+ * Find all available ingredients (RAW + SEMI) for composition selection
+ * Optionally exclude a specific ingredient ID (to prevent self-reference)
+ */
+export declare const findAvailableRawIngredients: (excludeIngredientId?: string) => Promise<AvailableRawIngredient[]>;
 /**
  * Find ingredient costs by IDs (for HPP calculation)
  */
@@ -74,7 +87,13 @@ export declare const compositionRepository: {
     }, transaction?: Prisma.TransactionClient) => Promise<CompositionWithDetails>;
     softDelete: (compositionId: string, transaction?: Prisma.TransactionClient) => Promise<void>;
     softDeleteByParentId: (parentId: string, transaction?: Prisma.TransactionClient) => Promise<void>;
-    findAvailableRawIngredients: () => Promise<AvailableRawIngredient[]>;
+    upsert: (data: {
+        parent_id: string;
+        child_id: string;
+        qty_needed: number;
+    }, transaction?: Prisma.TransactionClient) => Promise<CompositionWithDetails>;
+    softDeleteMissing: (parentId: string, keptChildIds: string[], transaction?: Prisma.TransactionClient) => Promise<void>;
+    findAvailableRawIngredients: (excludeIngredientId?: string) => Promise<AvailableRawIngredient[]>;
     findIngredientCostsByIds: (ingredientIds: string[]) => Promise<{
         ingredient_id: string;
         name: string;

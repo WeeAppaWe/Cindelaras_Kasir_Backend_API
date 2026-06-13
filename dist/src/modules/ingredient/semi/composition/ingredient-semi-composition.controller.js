@@ -77,13 +77,13 @@ const deleteComposition = async (req, res, next) => {
 };
 exports.deleteComposition = deleteComposition;
 /**
- * Get Available Raw Ingredients for Composition
- * GET /api/ingredient/semi/composition/available-ingredients
+ * Get Available Ingredients for Composition (RAW + SEMI, exclude self)
+ * GET /api/ingredient/semi/composition/available-ingredients?exclude_id=:ingredient_id
  */
 const getAvailableIngredients = async (req, res, next) => {
     try {
-        const data = await ingredient_semi_composition_service_1.default.getAvailableIngredients();
-        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'Berhasil mengambil daftar bahan baku' }, data));
+        const data = await ingredient_semi_composition_service_1.default.getAvailableIngredients(req);
+        res.status(200).json((0, response_api_1.default)({ code: 200, message: 'Berhasil mengambil daftar bahan tersedia' }, data));
     }
     catch (error) {
         next(error);

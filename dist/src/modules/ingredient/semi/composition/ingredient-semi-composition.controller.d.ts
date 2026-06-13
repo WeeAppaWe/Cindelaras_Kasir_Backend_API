@@ -26,8 +26,8 @@ export declare const updateComposition: (req: AuthenticatedRequest, res: Respons
  */
 export declare const deleteComposition: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 /**
- * Get Available Raw Ingredients for Composition
- * GET /api/ingredient/semi/composition/available-ingredients
+ * Get Available Ingredients for Composition (RAW + SEMI, exclude self)
+ * GET /api/ingredient/semi/composition/available-ingredients?exclude_id=:ingredient_id
  */
 export declare const getAvailableIngredients: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 /**
