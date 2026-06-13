@@ -28,7 +28,7 @@ const semiIngredientSelectFields = {
 // Select fields with compositions
 const semiIngredientWithCompositionsSelect = {
     ...semiIngredientSelectFields,
-    child_compositions: {
+    parent_compositions: {
         where: { deleted_at: null },
         select: {
             ingredient_composition_id: true,
@@ -53,7 +53,7 @@ const semiIngredientWithCompositionsSelect = {
 // Select fields with compositions AND stock_qty on child ingredient
 const semiIngredientWithCompositionsAndStockSelect = {
     ...semiIngredientSelectFields,
-    child_compositions: {
+    parent_compositions: {
         where: { deleted_at: null },
         select: {
             ingredient_composition_id: true,
@@ -187,7 +187,14 @@ const findByIdWithCompositions = async (ingredientId) => {
             },
             select: semiIngredientWithCompositionsSelect,
         });
-        return ingredient;
+        if (!ingredient)
+            return null;
+        // Rename parent_compositions → child_compositions to keep API contract
+        const { parent_compositions, ...rest } = ingredient;
+        return {
+            ...rest,
+            child_compositions: parent_compositions,
+        };
     }
     catch (error) {
         console.error('--- Repository Error:', error);
@@ -208,7 +215,14 @@ const findByIdWithCompositionsAndStock = async (ingredientId) => {
             },
             select: semiIngredientWithCompositionsAndStockSelect,
         });
-        return ingredient ?? null;
+        if (!ingredient)
+            return null;
+        // Rename parent_compositions → child_compositions to keep API contract
+        const { parent_compositions, ...rest } = ingredient;
+        return {
+            ...rest,
+            child_compositions: parent_compositions,
+        };
     }
     catch (error) {
         console.error('--- Repository Error:', error);

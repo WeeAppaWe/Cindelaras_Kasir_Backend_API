@@ -13,7 +13,7 @@ export const createCompositionSchema = z.object({
         .uuid('Format ingredient_id tidak valid'),
     qty_needed: z
         .number()
-        .min(0.01, 'Jumlah harus lebih dari 0'),
+        .positive('Jumlah harus lebih dari 0'),
 });
 
 /**
@@ -22,7 +22,7 @@ export const createCompositionSchema = z.object({
 export const updateCompositionSchema = z.object({
     qty_needed: z
         .number()
-        .min(0.01, 'Jumlah harus lebih dari 0'),
+        .positive('Jumlah harus lebih dari 0'),
 });
 
 /**
@@ -32,7 +32,7 @@ export const bulkAddCompositionsSchema = z.object({
     compositions: z.array(
         z.object({
             child_id: z.string().uuid('Format ingredient_id tidak valid'),
-            qty_needed: z.number().min(0.01, 'Jumlah harus lebih dari 0'),
+            qty_needed: z.number().positive('Jumlah harus lebih dari 0'),
         })
     ).min(1, 'Minimal 1 bahan dalam komposisi'),
     target_yield: z.number().min(0.01, 'Target yield harus lebih dari 0').default(1).optional(),
@@ -66,7 +66,7 @@ export const hppPreviewSchema = z.object({
     compositions: z.array(
         z.object({
             ingredient_id: z.string().uuid('Format ingredient_id tidak valid'),
-            qty_needed: z.number().min(0.01, 'Jumlah harus lebih dari 0'),
+            qty_needed: z.number().positive('Jumlah harus lebih dari 0'),
         })
     ).min(1, 'Minimal 1 bahan untuk preview HPP'),
     target_yield: z.number().min(0.01, 'Target yield harus lebih dari 0').default(1).optional(),

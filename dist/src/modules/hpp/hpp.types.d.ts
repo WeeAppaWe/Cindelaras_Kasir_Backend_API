@@ -36,6 +36,8 @@ export interface HPPCalculationResult {
     total_hpp: number;
     recipe_count: number;
     recipes: {
+        menu_recipe_id: string;
+        ingredient_id: string;
         ingredient_name: string;
         qty_needed: number;
         unit_name: string;

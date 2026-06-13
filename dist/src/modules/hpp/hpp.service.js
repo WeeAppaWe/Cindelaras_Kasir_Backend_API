@@ -49,6 +49,8 @@ const calculateMenuHPP = async (menuId, transaction) => {
             total_hpp: totalHPP,
             recipe_count: recipes.length,
             recipes: recipes.map((r) => ({
+                menu_recipe_id: r.menu_recipe_id,
+                ingredient_id: r.ingredient_id,
                 ingredient_name: r.ingredient.name,
                 qty_needed: r.qty_needed,
                 unit_name: r.ingredient.unit.name,
