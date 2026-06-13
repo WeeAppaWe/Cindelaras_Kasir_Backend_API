@@ -163,6 +163,7 @@ ingredient_compositions.child_id -> ingredients.ingredient_id
 - Komposisi dihapus dengan soft delete melalui field `ingredient_compositions.deleted_at`.
 - HPP bahan setengah jadi dihitung dari `qty_needed * avg_cost` pada bahan penyusun, lalu dibagi `target_yield`.
 - `target_yield` tidak disimpan sebagai field tabel pada schema saat ini; nilainya dipakai dari request saat preview atau recalculate HPP.
+- **Catatan relasi Prisma:** Di tabel `ingredient_compositions`, bahan setengah jadi berperan sebagai `parent` (induk). Query komposisi menggunakan relasi `parent_compositions` di Prisma (mencari baris di mana bahan semi ini adalah `parent_id`). Field pada response tetap menggunakan nama `child_compositions` sesuai konteks bisnis — FE tidak perlu melakukan perubahan apapun.
 
 ---
 

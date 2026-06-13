@@ -32,7 +32,7 @@ const semiIngredientSelectFields = {
 // Select fields with compositions
 const semiIngredientWithCompositionsSelect = {
     ...semiIngredientSelectFields,
-    child_compositions: {
+    parent_compositions: {
         where: { deleted_at: null },
         select: {
             ingredient_composition_id: true,
@@ -58,7 +58,7 @@ const semiIngredientWithCompositionsSelect = {
 // Select fields with compositions AND stock_qty on child ingredient
 const semiIngredientWithCompositionsAndStockSelect = {
     ...semiIngredientSelectFields,
-    child_compositions: {
+    parent_compositions: {
         where: { deleted_at: null },
         select: {
             ingredient_composition_id: true,
@@ -204,7 +204,14 @@ export const findByIdWithCompositions = async (ingredientId: string): Promise<Se
             select: semiIngredientWithCompositionsSelect,
         });
 
-        return ingredient as SemiIngredientWithCompositions | null;
+        if (!ingredient) return null;
+
+        // Rename parent_compositions → child_compositions to keep API contract
+        const { parent_compositions, ...rest } = ingredient;
+        return {
+            ...rest,
+            child_compositions: parent_compositions,
+        } as SemiIngredientWithCompositions;
     } catch (error) {
         console.error('--- Repository Error:', error);
         handlePrismaError(error);
@@ -225,7 +232,14 @@ export const findByIdWithCompositionsAndStock = async (ingredientId: string): Pr
             select: semiIngredientWithCompositionsAndStockSelect,
         });
 
-        return ingredient ?? null;
+        if (!ingredient) return null;
+
+        // Rename parent_compositions → child_compositions to keep API contract
+        const { parent_compositions, ...rest } = ingredient;
+        return {
+            ...rest,
+            child_compositions: parent_compositions,
+        };
     } catch (error) {
         console.error('--- Repository Error:', error);
         handlePrismaError(error);
