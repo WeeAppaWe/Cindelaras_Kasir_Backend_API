@@ -96,8 +96,8 @@ export const getDetail = async (req: AuthenticatedRequest): Promise<MenuDetailRe
         return {
             ...menu,
             recipes: hppResult.recipes.map((r) => ({
-                menu_recipe_id: '', // Will be populated if needed
-                ingredient_id: '', // Will be populated if needed
+                menu_recipe_id: r.menu_recipe_id,
+                ingredient_id: r.ingredient_id,
                 ingredient_name: r.ingredient_name,
                 qty_needed: r.qty_needed,
                 unit_name: r.unit_name,
