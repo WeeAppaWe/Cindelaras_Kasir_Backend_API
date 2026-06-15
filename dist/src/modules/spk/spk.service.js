@@ -63,7 +63,7 @@ const calculateForecasts = async (lookbackDays, ingredientType) => {
                 const usageQty = Number(recipe.qty_needed) * menuQty;
                 const ingredient = recipe.ingredient;
                 // Filter by ingredient type if specified
-                if (ingredientType && ingredientType !== 'all' && ingredient.type !== ingredientType) {
+                if (ingredientType && ingredientType !== 'all' && ingredient.type.toUpperCase() !== ingredientType.toUpperCase()) {
                     continue;
                 }
                 // Store ingredient info

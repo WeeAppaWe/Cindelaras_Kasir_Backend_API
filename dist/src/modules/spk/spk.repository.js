@@ -71,7 +71,7 @@ const getAllIngredients = async (ingredientType) => {
             deleted_at: null,
         };
         if (ingredientType && ingredientType !== 'all') {
-            where.type = ingredientType;
+            where.type = ingredientType.toUpperCase();
         }
         const ingredients = await prisma.ingredient.findMany({
             where,
