@@ -216,14 +216,12 @@ export const getSalesTrend = async (req: AuthenticatedRequest): Promise<Dashboar
 };
 
 /**
- * Get top 5 best-selling menus for a given day
+ * Get top 5 best-selling menus for all-time
  * Ordered by qty_sold descending — ties broken by revenue descending (handled by DB)
  */
-export const getTopMenus = async (req: AuthenticatedRequest): Promise<DashboardTopMenusResponse> => {
+export const getTopMenus = async (_req: AuthenticatedRequest): Promise<DashboardTopMenusResponse> => {
     try {
-        const targetDate = (req.query.date as string) || getTodayDateStr();
-
-        const rows = await dashboardRepository.getTopMenus(targetDate);
+        const rows = await dashboardRepository.getTopMenus();
 
         const items: TopMenuItem[] = rows.map((row, index) => ({
             rank: index + 1,
@@ -236,7 +234,7 @@ export const getTopMenus = async (req: AuthenticatedRequest): Promise<DashboardT
         }));
 
         return {
-            date: targetDate,
+            date: 'Sepanjang Masa',
             total_items: items.length,
             items,
         };
