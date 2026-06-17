@@ -10,6 +10,7 @@ const postgres_connection_1 = __importDefault(require("../../../database/postgre
 const metadata_info_utility_1 = require("../../../utility/metadata-info.utility");
 const opname_repository_1 = __importDefault(require("./opname.repository"));
 const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
+const webhook_emitter_1 = __importDefault(require("../../webhook/webhook.emitter"));
 const opname_schema_1 = require("./opname.schema");
 const stock_type_schema_1 = require("../stock-type/stock-type.schema");
 const pagination_utility_1 = require("../../../utility/pagination.utility");
@@ -258,12 +259,17 @@ const applyAdjustment = async (req) => {
                 }, transaction);
             }
             await opname_repository_1.default.updateStatus(opnameId, opname_schema_1.OpnameStatus.APPLIED, transaction);
-            return items.length;
+            return items;
         });
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = result.map((item) => item.ingredient_id);
+        if (changedIngredientIds.length > 0) {
+            webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
         return {
             success: true,
             message: 'Adjustment berhasil diaplikasikan',
-            adjustments_count: result,
+            adjustments_count: result.length,
         };
     }
     catch (error) {

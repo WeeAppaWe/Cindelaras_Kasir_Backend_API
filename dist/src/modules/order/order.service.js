@@ -14,6 +14,7 @@ const receipt_number_utility_1 = require("../../../utility/receipt-number.utilit
 const order_repository_1 = __importDefault(require("./order.repository"));
 const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
 const receipt_utility_1 = __importDefault(require("../../../utility/receipt.utility"));
+const webhook_emitter_1 = __importDefault(require("../../webhook/webhook.emitter"));
 const order_schema_1 = require("./order.schema");
 const store_setting_repository_1 = __importDefault(require("../store-setting/store-setting.repository"));
 // Remove global prisma instance to allow mocking in tests
@@ -253,6 +254,11 @@ const confirmPayment = async (req) => {
                 await order_repository_1.default.updateIngredientStock(ingredientId, deductAmount, order.user_id, stockType.stock_type_id, transaction);
             }
         });
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = Array.from(stockDeductions.keys());
+        if (changedIngredientIds.length > 0) {
+            webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
         // Fetch updated order
         const updatedOrder = await order_repository_1.default.findByIdWithDetails(orderId);
         // Build message

@@ -9,6 +9,7 @@ import { AuthenticatedRequest } from '../../../types';
 import orderRepository from './order.repository';
 import stockTypeRepository from '../stock-type/stock-type.repository';
 import receiptUtility from '../../../utility/receipt.utility';
+import webhookEmitter from '../../webhook/webhook.emitter';
 import {
     CreateOrderRequest,
     OrderListResponse,
@@ -308,6 +309,12 @@ export const confirmPayment = async (req: AuthenticatedRequest): Promise<Confirm
                 );
             }
         });
+
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = Array.from(stockDeductions.keys());
+        if (changedIngredientIds.length > 0) {
+            webhookEmitter.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
 
         // Fetch updated order
         const updatedOrder = await orderRepository.findByIdWithDetails(orderId);

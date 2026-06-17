@@ -9,51 +9,51 @@ export declare const getOrderItemsWithRecipes: (startDate: Date, endDate: Date) 
             recipes: ({
                 ingredient: {
                     unit: {
-                        name: string;
                         created_at: Date;
                         updated_at: Date | null;
                         deleted_at: Date | null;
+                        name: string;
                         unit_measure_id: string;
                     };
                 } & {
-                    type: string;
-                    name: string;
+                    ingredient_id: string;
                     created_at: Date;
                     updated_at: Date | null;
                     deleted_at: Date | null;
-                    ingredient_id: string;
+                    name: string;
+                    type: string;
                     unit_id: string;
                     stock_qty: import("@prisma/client/runtime/client").Decimal;
                     min_stock: import("@prisma/client/runtime/client").Decimal;
                     avg_cost: import("@prisma/client/runtime/client").Decimal;
                 };
             } & {
+                menu_recipe_id: string;
+                menu_id: string;
+                ingredient_id: string;
+                qty_needed: import("@prisma/client/runtime/client").Decimal;
                 created_at: Date;
                 updated_at: Date | null;
                 deleted_at: Date | null;
-                menu_id: string;
-                menu_recipe_id: string;
-                ingredient_id: string;
-                qty_needed: import("@prisma/client/runtime/client").Decimal;
             })[];
         } & {
-            name: string;
+            menu_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            description: string | null;
-            menu_id: string;
             category_id: string;
+            name: string;
             price: import("@prisma/client/runtime/client").Decimal;
             cost: import("@prisma/client/runtime/client").Decimal;
+            description: string | null;
             image_url: string | null;
             is_available: boolean;
         };
     } & {
+        menu_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        menu_id: string;
         price: import("@prisma/client/runtime/client").Decimal;
         order_item_id: string;
         order_id: string;
@@ -61,10 +61,10 @@ export declare const getOrderItemsWithRecipes: (startDate: Date, endDate: Date) 
         subtotal: import("@prisma/client/runtime/client").Decimal;
     })[];
 } & {
-    user_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
+    user_id: string;
     status: string;
     shift_id: string;
     order_id: string;
@@ -92,51 +92,51 @@ export declare const spkRepository: {
                 recipes: ({
                     ingredient: {
                         unit: {
-                            name: string;
                             created_at: Date;
                             updated_at: Date | null;
                             deleted_at: Date | null;
+                            name: string;
                             unit_measure_id: string;
                         };
                     } & {
-                        type: string;
-                        name: string;
+                        ingredient_id: string;
                         created_at: Date;
                         updated_at: Date | null;
                         deleted_at: Date | null;
-                        ingredient_id: string;
+                        name: string;
+                        type: string;
                         unit_id: string;
                         stock_qty: import("@prisma/client/runtime/client").Decimal;
                         min_stock: import("@prisma/client/runtime/client").Decimal;
                         avg_cost: import("@prisma/client/runtime/client").Decimal;
                     };
                 } & {
+                    menu_recipe_id: string;
+                    menu_id: string;
+                    ingredient_id: string;
+                    qty_needed: import("@prisma/client/runtime/client").Decimal;
                     created_at: Date;
                     updated_at: Date | null;
                     deleted_at: Date | null;
-                    menu_id: string;
-                    menu_recipe_id: string;
-                    ingredient_id: string;
-                    qty_needed: import("@prisma/client/runtime/client").Decimal;
                 })[];
             } & {
-                name: string;
+                menu_id: string;
                 created_at: Date;
                 updated_at: Date | null;
                 deleted_at: Date | null;
-                description: string | null;
-                menu_id: string;
                 category_id: string;
+                name: string;
                 price: import("@prisma/client/runtime/client").Decimal;
                 cost: import("@prisma/client/runtime/client").Decimal;
+                description: string | null;
                 image_url: string | null;
                 is_available: boolean;
             };
         } & {
+            menu_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            menu_id: string;
             price: import("@prisma/client/runtime/client").Decimal;
             order_item_id: string;
             order_id: string;
@@ -144,10 +144,10 @@ export declare const spkRepository: {
             subtotal: import("@prisma/client/runtime/client").Decimal;
         })[];
     } & {
-        user_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        user_id: string;
         status: string;
         shift_id: string;
         order_id: string;

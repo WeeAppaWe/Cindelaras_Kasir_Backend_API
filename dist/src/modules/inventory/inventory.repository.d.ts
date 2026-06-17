@@ -24,8 +24,8 @@ export declare const findAllStockTypes: () => Promise<StockTypeData[]>;
  * Find ingredient by ID
  */
 export declare const findIngredientById: (ingredientId: string) => Promise<{
-    name: string;
     ingredient_id: string;
+    name: string;
     stock_qty: import("@prisma/client/runtime/client").Decimal;
     avg_cost: import("@prisma/client/runtime/client").Decimal;
     unit: {
@@ -55,8 +55,8 @@ export declare const inventoryRepository: {
     create: (data: Prisma.StockMovementUncheckedCreateInput, transaction?: Prisma.TransactionClient) => Promise<StockMovementWithDetails>;
     findAllStockTypes: () => Promise<StockTypeData[]>;
     findIngredientById: (ingredientId: string) => Promise<{
-        name: string;
         ingredient_id: string;
+        name: string;
         stock_qty: import("@prisma/client/runtime/client").Decimal;
         avg_cost: import("@prisma/client/runtime/client").Decimal;
         unit: {

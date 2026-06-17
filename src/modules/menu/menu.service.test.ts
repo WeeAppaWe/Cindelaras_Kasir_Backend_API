@@ -21,6 +21,9 @@ import { mockCategory } from '../../tests/mocks/category.mock';
 jest.mock('./menu.repository');
 jest.mock('../category/category.repository');
 jest.mock('../hpp/hpp.service');
+jest.mock('../../webhook/handlers/menu-availability.repository');
+
+import menuAvailabilityRepository from '../../webhook/handlers/menu-availability.repository';
 
 // Mock getPrismaClient
 jest.mock('../../../database/postgres.connection', () => {
@@ -421,6 +424,7 @@ describe('Menu Service', () => {
             const toggledMenu = { ...mockMenu, is_available: true };
 
             (menuRepository.findById as jest.Mock).mockResolvedValue(inactiveMenu);
+            (menuAvailabilityRepository.findMenuIdsWithInsufficientStock as jest.Mock).mockResolvedValue([]);
             (menuRepository.update as jest.Mock).mockResolvedValue(toggledMenu);
 
             const result = await menuService.toggleAvailability(mockRequest);
@@ -430,6 +434,21 @@ describe('Menu Service', () => {
                 is_available: true,
             });
             expect(result).toEqual(toggledMenu);
+        });
+
+        it('should throw ErrorValidationException when trying to toggle false to true but stock is insufficient', async () => {
+            const mockRequest = {
+                params: { menu_id: mockMenu.menu_id },
+            } as unknown as AuthenticatedRequest;
+
+            const inactiveMenu = { ...mockMenu, is_available: false };
+
+            (menuRepository.findById as jest.Mock).mockResolvedValue(inactiveMenu);
+            (menuAvailabilityRepository.findMenuIdsWithInsufficientStock as jest.Mock).mockResolvedValue([mockMenu.menu_id]);
+
+            await expect(menuService.toggleAvailability(mockRequest))
+                .rejects
+                .toThrow(ErrorValidationException);
         });
     });
 });

@@ -15,6 +15,7 @@ const ingredient_semi_repository_1 = __importDefault(require("./ingredient-semi.
 const unit_measure_service_1 = __importDefault(require("../../unit-measure/unit-measure.service"));
 const stock_type_repository_1 = __importDefault(require("../../stock-type/stock-type.repository"));
 const ingredient_semi_composition_repository_1 = __importDefault(require("../semi/composition/ingredient-semi-composition.repository"));
+const webhook_emitter_1 = __importDefault(require("../../../webhook/webhook.emitter"));
 const ingredient_semi_types_1 = require("./ingredient-semi.types");
 const stock_type_schema_1 = require("../../stock-type/stock-type.schema");
 const prisma = (0, postgres_connection_1.default)();
@@ -397,6 +398,11 @@ const produce = async (req) => {
             const newAvgCost = (0, cost_calculation_utility_1.roundCurrency)(totalHPP / body.qty);
             await ingredient_semi_repository_1.default.updateAvgCost(ingredientId, newAvgCost, transaction);
         });
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = [ingredientId, ...deductedIngredients.map((d) => d.ingredient_id)];
+        if (changedIngredientIds.length > 0) {
+            webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
         // 8. Ambil data terbaru bahan semi setelah transaksi
         const updatedIngredient = await ingredient_semi_repository_1.default.findById(ingredientId);
         return {
@@ -585,6 +591,11 @@ const createAndProduce = async (req) => {
             // f. Update avg_cost bahan semi
             await ingredient_semi_repository_1.default.updateAvgCost(newIngredientId, newAvgCost, transaction);
         });
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = [newIngredientId, ...deductedIngredients.map((d) => d.ingredient_id)];
+        if (changedIngredientIds.length > 0) {
+            webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
         // 10. Fetch data lengkap dengan komposisi untuk response
         const finalIngredient = await ingredient_semi_repository_1.default.findByIdWithCompositions(newIngredientId);
         return {

@@ -8,6 +8,7 @@ import { AuthenticatedRequest } from '../../../types';
 import menuRepository from './menu.repository';
 import categoryRepository from '../category/category.repository';
 import hppService from '../hpp/hpp.service';
+import menuAvailabilityRepository from '../../webhook/handlers/menu-availability.repository';
 import {
     CreateMenuRequest,
     UpdateMenuRequest,
@@ -259,9 +260,22 @@ export const toggleAvailability = async (req: AuthenticatedRequest): Promise<Men
             throw new ErrorNotFoundException('Menu tidak ditemukan');
         }
 
+        const isActivating = !existingMenu.is_available;
+
+        // If trying to activate, ensure stock is sufficient
+        if (isActivating) {
+            const insufficient = await menuAvailabilityRepository.findMenuIdsWithInsufficientStock([menuId]);
+
+            if (insufficient.length > 0) {
+                throw new ErrorValidationException('Stok bahan tidak mencukupi, menu tidak dapat diaktifkan', [
+                    { location: 'system', field: 'is_available', message: 'Stok bahan resep kurang dari kebutuhan minimum' }
+                ]);
+            }
+        }
+
         // Toggle availability - no transaction needed for single update
         const result = await menuRepository.update(menuId, {
-            is_available: !existingMenu.is_available,
+            is_available: isActivating,
         });
 
         return result;

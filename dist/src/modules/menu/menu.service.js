@@ -13,6 +13,7 @@ const cost_calculation_utility_1 = require("../../../utility/cost-calculation.ut
 const menu_repository_1 = __importDefault(require("./menu.repository"));
 const category_repository_1 = __importDefault(require("../category/category.repository"));
 const hpp_service_1 = __importDefault(require("../hpp/hpp.service"));
+const menu_availability_repository_1 = __importDefault(require("../../webhook/handlers/menu-availability.repository"));
 const prisma = (0, postgres_connection_1.default)();
 /**
  * Get all menus with pagination and filters
@@ -228,9 +229,19 @@ const toggleAvailability = async (req) => {
         if (!existingMenu) {
             throw new error_not_found_exception_1.ErrorNotFoundException('Menu tidak ditemukan');
         }
+        const isActivating = !existingMenu.is_available;
+        // If trying to activate, ensure stock is sufficient
+        if (isActivating) {
+            const insufficient = await menu_availability_repository_1.default.findMenuIdsWithInsufficientStock([menuId]);
+            if (insufficient.length > 0) {
+                throw new error_validation_exception_1.ErrorValidationException('Stok bahan tidak mencukupi, menu tidak dapat diaktifkan', [
+                    { location: 'system', field: 'is_available', message: 'Stok bahan resep kurang dari kebutuhan minimum' }
+                ]);
+            }
+        }
         // Toggle availability - no transaction needed for single update
         const result = await menu_repository_1.default.update(menuId, {
-            is_available: !existingMenu.is_available,
+            is_available: isActivating,
         });
         return result;
     }

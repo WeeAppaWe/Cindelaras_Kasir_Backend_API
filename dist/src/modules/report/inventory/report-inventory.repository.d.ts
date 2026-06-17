@@ -5,45 +5,45 @@ export declare const getAllIngredientsWithStatus: (ingredientType?: "raw" | "sem
         unit_measure_id: string;
     };
 } & {
-    type: string;
-    name: string;
+    ingredient_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
-    ingredient_id: string;
+    name: string;
+    type: string;
     unit_id: string;
     stock_qty: import("@prisma/client/runtime/client").Decimal;
     min_stock: import("@prisma/client/runtime/client").Decimal;
     avg_cost: import("@prisma/client/runtime/client").Decimal;
 })[]>;
 export declare const getStockMovementsForPeriod: (filter: ReportFilter) => Promise<({
-    user: {
-        user_id: string;
-        name: string;
-    };
-    supplier: {
-        name: string;
-        supplier_id: string;
-    };
     ingredient: {
-        type: string;
-        name: string;
         ingredient_id: string;
+        name: string;
+        type: string;
         avg_cost: import("@prisma/client/runtime/client").Decimal;
         unit: {
             name: string;
         };
+    };
+    user: {
+        name: string;
+        user_id: string;
+    };
+    supplier: {
+        name: string;
+        supplier_id: string;
     };
     stock_type: {
         name: string;
         stock_type_id: string;
     };
 } & {
-    user_id: string;
+    ingredient_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
-    ingredient_id: string;
+    user_id: string;
     qty: import("@prisma/client/runtime/client").Decimal;
     stock_movement_id: string;
     supplier_id: string | null;
@@ -54,8 +54,8 @@ export declare const getStockMovementsForPeriod: (filter: ReportFilter) => Promi
 })[]>;
 export declare const getStockOpnamesForPeriod: (filter: ReportFilter) => Promise<({
     user: {
-        user_id: string;
         name: string;
+        user_id: string;
     };
     items: {
         stock_opname_item_id: string;
@@ -64,10 +64,10 @@ export declare const getStockOpnamesForPeriod: (filter: ReportFilter) => Promise
         difference: import("@prisma/client/runtime/client").Decimal;
     }[];
 } & {
-    user_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
+    user_id: string;
     status: string;
     notes: string | null;
     stock_opname_id: string;
@@ -79,12 +79,12 @@ export declare const getIngredientMovements: (ingredientId: string, startDate: D
             name: string;
         };
     } & {
-        type: string;
-        name: string;
+        ingredient_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        ingredient_id: string;
+        name: string;
+        type: string;
         unit_id: string;
         stock_qty: import("@prisma/client/runtime/client").Decimal;
         min_stock: import("@prisma/client/runtime/client").Decimal;
@@ -101,11 +101,11 @@ export declare const getIngredientMovements: (ingredientId: string, startDate: D
             name: string;
         };
     } & {
-        user_id: string;
+        ingredient_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        ingredient_id: string;
+        user_id: string;
         qty: import("@prisma/client/runtime/client").Decimal;
         stock_movement_id: string;
         supplier_id: string | null;
@@ -124,45 +124,45 @@ export declare const reportInventoryRepository: {
             unit_measure_id: string;
         };
     } & {
-        type: string;
-        name: string;
+        ingredient_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        ingredient_id: string;
+        name: string;
+        type: string;
         unit_id: string;
         stock_qty: import("@prisma/client/runtime/client").Decimal;
         min_stock: import("@prisma/client/runtime/client").Decimal;
         avg_cost: import("@prisma/client/runtime/client").Decimal;
     })[]>;
     getStockMovementsForPeriod: (filter: ReportFilter) => Promise<({
-        user: {
-            user_id: string;
-            name: string;
-        };
-        supplier: {
-            name: string;
-            supplier_id: string;
-        };
         ingredient: {
-            type: string;
-            name: string;
             ingredient_id: string;
+            name: string;
+            type: string;
             avg_cost: import("@prisma/client/runtime/client").Decimal;
             unit: {
                 name: string;
             };
+        };
+        user: {
+            name: string;
+            user_id: string;
+        };
+        supplier: {
+            name: string;
+            supplier_id: string;
         };
         stock_type: {
             name: string;
             stock_type_id: string;
         };
     } & {
-        user_id: string;
+        ingredient_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        ingredient_id: string;
+        user_id: string;
         qty: import("@prisma/client/runtime/client").Decimal;
         stock_movement_id: string;
         supplier_id: string | null;
@@ -173,8 +173,8 @@ export declare const reportInventoryRepository: {
     })[]>;
     getStockOpnamesForPeriod: (filter: ReportFilter) => Promise<({
         user: {
-            user_id: string;
             name: string;
+            user_id: string;
         };
         items: {
             stock_opname_item_id: string;
@@ -183,10 +183,10 @@ export declare const reportInventoryRepository: {
             difference: import("@prisma/client/runtime/client").Decimal;
         }[];
     } & {
-        user_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        user_id: string;
         status: string;
         notes: string | null;
         stock_opname_id: string;
@@ -198,12 +198,12 @@ export declare const reportInventoryRepository: {
                 name: string;
             };
         } & {
-            type: string;
-            name: string;
+            ingredient_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            ingredient_id: string;
+            name: string;
+            type: string;
             unit_id: string;
             stock_qty: import("@prisma/client/runtime/client").Decimal;
             min_stock: import("@prisma/client/runtime/client").Decimal;
@@ -220,11 +220,11 @@ export declare const reportInventoryRepository: {
                 name: string;
             };
         } & {
-            user_id: string;
+            ingredient_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            ingredient_id: string;
+            user_id: string;
             qty: import("@prisma/client/runtime/client").Decimal;
             stock_movement_id: string;
             supplier_id: string | null;

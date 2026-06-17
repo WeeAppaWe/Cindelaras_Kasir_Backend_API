@@ -1,69 +1,69 @@
 import { ReportFilter } from './report-operational.types';
 export declare const getAllOrdersForPeriod: (filter: ReportFilter) => Promise<({
-    user: {
-        user_id: string;
-        name: string;
-    };
     order_items: ({
         menu: {
-            category: {
-                name: string;
-                created_at: Date;
-                updated_at: Date | null;
-                deleted_at: Date | null;
-                category_id: string;
-            };
             recipes: ({
                 ingredient: {
-                    type: string;
-                    name: string;
+                    ingredient_id: string;
                     created_at: Date;
                     updated_at: Date | null;
                     deleted_at: Date | null;
-                    ingredient_id: string;
+                    name: string;
+                    type: string;
                     unit_id: string;
                     stock_qty: import("@prisma/client/runtime/client").Decimal;
                     min_stock: import("@prisma/client/runtime/client").Decimal;
                     avg_cost: import("@prisma/client/runtime/client").Decimal;
                 };
             } & {
+                menu_recipe_id: string;
+                menu_id: string;
+                ingredient_id: string;
+                qty_needed: import("@prisma/client/runtime/client").Decimal;
                 created_at: Date;
                 updated_at: Date | null;
                 deleted_at: Date | null;
-                menu_id: string;
-                menu_recipe_id: string;
-                ingredient_id: string;
-                qty_needed: import("@prisma/client/runtime/client").Decimal;
             })[];
+            category: {
+                created_at: Date;
+                updated_at: Date | null;
+                deleted_at: Date | null;
+                category_id: string;
+                name: string;
+            };
         } & {
-            name: string;
+            menu_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            description: string | null;
-            menu_id: string;
             category_id: string;
+            name: string;
             price: import("@prisma/client/runtime/client").Decimal;
             cost: import("@prisma/client/runtime/client").Decimal;
+            description: string | null;
             image_url: string | null;
             is_available: boolean;
         };
     } & {
+        menu_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
-        menu_id: string;
         price: import("@prisma/client/runtime/client").Decimal;
         order_item_id: string;
         order_id: string;
         qty: number;
         subtotal: import("@prisma/client/runtime/client").Decimal;
     })[];
+    user: {
+        name: string;
+        user_id: string;
+    };
 } & {
-    user_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
+    user_id: string;
     status: string;
     shift_id: string;
     order_id: string;
@@ -84,24 +84,24 @@ export declare const getShiftsWithOrderCounts: (filter: ReportFilter) => Promise
         payment_type: string;
     }[];
     user: {
-        user_id: string;
         name: string;
+        user_id: string;
     };
     cash_movements: {
-        type: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        type: string;
         amount: import("@prisma/client/runtime/client").Decimal;
         note: string | null;
         cash_movement_id: string;
         shift_id: string;
     }[];
 } & {
-    user_id: string;
     created_at: Date;
     updated_at: Date | null;
     deleted_at: Date | null;
+    user_id: string;
     shift_id: string;
     start_cash: import("@prisma/client/runtime/client").Decimal;
     end_cash: import("@prisma/client/runtime/client").Decimal | null;
@@ -112,14 +112,14 @@ export declare const getShiftsWithOrderCounts: (filter: ReportFilter) => Promise
 export declare const getUsersWithOrderStats: (filter: ReportFilter) => Promise<{
     orders: ({
         user: {
-            user_id: string;
             name: string;
+            user_id: string;
         };
     } & {
-        user_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        user_id: string;
         status: string;
         shift_id: string;
         order_id: string;
@@ -147,70 +147,70 @@ export declare const getMenuPerformanceData: (filter: ReportFilter, limit?: numb
 }[]>;
 export declare const reportOperationalRepository: {
     getAllOrdersForPeriod: (filter: ReportFilter) => Promise<({
-        user: {
-            user_id: string;
-            name: string;
-        };
         order_items: ({
             menu: {
-                category: {
-                    name: string;
-                    created_at: Date;
-                    updated_at: Date | null;
-                    deleted_at: Date | null;
-                    category_id: string;
-                };
                 recipes: ({
                     ingredient: {
-                        type: string;
-                        name: string;
+                        ingredient_id: string;
                         created_at: Date;
                         updated_at: Date | null;
                         deleted_at: Date | null;
-                        ingredient_id: string;
+                        name: string;
+                        type: string;
                         unit_id: string;
                         stock_qty: import("@prisma/client/runtime/client").Decimal;
                         min_stock: import("@prisma/client/runtime/client").Decimal;
                         avg_cost: import("@prisma/client/runtime/client").Decimal;
                     };
                 } & {
+                    menu_recipe_id: string;
+                    menu_id: string;
+                    ingredient_id: string;
+                    qty_needed: import("@prisma/client/runtime/client").Decimal;
                     created_at: Date;
                     updated_at: Date | null;
                     deleted_at: Date | null;
-                    menu_id: string;
-                    menu_recipe_id: string;
-                    ingredient_id: string;
-                    qty_needed: import("@prisma/client/runtime/client").Decimal;
                 })[];
+                category: {
+                    created_at: Date;
+                    updated_at: Date | null;
+                    deleted_at: Date | null;
+                    category_id: string;
+                    name: string;
+                };
             } & {
-                name: string;
+                menu_id: string;
                 created_at: Date;
                 updated_at: Date | null;
                 deleted_at: Date | null;
-                description: string | null;
-                menu_id: string;
                 category_id: string;
+                name: string;
                 price: import("@prisma/client/runtime/client").Decimal;
                 cost: import("@prisma/client/runtime/client").Decimal;
+                description: string | null;
                 image_url: string | null;
                 is_available: boolean;
             };
         } & {
+            menu_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
-            menu_id: string;
             price: import("@prisma/client/runtime/client").Decimal;
             order_item_id: string;
             order_id: string;
             qty: number;
             subtotal: import("@prisma/client/runtime/client").Decimal;
         })[];
+        user: {
+            name: string;
+            user_id: string;
+        };
     } & {
-        user_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        user_id: string;
         status: string;
         shift_id: string;
         order_id: string;
@@ -231,24 +231,24 @@ export declare const reportOperationalRepository: {
             payment_type: string;
         }[];
         user: {
-            user_id: string;
             name: string;
+            user_id: string;
         };
         cash_movements: {
-            type: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
+            type: string;
             amount: import("@prisma/client/runtime/client").Decimal;
             note: string | null;
             cash_movement_id: string;
             shift_id: string;
         }[];
     } & {
-        user_id: string;
         created_at: Date;
         updated_at: Date | null;
         deleted_at: Date | null;
+        user_id: string;
         shift_id: string;
         start_cash: import("@prisma/client/runtime/client").Decimal;
         end_cash: import("@prisma/client/runtime/client").Decimal | null;
@@ -259,14 +259,14 @@ export declare const reportOperationalRepository: {
     getUsersWithOrderStats: (filter: ReportFilter) => Promise<{
         orders: ({
             user: {
-                user_id: string;
                 name: string;
+                user_id: string;
             };
         } & {
-            user_id: string;
             created_at: Date;
             updated_at: Date | null;
             deleted_at: Date | null;
+            user_id: string;
             status: string;
             shift_id: string;
             order_id: string;

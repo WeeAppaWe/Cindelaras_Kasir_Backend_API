@@ -16,7 +16,11 @@ const exception_1 = require("./exception");
 const index_1 = __importDefault(require("./route/index"));
 // swagger documentation
 const swagger_utility_1 = __importDefault(require("./utility/swagger.utility"));
+// webhook system
+const webhook_register_1 = require("./src/webhook/webhook.register");
 const app = (0, express_1.default)();
+// register webhook handlers
+(0, webhook_register_1.registerWebhooks)();
 // setting cors
 const corsOptions = {
     origin: '*',

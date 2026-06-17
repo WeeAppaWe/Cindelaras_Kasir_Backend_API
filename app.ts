@@ -14,7 +14,13 @@ import indexRouter from './route/index';
 // swagger documentation
 import swaggerDocs from './utility/swagger.utility';
 
+// webhook system
+import { registerWebhooks } from './src/webhook/webhook.register';
+
 const app: Application = express();
+
+// register webhook handlers
+registerWebhooks();
 
 // setting cors
 const corsOptions: cors.CorsOptions = {

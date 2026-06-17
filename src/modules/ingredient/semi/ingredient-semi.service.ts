@@ -10,6 +10,7 @@ import semiIngredientRepository from './ingredient-semi.repository';
 import unitMeasureService from '../../unit-measure/unit-measure.service';
 import stockTypeRepository from '../../stock-type/stock-type.repository';
 import compositionRepository from '../semi/composition/ingredient-semi-composition.repository';
+import webhookEmitter from '../../../webhook/webhook.emitter';
 import {
     CreateSemiIngredientRequest,
     UpdateSemiIngredientRequest,
@@ -463,6 +464,12 @@ export const produce = async (req: AuthenticatedRequest): Promise<ProduceSemiIng
             await semiIngredientRepository.updateAvgCost(ingredientId, newAvgCost, transaction);
         });
 
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = [ingredientId, ...deductedIngredients.map((d) => d.ingredient_id)];
+        if (changedIngredientIds.length > 0) {
+            webhookEmitter.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
+
         // 8. Ambil data terbaru bahan semi setelah transaksi
         const updatedIngredient = await semiIngredientRepository.findById(ingredientId);
 
@@ -682,6 +689,12 @@ export const createAndProduce = async (req: AuthenticatedRequest): Promise<Creat
             // f. Update avg_cost bahan semi
             await semiIngredientRepository.updateAvgCost(newIngredientId, newAvgCost, transaction);
         });
+
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = [newIngredientId, ...deductedIngredients.map((d) => d.ingredient_id)];
+        if (changedIngredientIds.length > 0) {
+            webhookEmitter.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
 
         // 10. Fetch data lengkap dengan komposisi untuk response
         const finalIngredient = await semiIngredientRepository.findByIdWithCompositions(newIngredientId!);

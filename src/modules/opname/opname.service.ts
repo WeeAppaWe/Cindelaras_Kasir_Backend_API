@@ -5,6 +5,7 @@ import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { AuthenticatedRequest } from '../../../types';
 import opnameRepository from './opname.repository';
 import stockTypeRepository from '../stock-type/stock-type.repository';
+import webhookEmitter from '../../webhook/webhook.emitter';
 import {
     CreateOpnameRequest,
     UpdateOpnameRequest,
@@ -327,13 +328,19 @@ export const applyAdjustment = async (req: AuthenticatedRequest): Promise<ApplyA
 
             await opnameRepository.updateStatus(opnameId, OpnameStatus.APPLIED, transaction);
 
-            return items.length;
+            return items;
         });
+
+        // Webhook: notify stock changed for menu availability check
+        const changedIngredientIds = result.map((item) => item.ingredient_id);
+        if (changedIngredientIds.length > 0) {
+            webhookEmitter.emit('stock.changed', { ingredient_ids: changedIngredientIds });
+        }
 
         return {
             success: true,
             message: 'Adjustment berhasil diaplikasikan',
-            adjustments_count: result,
+            adjustments_count: result.length,
         };
     } catch (error) {
         console.error(`--- Opname Service Error: ${(error as Error).message}`);

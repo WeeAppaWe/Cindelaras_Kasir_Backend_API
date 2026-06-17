@@ -7,6 +7,7 @@ import { getMetadataInfo } from '../../../utility/metadata-info.utility';
 import { AuthenticatedRequest } from '../../../types';
 import inventoryRepository from './inventory.repository';
 import stockTypeRepository from '../stock-type/stock-type.repository';
+import webhookEmitter from '../../webhook/webhook.emitter';
 import {
     StockInRequest,
     StockOutRequest,
@@ -164,6 +165,9 @@ export const stockIn = async (req: AuthenticatedRequest): Promise<StockMovementW
             return movement;
         });
 
+        // Webhook: notify stock changed for menu availability check
+        webhookEmitter.emit('stock.changed', { ingredient_ids: [body.ingredient_id] });
+
         // Fetch complete data with relations
         const fullMovement = await inventoryRepository.findById(result.stock_movement_id);
         return fullMovement!;
@@ -253,6 +257,9 @@ export const stockOut = async (req: AuthenticatedRequest): Promise<StockMovement
 
             return movement;
         });
+
+        // Webhook: notify stock changed for menu availability check
+        webhookEmitter.emit('stock.changed', { ingredient_ids: [body.ingredient_id] });
 
         // Fetch complete data with relations
         const fullMovement = await inventoryRepository.findById(result.stock_movement_id);

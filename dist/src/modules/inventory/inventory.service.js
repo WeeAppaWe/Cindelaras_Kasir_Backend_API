@@ -12,6 +12,7 @@ const cost_calculation_utility_1 = require("../../../utility/cost-calculation.ut
 const metadata_info_utility_1 = require("../../../utility/metadata-info.utility");
 const inventory_repository_1 = __importDefault(require("./inventory.repository"));
 const stock_type_repository_1 = __importDefault(require("../stock-type/stock-type.repository"));
+const webhook_emitter_1 = __importDefault(require("../../webhook/webhook.emitter"));
 const stock_type_schema_1 = require("../stock-type/stock-type.schema");
 const prisma = (0, postgres_connection_1.default)();
 /**
@@ -135,6 +136,8 @@ const stockIn = async (req) => {
             }, transaction);
             return movement;
         });
+        // Webhook: notify stock changed for menu availability check
+        webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: [body.ingredient_id] });
         // Fetch complete data with relations
         const fullMovement = await inventory_repository_1.default.findById(result.stock_movement_id);
         return fullMovement;
@@ -213,6 +216,8 @@ const stockOut = async (req) => {
             }, transaction);
             return movement;
         });
+        // Webhook: notify stock changed for menu availability check
+        webhook_emitter_1.default.emit('stock.changed', { ingredient_ids: [body.ingredient_id] });
         // Fetch complete data with relations
         const fullMovement = await inventory_repository_1.default.findById(result.stock_movement_id);
         return fullMovement;
