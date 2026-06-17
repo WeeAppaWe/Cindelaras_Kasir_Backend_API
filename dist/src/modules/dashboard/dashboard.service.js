@@ -181,13 +181,12 @@ const getSalesTrend = async (req) => {
 };
 exports.getSalesTrend = getSalesTrend;
 /**
- * Get top 5 best-selling menus for a given day
+ * Get top 5 best-selling menus for all-time
  * Ordered by qty_sold descending — ties broken by revenue descending (handled by DB)
  */
-const getTopMenus = async (req) => {
+const getTopMenus = async (_req) => {
     try {
-        const targetDate = req.query.date || getTodayDateStr();
-        const rows = await dashboard_repository_1.default.getTopMenus(targetDate);
+        const rows = await dashboard_repository_1.default.getTopMenus();
         const items = rows.map((row, index) => ({
             rank: index + 1,
             menu_id: row.menu_id,
@@ -198,7 +197,7 @@ const getTopMenus = async (req) => {
             margin_percentage: calcMenuMargin(row.price, row.cost),
         }));
         return {
-            date: targetDate,
+            date: 'Sepanjang Masa',
             total_items: items.length,
             items,
         };

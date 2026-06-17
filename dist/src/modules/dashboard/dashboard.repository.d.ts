@@ -14,11 +14,11 @@ export declare const getLowStockCount: () => Promise<number>;
  */
 export declare const getSalesTrend: (startDate: string, endDate: string) => Promise<SalesTrendRow[]>;
 /**
- * Get top 5 menus by qty_sold for a given day
+ * Get top 5 menus by qty_sold for all-time
  * Returns menu_id, name, category, qty_sold, revenue, price, cost
  * price and cost are passed through so service can compute margin_percentage
  */
-export declare const getTopMenus: (dateStr: string) => Promise<TopMenuRow[]>;
+export declare const getTopMenus: () => Promise<TopMenuRow[]>;
 /**
  * Get stock status counts grouped by AMAN / MENIPIS / KRITIS
  *
@@ -40,7 +40,7 @@ export declare const dashboardRepository: {
     getDailyOrderSummary: (dateStr: string) => Promise<DailyOrderSummary>;
     getLowStockCount: () => Promise<number>;
     getSalesTrend: (startDate: string, endDate: string) => Promise<SalesTrendRow[]>;
-    getTopMenus: (dateStr: string) => Promise<TopMenuRow[]>;
+    getTopMenus: () => Promise<TopMenuRow[]>;
     getStockStatusCounts: () => Promise<StockStatusRow[]>;
     getRecentStockMovements: () => Promise<RecentStockMovementRow[]>;
 };

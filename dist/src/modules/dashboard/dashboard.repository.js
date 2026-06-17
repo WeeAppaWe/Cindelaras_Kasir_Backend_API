@@ -120,13 +120,12 @@ const getSalesTrend = async (startDate, endDate) => {
 };
 exports.getSalesTrend = getSalesTrend;
 /**
- * Get top 5 menus by qty_sold for a given day
+ * Get top 5 menus by qty_sold for all-time
  * Returns menu_id, name, category, qty_sold, revenue, price, cost
  * price and cost are passed through so service can compute margin_percentage
  */
-const getTopMenus = async (dateStr) => {
+const getTopMenus = async () => {
     try {
-        const { start, end } = buildDayRange(dateStr);
         const rows = await prisma.$queryRaw `
             SELECT
                 m.menu_id,
@@ -143,8 +142,6 @@ const getTopMenus = async (dateStr) => {
             WHERE o.status     = 'COMPLETED'
               AND o.deleted_at IS NULL
               AND oi.deleted_at IS NULL
-              AND o.created_at >= ${start}
-              AND o.created_at <= ${end}
             GROUP BY m.menu_id, m.name, c.name, m.price, m.cost
             ORDER BY qty_sold DESC
             LIMIT 5

@@ -10,10 +10,10 @@ export declare const getKPI: (req: AuthenticatedRequest) => Promise<DashboardKPI
  */
 export declare const getSalesTrend: (req: AuthenticatedRequest) => Promise<DashboardSalesTrendResponse>;
 /**
- * Get top 5 best-selling menus for a given day
+ * Get top 5 best-selling menus for all-time
  * Ordered by qty_sold descending — ties broken by revenue descending (handled by DB)
  */
-export declare const getTopMenus: (req: AuthenticatedRequest) => Promise<DashboardTopMenusResponse>;
+export declare const getTopMenus: (_req: AuthenticatedRequest) => Promise<DashboardTopMenusResponse>;
 /**
  * Get stock status distribution for radial chart
  * Categories: AMAN (>=min_stock), MENIPIS (>0 & <min_stock), KRITIS (<=0)
@@ -29,7 +29,7 @@ export declare const getRecentStockMovements: () => Promise<DashboardRecentStock
 export declare const dashboardService: {
     getKPI: (req: AuthenticatedRequest) => Promise<DashboardKPIResponse>;
     getSalesTrend: (req: AuthenticatedRequest) => Promise<DashboardSalesTrendResponse>;
-    getTopMenus: (req: AuthenticatedRequest) => Promise<DashboardTopMenusResponse>;
+    getTopMenus: (_req: AuthenticatedRequest) => Promise<DashboardTopMenusResponse>;
     getStockStatus: () => Promise<DashboardStockStatusResponse>;
     getRecentStockMovements: () => Promise<DashboardRecentStockMovementsResponse>;
 };
