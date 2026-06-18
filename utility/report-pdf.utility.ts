@@ -195,26 +195,28 @@ export const generateReportPdf = async (
                 let x = PAGE_MARGIN;
 
                 ensureSpace(54);
+                let currentY = doc.y;
 
                 metrics.forEach((metric, index) => {
                     if (index > 0 && index % columns === 0) {
-                        doc.y += 62;
+                        currentY += 62;
                         x = PAGE_MARGIN;
+                        doc.y = currentY;
                         ensureSpace(54);
+                        currentY = doc.y;
                     }
 
-                    const y = doc.y;
-                    doc.roundedRect(x, y, cardWidth, 52, 6).fillAndStroke('#F8FAFC', '#E5E7EB');
+                    doc.roundedRect(x, currentY, cardWidth, 52, 6).fillAndStroke('#F8FAFC', '#E5E7EB');
                     doc
                         .font('Helvetica')
                         .fontSize(7)
                         .fillColor('#6B7280')
-                        .text(metric.label, x + 10, y + 10, { width: cardWidth - 20 });
+                        .text(metric.label, x + 10, currentY + 10, { width: cardWidth - 20 });
                     doc
                         .font('Helvetica-Bold')
                         .fontSize(12)
                         .fillColor('#111827')
-                        .text(formatValue(metric.value, metric.format), x + 10, y + 26, {
+                        .text(formatValue(metric.value, metric.format), x + 10, currentY + 26, {
                             width: cardWidth - 20,
                             ellipsis: true,
                         });
@@ -222,7 +224,7 @@ export const generateReportPdf = async (
                     x += cardWidth + gap;
                 });
 
-                doc.y += 68;
+                doc.y = currentY + 68;
             };
 
             const drawMetadata = (metrics: ReportExportMetric[] = []): void => {
