@@ -1,4 +1,4 @@
-import { IngredientData, IngredientSupplier } from './spk.types';
+import { IngredientData, IngredientSupplier, IngredientCompositionData } from './spk.types';
 /**
  * Ambil semua order items dalam periode tertentu dengan data recipe explosion
  * untuk menghitung pemakaian bahan per hari
@@ -85,6 +85,11 @@ export declare const getAllIngredients: (ingredientType?: "raw" | "semi" | "all"
  * Ambil supplier terakhir untuk setiap ingredient dari stock movements
  */
 export declare const getLastSupplierForIngredients: (ingredientIds: string[]) => Promise<IngredientSupplier[] | undefined>;
+/**
+ * Ambil semua komposisi bahan (Bill of Materials)
+ * untuk recursive recipe explosion pada SPK
+ */
+export declare const getAllIngredientCompositions: () => Promise<IngredientCompositionData[] | undefined>;
 export declare const spkRepository: {
     getOrderItemsWithRecipes: (startDate: Date, endDate: Date) => Promise<({
         order_items: ({
@@ -161,6 +166,7 @@ export declare const spkRepository: {
         order_type: string;
     })[]>;
     getAllIngredients: (ingredientType?: "raw" | "semi" | "all" | null) => Promise<IngredientData[] | undefined>;
+    getAllIngredientCompositions: () => Promise<IngredientCompositionData[] | undefined>;
     getLastSupplierForIngredients: (ingredientIds: string[]) => Promise<IngredientSupplier[] | undefined>;
 };
 export default spkRepository;

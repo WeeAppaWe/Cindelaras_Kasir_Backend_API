@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.spkRepository = exports.getLastSupplierForIngredients = exports.getAllIngredients = exports.getOrderItemsWithRecipes = void 0;
+exports.spkRepository = exports.getAllIngredientCompositions = exports.getLastSupplierForIngredients = exports.getAllIngredients = exports.getOrderItemsWithRecipes = void 0;
 const postgres_connection_1 = __importDefault(require("../../../database/postgres.connection"));
 const prisma_error_handler_utility_1 = require("../../../utility/prisma-error-handler.utility");
 const prisma = (0, postgres_connection_1.default)();
@@ -137,11 +137,38 @@ const getLastSupplierForIngredients = async (ingredientIds) => {
 };
 exports.getLastSupplierForIngredients = getLastSupplierForIngredients;
 // ============================================
+// GET ALL INGREDIENT COMPOSITIONS (BOM)
+// ============================================
+/**
+ * Ambil semua komposisi bahan (Bill of Materials)
+ * untuk recursive recipe explosion pada SPK
+ */
+const getAllIngredientCompositions = async () => {
+    try {
+        const compositions = await prisma.ingredientComposition.findMany({
+            where: {
+                deleted_at: null,
+            },
+        });
+        return compositions.map(c => ({
+            parent_id: c.parent_id,
+            child_id: c.child_id,
+            qty_needed: Number(c.qty_needed),
+        }));
+    }
+    catch (error) {
+        console.error('--- SPK Repository Error:', error);
+        (0, prisma_error_handler_utility_1.handlePrismaError)(error);
+    }
+};
+exports.getAllIngredientCompositions = getAllIngredientCompositions;
+// ============================================
 // EXPORT REPOSITORY
 // ============================================
 exports.spkRepository = {
     getOrderItemsWithRecipes: exports.getOrderItemsWithRecipes,
     getAllIngredients: exports.getAllIngredients,
+    getAllIngredientCompositions: exports.getAllIngredientCompositions,
     getLastSupplierForIngredients: exports.getLastSupplierForIngredients,
 };
 exports.default = exports.spkRepository;
