@@ -11,6 +11,7 @@ import {
     SPKAnalysisResponse,
     IngredientData,
     IngredientSupplier,
+    IngredientCompositionData,
 } from './spk.types';
 
 // ============================================
@@ -36,6 +37,57 @@ const generateDateRange = (startDate: Date, endDate: Date): string[] => {
     }
 
     return dates;
+};
+
+/**
+ * Recursive recipe explosion (BOM - Bill of Materials)
+ * Membongkar bahan setengah jadi menjadi bahan mentah penyusunnya.
+ * Jika bahan tidak memiliki komposisi (child), maka bahan tersebut
+ * dianggap sebagai bahan dasar dan dikembalikan langsung.
+ *
+ * @param ingredientId - ID bahan yang akan dibongkar
+ * @param qty - Jumlah bahan yang dibutuhkan
+ * @param compositionsMap - Map parent_id -> list of children compositions
+ * @param visited - Set untuk mendeteksi circular reference
+ * @param depth - Kedalaman rekursi saat ini (max 10)
+ * @returns Array of { ingredientId, qty } bahan dasar
+ */
+const explodeIngredient = (
+    ingredientId: string,
+    qty: number,
+    compositionsMap: Map<string, IngredientCompositionData[]>,
+    visited: Set<string> = new Set(),
+    depth: number = 0
+): { ingredientId: string; qty: number }[] => {
+    // Safety: prevent infinite loops from circular references
+    if (visited.has(ingredientId) || depth > 10) {
+        return [{ ingredientId, qty }];
+    }
+
+    const children = compositionsMap.get(ingredientId);
+
+    // Jika tidak punya komposisi anak, ini adalah bahan dasar
+    if (!children || children.length === 0) {
+        return [{ ingredientId, qty }];
+    }
+
+    // Bongkar ke bahan anak dengan mengalikan qty
+    visited.add(ingredientId);
+    const results: { ingredientId: string; qty: number }[] = [];
+
+    for (const child of children) {
+        const childQty = qty * child.qty_needed;
+        const exploded = explodeIngredient(
+            child.child_id,
+            childQty,
+            compositionsMap,
+            new Set(visited),
+            depth + 1
+        );
+        results.push(...exploded);
+    }
+
+    return results;
 };
 
 // ============================================
@@ -73,6 +125,31 @@ const calculateForecasts = async (
         return new Map();
     }
 
+    // Get all ingredient compositions for BOM explosion
+    const compositions = await spkRepository.getAllIngredientCompositions();
+    const compositionsMap = new Map<string, IngredientCompositionData[]>();
+    if (compositions) {
+        for (const comp of compositions) {
+            if (!compositionsMap.has(comp.parent_id)) {
+                compositionsMap.set(comp.parent_id, []);
+            }
+            compositionsMap.get(comp.parent_id)!.push(comp);
+        }
+    }
+
+    // Get all ingredients for info lookup (we need info of exploded children too)
+    const allIngredientsForInfo = await spkRepository.getAllIngredients('all');
+    const allIngredientInfoMap = new Map<string, { name: string; type: string; unit_name: string }>();
+    if (allIngredientsForInfo) {
+        for (const ing of allIngredientsForInfo) {
+            allIngredientInfoMap.set(ing.ingredient_id, {
+                name: ing.name,
+                type: ing.type,
+                unit_name: ing.unit_name,
+            });
+        }
+    }
+
     // Generate all dates in range
     const allDates = generateDateRange(startDate, endDate);
 
@@ -87,32 +164,46 @@ const calculateForecasts = async (
             const menuQty = orderItem.qty;
 
             for (const recipe of orderItem.menu.recipes) {
-                const ingredientId = recipe.ingredient_id;
+                const recipeIngredientId = recipe.ingredient_id;
                 const usageQty = Number(recipe.qty_needed) * menuQty;
-                const ingredient = recipe.ingredient;
 
-                // Filter by ingredient type if specified
-                if (ingredientType && ingredientType !== 'all' && ingredient.type.toUpperCase() !== ingredientType.toUpperCase()) {
-                    continue;
+                // Recursive BOM explosion: decompose semi-finished into raw materials
+                const explodedIngredients = explodeIngredient(
+                    recipeIngredientId,
+                    usageQty,
+                    compositionsMap
+                );
+
+                for (const exploded of explodedIngredients) {
+                    const ingredientId = exploded.ingredientId;
+
+                    // Get ingredient info from the pre-fetched map
+                    const ingredientInfo = allIngredientInfoMap.get(ingredientId);
+                    if (!ingredientInfo) continue;
+
+                    // Filter by ingredient type if specified
+                    if (ingredientType && ingredientType !== 'all' && ingredientInfo.type.toUpperCase() !== ingredientType.toUpperCase()) {
+                        continue;
+                    }
+
+                    // Store ingredient info
+                    if (!ingredientInfoMap.has(ingredientId)) {
+                        ingredientInfoMap.set(ingredientId, {
+                            name: ingredientInfo.name,
+                            type: ingredientInfo.type,
+                            unit: ingredientInfo.unit_name,
+                        });
+                    }
+
+                    // Accumulate daily usage
+                    if (!ingredientUsageMap.has(ingredientId)) {
+                        ingredientUsageMap.set(ingredientId, new Map());
+                    }
+
+                    const dateUsageMap = ingredientUsageMap.get(ingredientId)!;
+                    const currentUsage = dateUsageMap.get(orderDate) || 0;
+                    dateUsageMap.set(orderDate, currentUsage + exploded.qty);
                 }
-
-                // Store ingredient info
-                if (!ingredientInfoMap.has(ingredientId)) {
-                    ingredientInfoMap.set(ingredientId, {
-                        name: ingredient.name,
-                        type: ingredient.type,
-                        unit: ingredient.unit.name,
-                    });
-                }
-
-                // Accumulate daily usage
-                if (!ingredientUsageMap.has(ingredientId)) {
-                    ingredientUsageMap.set(ingredientId, new Map());
-                }
-
-                const dateUsageMap = ingredientUsageMap.get(ingredientId)!;
-                const currentUsage = dateUsageMap.get(orderDate) || 0;
-                dateUsageMap.set(orderDate, currentUsage + usageQty);
             }
         }
     }

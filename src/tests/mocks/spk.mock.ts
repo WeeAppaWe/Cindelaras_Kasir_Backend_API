@@ -196,3 +196,111 @@ export const expectedTelurWMA = 700 / 15; // ~46.67 butir/day
 // For 7 days target with 10% buffer:
 // Beras: (4.67 * 7) * 1.10 = 35.97 - 15 (current) = 20.97 -> ceil = 21
 // Telur: (46.67 * 7) * 1.10 = 359.37 - 50 (current) = 309.37 -> ceil = 310
+
+// ============================================
+// MOCK DATA FOR RECURSIVE BOM EXPLOSION
+// ============================================
+
+/**
+ * Scenario: Menu "Nasi Goreng Spesial" uses "Bumbu Racik" (semi-finished).
+ * "Bumbu Racik" is composed of:
+ *   - Bawang Merah (raw) - 0.1 kg per unit
+ *   - Cabai (raw) - 0.05 kg per unit
+ *
+ * So when a menu uses 1 unit of "Bumbu Racik",
+ * the system should decompose it into 0.1 kg Bawang Merah + 0.05 kg Cabai.
+ */
+
+export const mockIngredientBawangMerah = {
+    ingredient_id: 'ing-004',
+    name: 'Bawang Merah',
+    type: 'RAW',
+    stock_qty: 3,
+    min_stock: 2,
+    avg_cost: 30000,
+    deleted_at: null,
+    unit: mockUnitKg,
+};
+
+export const mockIngredientCabai = {
+    ingredient_id: 'ing-005',
+    name: 'Cabai',
+    type: 'RAW',
+    stock_qty: 1,
+    min_stock: 1,
+    avg_cost: 40000,
+    deleted_at: null,
+    unit: mockUnitKg,
+};
+
+// Menu that uses semi-finished ingredient
+export const mockRecipeBumbuRacik = {
+    recipe_id: 'recipe-003',
+    menu_id: 'menu-002',
+    ingredient_id: 'ing-003', // Bumbu Racik (semi)
+    qty_needed: 0.5, // 0.5 kg per porsi
+    deleted_at: null,
+    ingredient: mockIngredientBumbu,
+};
+
+export const mockMenuWithSemi = {
+    menu_id: 'menu-002',
+    name: 'Nasi Goreng Spesial',
+    deleted_at: null,
+    recipes: [mockRecipeBeras, mockRecipeBumbuRacik],
+};
+
+export const mockOrderItemWithSemi = {
+    order_item_id: 'item-002',
+    menu_id: 'menu-002',
+    qty: 10,
+    deleted_at: null,
+    menu: mockMenuWithSemi,
+};
+
+export const mockOrdersWithSemiIngredient = [
+    {
+        order_id: 'order-semi-001',
+        created_at: new Date('2026-01-01T10:00:00Z'),
+        status: 'COMPLETED',
+        deleted_at: null,
+        order_items: [{ ...mockOrderItemWithSemi, qty: 10 }],
+    },
+];
+
+// BOM Compositions: Bumbu Racik -> Bawang Merah (0.1) + Cabai (0.05)
+export const mockIngredientCompositions = [
+    {
+        parent_id: 'ing-003', // Bumbu Racik (semi)
+        child_id: 'ing-004',  // Bawang Merah (raw)
+        qty_needed: 0.1,
+    },
+    {
+        parent_id: 'ing-003', // Bumbu Racik (semi)
+        child_id: 'ing-005',  // Cabai (raw)
+        qty_needed: 0.05,
+    },
+];
+
+// All ingredients including raw children for info lookup
+export const mockAllIngredientsWithChildren = [
+    ...mockAllIngredients,
+    {
+        ingredient_id: 'ing-004',
+        name: 'Bawang Merah',
+        type: 'RAW',
+        stock_qty: 3,
+        min_stock: 2,
+        avg_cost: 30000,
+        unit_name: 'Kg',
+    },
+    {
+        ingredient_id: 'ing-005',
+        name: 'Cabai',
+        type: 'RAW',
+        stock_qty: 1,
+        min_stock: 1,
+        avg_cost: 40000,
+        unit_name: 'Kg',
+    },
+];

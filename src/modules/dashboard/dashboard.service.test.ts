@@ -288,9 +288,9 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(mockTopMenuRows);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
-            expect(result.date).toBe('2024-06-15');
+            expect(result.date).toBe('Sepanjang Masa');
             expect(result.total_items).toBe(5);
             expect(result.items).toHaveLength(5);
         });
@@ -299,7 +299,7 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(mockTopMenuRows);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
             expect(result.items[0].rank).toBe(1);
             expect(result.items[1].rank).toBe(2);
@@ -310,7 +310,7 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(mockTopMenuRows);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
             expect(result.items[0].margin_percentage).toBe(expectedTopMenuItems[0].margin_percentage); // 42
             expect(result.items[1].margin_percentage).toBe(expectedTopMenuItems[1].margin_percentage); // 38
@@ -322,7 +322,7 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(mockTopMenuRows);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
             expect((result.items[0] as any).price).toBeUndefined();
             expect((result.items[0] as any).cost).toBeUndefined();
@@ -333,7 +333,7 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(zeroPrice);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
             expect(result.items[0].margin_percentage).toBe(0);
         });
@@ -342,35 +342,26 @@ describe('Dashboard Service', () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue([]);
 
-            const result = await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            const result = await getTopMenus(mockRequest());
 
             expect(result.total_items).toBe(0);
             expect(result.items).toHaveLength(0);
         });
 
-        it('should use today\'s date when no date query param is provided', async () => {
-            (dashboardRepository.getTopMenus as jest.Mock)
-                .mockResolvedValue([]);
-
-            const result = await getTopMenus(mockRequest());
-
-            expect(result.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-        });
-
-        it('should call repository getTopMenus with correct date', async () => {
+        it('should call repository getTopMenus with no arguments', async () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockResolvedValue(mockTopMenuRows);
 
-            await getTopMenus(mockRequest({ date: '2024-06-15' }));
+            await getTopMenus(mockRequest());
 
-            expect(dashboardRepository.getTopMenus).toHaveBeenCalledWith('2024-06-15');
+            expect(dashboardRepository.getTopMenus).toHaveBeenCalledWith();
         });
 
         it('should propagate error from repository', async () => {
             (dashboardRepository.getTopMenus as jest.Mock)
                 .mockRejectedValue(new Error('Database error'));
 
-            await expect(getTopMenus(mockRequest({ date: '2024-06-15' })))
+            await expect(getTopMenus(mockRequest()))
                 .rejects
                 .toThrow('Database error');
         });

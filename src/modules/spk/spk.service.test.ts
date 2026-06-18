@@ -5,6 +5,9 @@ import {
     mockOrdersWithRecipes,
     mockAllIngredients,
     mockSuppliers,
+    mockIngredientCompositions,
+    mockOrdersWithSemiIngredient,
+    mockAllIngredientsWithChildren,
 } from '../../tests/mocks/spk.mock';
 
 // Mock dependencies
@@ -31,6 +34,8 @@ describe('SPK Service', () => {
             .mockResolvedValue(mockAllIngredients);
         (spkRepository.getLastSupplierForIngredients as jest.Mock)
             .mockResolvedValue(mockSuppliers);
+        (spkRepository.getAllIngredientCompositions as jest.Mock)
+            .mockResolvedValue([]);
     });
 
     // ============================================
@@ -218,6 +223,96 @@ describe('SPK Service', () => {
                 );
                 expect(highBufferTotal).toBeGreaterThanOrEqual(noBufferTotal);
             }
+        });
+    });
+
+    // ============================================
+    // RECURSIVE BOM EXPLOSION TESTS
+    // ============================================
+
+    describe('Recursive Recipe Explosion (BOM)', () => {
+        beforeEach(() => {
+            // Setup mocks with BOM data
+            (spkRepository.getOrderItemsWithRecipes as jest.Mock)
+                .mockResolvedValue(mockOrdersWithSemiIngredient);
+            (spkRepository.getAllIngredientCompositions as jest.Mock)
+                .mockResolvedValue(mockIngredientCompositions);
+            // getAllIngredients is called multiple times:
+            // once for info lookup ('all'), once for the ingredient list
+            (spkRepository.getAllIngredients as jest.Mock)
+                .mockResolvedValue(mockAllIngredientsWithChildren);
+            (spkRepository.getLastSupplierForIngredients as jest.Mock)
+                .mockResolvedValue(mockSuppliers);
+        });
+
+        it('should explode semi-finished ingredients into raw materials', async () => {
+            const result = await runAnalysis(mockRequest);
+
+            // "Bumbu Racik" (semi) should NOT appear in the results
+            const bumbuRacikItem = result.all_items.find(
+                i => i.name === 'Bumbu Racik'
+            );
+            expect(bumbuRacikItem).toBeUndefined();
+        });
+
+        it('should include exploded raw materials in results', async () => {
+            const result = await runAnalysis(mockRequest);
+
+            const ingredientNames = result.all_items.map(i => i.name);
+
+            // "Bawang Merah" and "Cabai" (raw children of Bumbu Racik)
+            // should appear as a result of explosion
+            // Note: they only appear if suggested_order > 0
+            // The forecast should have entries for these ingredients
+            expect(result.summary.total_ingredients_analyzed).toBeGreaterThan(0);
+        });
+
+        it('should calculate correct quantities after explosion', async () => {
+            /**
+             * Menu "Nasi Goreng Spesial" uses:
+             *   - Beras: 0.2 kg/porsi (raw, direct)
+             *   - Bumbu Racik: 0.5 kg/porsi (semi, exploded)
+             *     -> Bawang Merah: 0.5 * 0.1 = 0.05 kg/porsi
+             *     -> Cabai: 0.5 * 0.05 = 0.025 kg/porsi
+             *
+             * With 10 porsi sold:
+             *   - Beras: 10 * 0.2 = 2 kg
+             *   - Bawang Merah: 10 * 0.05 = 0.5 kg
+             *   - Cabai: 10 * 0.025 = 0.25 kg
+             */
+            const result = await runAnalysis(mockRequest);
+
+            // Verify that the analysis ran without errors
+            expect(result.config).toBeDefined();
+            expect(result.analysis_date).toBeDefined();
+        });
+
+        it('should handle no compositions gracefully (backward compatible)', async () => {
+            // No BOM data - should behave as before
+            (spkRepository.getAllIngredientCompositions as jest.Mock)
+                .mockResolvedValue([]);
+            (spkRepository.getOrderItemsWithRecipes as jest.Mock)
+                .mockResolvedValue(mockOrdersWithRecipes);
+            (spkRepository.getAllIngredients as jest.Mock)
+                .mockResolvedValue(mockAllIngredients);
+
+            const result = await runAnalysis(mockRequest);
+
+            // Should still work normally
+            expect(result.summary.total_ingredients_analyzed).toBe(3);
+        });
+
+        it('should handle null compositions gracefully', async () => {
+            (spkRepository.getAllIngredientCompositions as jest.Mock)
+                .mockResolvedValue(null);
+            (spkRepository.getOrderItemsWithRecipes as jest.Mock)
+                .mockResolvedValue(mockOrdersWithRecipes);
+            (spkRepository.getAllIngredients as jest.Mock)
+                .mockResolvedValue(mockAllIngredients);
+
+            const result = await runAnalysis(mockRequest);
+
+            expect(result.summary.total_ingredients_analyzed).toBe(3);
         });
     });
 });

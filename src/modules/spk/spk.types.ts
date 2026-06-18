@@ -156,3 +156,13 @@ export interface IngredientSupplier {
     supplier_name: string;
     supplier_contact: string | null;
 }
+
+/**
+ * Ingredient composition data for recursive recipe explosion (BOM)
+ * Represents parent -> child relationship between ingredients
+ */
+export interface IngredientCompositionData {
+    parent_id: string;
+    child_id: string;
+    qty_needed: number;
+}

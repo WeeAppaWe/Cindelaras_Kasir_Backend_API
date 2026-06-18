@@ -1,6 +1,6 @@
 import getPrismaClient from '../../../database/postgres.connection';
 import { handlePrismaError } from '../../../utility/prisma-error-handler.utility';
-import { IngredientData, IngredientSupplier } from './spk.types';
+import { IngredientData, IngredientSupplier, IngredientCompositionData } from './spk.types';
 
 const prisma = getPrismaClient();
 
@@ -143,12 +143,40 @@ export const getLastSupplierForIngredients = async (
 };
 
 // ============================================
+// GET ALL INGREDIENT COMPOSITIONS (BOM)
+// ============================================
+
+/**
+ * Ambil semua komposisi bahan (Bill of Materials)
+ * untuk recursive recipe explosion pada SPK
+ */
+export const getAllIngredientCompositions = async (): Promise<IngredientCompositionData[] | undefined> => {
+    try {
+        const compositions = await prisma.ingredientComposition.findMany({
+            where: {
+                deleted_at: null,
+            },
+        });
+
+        return compositions.map(c => ({
+            parent_id: c.parent_id,
+            child_id: c.child_id,
+            qty_needed: Number(c.qty_needed),
+        }));
+    } catch (error) {
+        console.error('--- SPK Repository Error:', error);
+        handlePrismaError(error);
+    }
+};
+
+// ============================================
 // EXPORT REPOSITORY
 // ============================================
 
 export const spkRepository = {
     getOrderItemsWithRecipes,
     getAllIngredients,
+    getAllIngredientCompositions,
     getLastSupplierForIngredients,
 };
 
