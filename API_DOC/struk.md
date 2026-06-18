@@ -164,6 +164,7 @@ order_items.menu_id -> menus.menu_id
 | --- | --- | --- | --- |
 | `GET` | `/:order_id/pdf` | Public | Generate dan tampilkan/download PDF struk. |
 | `GET` | `/preview-sample` | ADMIN | Mengambil data contoh struk untuk preview konfigurasi toko/header/footer. |
+| `POST` | `/preview-pdf` | ADMIN | Menghasilkan PDF preview struk berdasarkan data pengaturan toko yang belum disimpan. |
 | `GET` | `/:order_id/preview` | ADMIN, CASHIER | Mengambil data struk dalam format JSON untuk preview. |
 | `POST` | `/:order_id/send` | ADMIN, CASHIER | Mengirim link struk PDF ke WhatsApp customer. |
 
@@ -432,6 +433,31 @@ Jika order tidak memiliki data customer, field customer bernilai `null`.
 
 ---
 
+### B. Preview Struk PDF dari Payload (Untuk Pengaturan Toko)
+
+Digunakan untuk men-_generate_ PDF yang sama persis formatnya dengan PDF ke WA, tapi datanya berasal dari halaman pengaturan toko yang belum disimpan.
+
+- **Endpoint:** `POST /preview-pdf`
+- **URL Lengkap:** `/api/receipt/preview-pdf`
+- **Tipe Response:** `application/pdf`
+- **Akses:** Admin (Token Bearer Diperlukan)
+
+**Request Body (JSON):**
+
+| Field | Tipe | Keterangan |
+| --- | --- | --- |
+| `store_name` | `string` | Nama toko |
+| `store_address` | `string` | Alamat toko |
+| `store_phone` | `string` | Nomor kontak |
+| `store_logo` | `string` | URL / path logo toko |
+| `receipt_header` | `string` | Teks header |
+| `receipt_footer` | `string` | Teks footer |
+
+**Response Sukses:**
+Mengembalikan file biner PDF secara langsung.
+
+---
+
 ## 4. Kirim Struk ke WhatsApp
 
 - **Endpoint:** `POST /:order_id/send`
@@ -665,6 +691,7 @@ Terjadi jika user tidak memiliki role **ADMIN** atau **CASHIER**.
 - `GET /api/receipt/:order_id/pdf` tidak membutuhkan auth, jadi aman dipakai sebagai link customer.
 - PDF selalu di-generate ulang dari data order saat link diakses.
 - `GET /api/receipt/preview-sample` khusus admin dan tidak membaca tabel order; endpoint ini memakai item transaksi contoh untuk melihat tampilan header/footer/logo toko.
+- `POST /api/receipt/preview-pdf` khusus admin untuk melihat file asli PDF dari *form* pengaturan.
 - `GET /api/receipt/:order_id/preview` cocok untuk preview internal aplikasi kasir.
 - `POST /api/receipt/:order_id/send` hanya mengirim link PDF, bukan file PDF langsung.
 - Base URL link WhatsApp mengikuti konfigurasi `API_BASE_URL`. Jika `API_BASE_URL` belum diakhiri `/api`, backend menambahkan `/api` otomatis.

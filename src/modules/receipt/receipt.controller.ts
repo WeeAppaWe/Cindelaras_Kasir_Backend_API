@@ -43,6 +43,18 @@ export const getPreviewSample = async (req: AuthenticatedRequest, res: Response,
 };
 
 /**
+ * Get Receipt Preview PDF
+ * POST /api/receipt/preview-pdf
+ */
+export const getPreviewPdf = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    await receiptService.getPreviewPdf(req, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Get Receipt Preview (JSON data)
  * GET /api/receipt/:order_id/preview
  */
@@ -60,6 +72,7 @@ export const receiptController = {
   sendReceipt,
   getPreviewSample,
   getReceiptPreview,
+  getPreviewPdf,
 };
 
 export default receiptController;

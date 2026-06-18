@@ -252,6 +252,7 @@ Source: `route/receipt.route.ts`
 | --- | --- | --- | --- |
 | `GET` | `/api/receipt/:order_id/pdf` | Public | Generate PDF struk on-demand. |
 | `GET` | `/api/receipt/preview-sample` | ADMIN | Ambil preview sample struk tanpa order. |
+| `POST` | `/api/receipt/preview-pdf` | ADMIN | Menghasilkan PDF preview struk dari data pengaturan toko. |
 | `GET` | `/api/receipt/:order_id/preview` | ADMIN, CASHIER | Ambil preview data struk. |
 | `POST` | `/api/receipt/:order_id/send` | ADMIN, CASHIER | Kirim struk ke WhatsApp. |
 

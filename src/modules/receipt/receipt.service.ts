@@ -268,6 +268,43 @@ export const getPreviewSample = async (): Promise<ReceiptDataForGenerator> => {
 };
 
 /**
+ * Generate sample PDF receipt for admin store-setting page preview.
+ * POST /api/receipt/preview-pdf
+ */
+export const getPreviewPdf = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const payload = req.body;
+    
+    // Normalize payload to fit StoreInfoForReceipt
+    const storeInfo: StoreInfoForReceipt = {
+      store_name: payload.store_name || 'Toko Anda',
+      store_address: payload.store_address || '',
+      store_phone: payload.store_phone || '',
+      store_logo: normalizeReceiptLogoValue(payload.store_logo || ''),
+      receipt_header: payload.receipt_header || '',
+      receipt_footer: payload.receipt_footer || '',
+    };
+
+    const receiptData = buildSampleReceiptData(storeInfo);
+    
+    // Generate PDF
+    const pdfBase64 = await generatePdfReceipt(receiptData);
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+
+    // Set response headers for PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="preview-struk.pdf"');
+    res.setHeader('Content-Length', pdfBuffer.length);
+
+    // Send PDF
+    res.send(pdfBuffer);
+  } catch (error) {
+    console.error(`--- Receipt Service Error: ${(error as Error).message}`);
+    throw error;
+  }
+};
+
+/**
  * Get receipt preview (JSON data for frontend display)
  * GET /api/receipt/:order_id/preview
  */
@@ -298,6 +335,7 @@ export const receiptService = {
   sendReceipt,
   getPreviewSample,
   getReceiptPreview,
+  getPreviewPdf,
 };
 
 export default receiptService;

@@ -26,10 +26,25 @@ export const sendReceiptSchema = z.object({
 export type OrderIdParam = z.infer<typeof orderIdParamSchema>;
 export type SendReceiptInput = z.infer<typeof sendReceiptSchema>;
 
+/**
+ * Preview PDF request schema
+ */
+export const previewPdfSchema = z.object({
+  store_name: z.string().default(''),
+  store_address: z.string().default(''),
+  store_phone: z.string().default(''),
+  store_logo: z.string().default(''),
+  receipt_header: z.string().default(''),
+  receipt_footer: z.string().default(''),
+});
+
+export type PreviewPdfInput = z.infer<typeof previewPdfSchema>;
+
 // Export schemas
 export const receiptSchemas = {
   orderIdParam: orderIdParamSchema,
   sendReceipt: sendReceiptSchema,
+  previewPdf: previewPdfSchema,
 };
 
 export default receiptSchemas;

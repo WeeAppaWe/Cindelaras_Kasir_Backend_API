@@ -18,6 +18,11 @@ export declare const sendReceipt: (req: AuthenticatedRequest) => Promise<SendRec
  */
 export declare const getPreviewSample: () => Promise<ReceiptDataForGenerator>;
 /**
+ * Generate sample PDF receipt for admin store-setting page preview.
+ * POST /api/receipt/preview-pdf
+ */
+export declare const getPreviewPdf: (req: Request, res: Response) => Promise<void>;
+/**
  * Get receipt preview (JSON data for frontend display)
  * GET /api/receipt/:order_id/preview
  */
@@ -27,6 +32,7 @@ export declare const receiptService: {
     sendReceipt: (req: AuthenticatedRequest) => Promise<SendReceiptResponse>;
     getPreviewSample: () => Promise<ReceiptDataForGenerator>;
     getReceiptPreview: (req: AuthenticatedRequest) => Promise<ReceiptDataForGenerator>;
+    getPreviewPdf: (req: Request, res: Response) => Promise<void>;
 };
 export default receiptService;
 //# sourceMappingURL=receipt.service.d.ts.map

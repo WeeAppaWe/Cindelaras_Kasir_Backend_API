@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.receiptService = exports.getReceiptPreview = exports.getPreviewSample = exports.sendReceipt = exports.getPdfReceipt = void 0;
+exports.receiptService = exports.getReceiptPreview = exports.getPreviewPdf = exports.getPreviewSample = exports.sendReceipt = exports.getPdfReceipt = void 0;
 const error_not_found_exception_1 = require("../../../exception/error-not-found.exception");
 const error_validation_exception_1 = require("../../../exception/error-validation.exception");
 const receipt_repository_1 = __importDefault(require("./receipt.repository"));
@@ -233,6 +233,39 @@ const getPreviewSample = async () => {
 };
 exports.getPreviewSample = getPreviewSample;
 /**
+ * Generate sample PDF receipt for admin store-setting page preview.
+ * POST /api/receipt/preview-pdf
+ */
+const getPreviewPdf = async (req, res) => {
+    try {
+        const payload = req.body;
+        // Normalize payload to fit StoreInfoForReceipt
+        const storeInfo = {
+            store_name: payload.store_name || 'Toko Anda',
+            store_address: payload.store_address || '',
+            store_phone: payload.store_phone || '',
+            store_logo: (0, receipt_utility_1.normalizeReceiptLogoValue)(payload.store_logo || ''),
+            receipt_header: payload.receipt_header || '',
+            receipt_footer: payload.receipt_footer || '',
+        };
+        const receiptData = buildSampleReceiptData(storeInfo);
+        // Generate PDF
+        const pdfBase64 = await (0, receipt_utility_1.generatePdfReceipt)(receiptData);
+        const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+        // Set response headers for PDF
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'inline; filename="preview-struk.pdf"');
+        res.setHeader('Content-Length', pdfBuffer.length);
+        // Send PDF
+        res.send(pdfBuffer);
+    }
+    catch (error) {
+        console.error(`--- Receipt Service Error: ${error.message}`);
+        throw error;
+    }
+};
+exports.getPreviewPdf = getPreviewPdf;
+/**
  * Get receipt preview (JSON data for frontend display)
  * GET /api/receipt/:order_id/preview
  */
@@ -260,6 +293,7 @@ exports.receiptService = {
     sendReceipt: exports.sendReceipt,
     getPreviewSample: exports.getPreviewSample,
     getReceiptPreview: exports.getReceiptPreview,
+    getPreviewPdf: exports.getPreviewPdf,
 };
 exports.default = exports.receiptService;
 //# sourceMappingURL=receipt.service.js.map

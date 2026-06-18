@@ -17,6 +17,11 @@ export declare const sendReceipt: (req: AuthenticatedRequest, res: Response, nex
  */
 export declare const getPreviewSample: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
 /**
+ * Get Receipt Preview PDF
+ * POST /api/receipt/preview-pdf
+ */
+export declare const getPreviewPdf: (req: Request, res: Response, next: NextFunction) => Promise<void>;
+/**
  * Get Receipt Preview (JSON data)
  * GET /api/receipt/:order_id/preview
  */
@@ -26,6 +31,7 @@ export declare const receiptController: {
     sendReceipt: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     getPreviewSample: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
     getReceiptPreview: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Promise<void>;
+    getPreviewPdf: (req: Request, res: Response, next: NextFunction) => Promise<void>;
 };
 export default receiptController;
 //# sourceMappingURL=receipt.controller.d.ts.map

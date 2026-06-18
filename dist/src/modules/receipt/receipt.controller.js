@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.receiptController = exports.getReceiptPreview = exports.getPreviewSample = exports.sendReceipt = exports.getPdfReceipt = void 0;
+exports.receiptController = exports.getReceiptPreview = exports.getPreviewPdf = exports.getPreviewSample = exports.sendReceipt = exports.getPdfReceipt = void 0;
 const receipt_service_1 = __importDefault(require("./receipt.service"));
 const response_api_1 = __importDefault(require("../../../utility/response-api"));
 /**
@@ -49,6 +49,19 @@ const getPreviewSample = async (req, res, next) => {
 };
 exports.getPreviewSample = getPreviewSample;
 /**
+ * Get Receipt Preview PDF
+ * POST /api/receipt/preview-pdf
+ */
+const getPreviewPdf = async (req, res, next) => {
+    try {
+        await receipt_service_1.default.getPreviewPdf(req, res);
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getPreviewPdf = getPreviewPdf;
+/**
  * Get Receipt Preview (JSON data)
  * GET /api/receipt/:order_id/preview
  */
@@ -67,6 +80,7 @@ exports.receiptController = {
     sendReceipt: exports.sendReceipt,
     getPreviewSample: exports.getPreviewSample,
     getReceiptPreview: exports.getReceiptPreview,
+    getPreviewPdf: exports.getPreviewPdf,
 };
 exports.default = exports.receiptController;
 //# sourceMappingURL=receipt.controller.js.map

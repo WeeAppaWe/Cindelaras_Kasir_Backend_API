@@ -6,6 +6,7 @@ import { RoleName } from '../src/modules/auth/auth.schema';
 import {
   orderIdParamSchema,
   sendReceiptSchema,
+  previewPdfSchema,
 } from '../src/modules/receipt/receipt.schema';
 import receiptController from '../src/modules/receipt/receipt.controller';
 
@@ -26,6 +27,14 @@ router.get(
   `/${pathGroup}/preview-sample`,
   ...adminMiddleware,
   receiptController.getPreviewSample
+);
+
+// POST /api/receipt/preview-pdf - Generate sample PDF receipt for preview
+router.post(
+  `/${pathGroup}/preview-pdf`,
+  ...adminMiddleware,
+  zodValidation(previewPdfSchema),
+  receiptController.getPreviewPdf
 );
 
 // GET /api/receipt/:order_id/pdf - Generate PDF on-demand (PUBLIC - no auth)
