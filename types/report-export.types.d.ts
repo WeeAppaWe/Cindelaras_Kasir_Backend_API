@@ -71,10 +71,12 @@ export interface ReportPdfOptions {
     store_name?: string;
     page_size?: 'A4' | 'LETTER';
     orientation?: 'portrait' | 'landscape';
+    timezone?: string;
 }
 
 export interface ReportExcelOptions {
     file_name?: string;
     sheet_name?: string;
     store_name?: string;
+    timezone?: string;
 }

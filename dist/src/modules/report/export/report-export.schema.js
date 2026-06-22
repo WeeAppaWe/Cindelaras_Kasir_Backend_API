@@ -67,11 +67,13 @@ exports.reportPdfOptionsSchema = zod_1.z.object({
     store_name: zod_1.z.string().max(150).optional(),
     page_size: zod_1.z.enum(['A4', 'LETTER']).optional(),
     orientation: zod_1.z.enum(['portrait', 'landscape']).optional(),
+    timezone: zod_1.z.string().optional(),
 });
 exports.reportExcelOptionsSchema = zod_1.z.object({
     file_name: zod_1.z.string().min(1).max(120).optional(),
     sheet_name: zod_1.z.string().min(1).max(31).optional(),
     store_name: zod_1.z.string().max(150).optional(),
+    timezone: zod_1.z.string().optional(),
 });
 exports.exportReportPdfSchema = zod_1.z.object({
     data: exports.reportExportDataSchema,

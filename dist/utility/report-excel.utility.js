@@ -33,16 +33,17 @@ const escapeXml = (value) => {
         return entities[char];
     });
 };
-const formatDate = (value, withTime = false) => {
+const formatDate = (value, withTime = false, timezone) => {
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) {
         return String(value);
     }
+    const options = timezone ? { timeZone: timezone } : {};
     return withTime
-        ? date.toLocaleString('id-ID')
-        : date.toLocaleDateString('id-ID');
+        ? date.toLocaleString('id-ID', options)
+        : date.toLocaleDateString('id-ID', options);
 };
-const formatValue = (value, format = 'text') => {
+const formatValue = (value, format = 'text', timezone) => {
     if (value === null || value === undefined || value === '') {
         return '-';
     }
@@ -56,10 +57,10 @@ const formatValue = (value, format = 'text') => {
         return `${(0, format_money_utility_1.formatNumber)(Number(value))}%`;
     }
     if (format === 'date') {
-        return formatDate(value);
+        return formatDate(value, false, timezone);
     }
     if (format === 'datetime') {
-        return formatDate(value, true);
+        return formatDate(value, true, timezone);
     }
     if (format === 'boolean') {
         return value ? 'Ya' : 'Tidak';
@@ -70,8 +71,8 @@ const getFileName = (data, options) => {
     const baseName = options?.file_name || sanitizeFileName(data.title);
     return ensureExtension(baseName, '.xls');
 };
-const getGeneratedAt = (data) => {
-    return formatDate(data.generated_at || new Date(), true);
+const getGeneratedAt = (data, options) => {
+    return formatDate(data.generated_at || new Date(), true, options?.timezone);
 };
 const row = (cells) => {
     return `<Row>${cells.join('')}</Row>`;
@@ -80,13 +81,13 @@ const cell = (value, styleId = 'Default') => {
     return `<Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escapeXml(String(value ?? ''))}</Data></Cell>`;
 };
 const blankRow = () => '<Row/>';
-const metricRows = (metrics = []) => {
+const metricRows = (metrics = [], timezone) => {
     return metrics.map((metric) => row([
         cell(metric.label, 'Label'),
-        cell(formatValue(metric.value, metric.format), 'Value'),
+        cell(formatValue(metric.value, metric.format, timezone), 'Value'),
     ]));
 };
-const tableRows = (table) => {
+const tableRows = (table, timezone) => {
     const rows = [];
     if (table.title) {
         rows.push(row([cell(table.title, 'Section')]));
@@ -98,7 +99,7 @@ const tableRows = (table) => {
     }
     table.rows.forEach((item) => {
         rows.push(row(table.columns.map((column) => {
-            return cell(formatValue(item[column.key], column.format), 'TableCell');
+            return cell(formatValue(item[column.key], column.format, timezone), 'TableCell');
         })));
     });
     return rows;
@@ -113,29 +114,29 @@ const worksheetRows = (data, options) => {
     if (options?.store_name) {
         rows.push(row([cell('Nama Toko', 'Label'), cell(options.store_name, 'Value')]));
     }
-    rows.push(row([cell('Dibuat', 'Label'), cell(getGeneratedAt(data), 'Value')]));
+    rows.push(row([cell('Dibuat', 'Label'), cell(getGeneratedAt(data, options), 'Value')]));
     if (data.period) {
-        rows.push(row([cell('Periode Mulai', 'Label'), cell(formatValue(data.period.start_date, 'date'), 'Value')]), row([cell('Periode Selesai', 'Label'), cell(formatValue(data.period.end_date, 'date'), 'Value')]));
+        rows.push(row([cell('Periode Mulai', 'Label'), cell(formatValue(data.period.start_date, 'date', options?.timezone), 'Value')]), row([cell('Periode Selesai', 'Label'), cell(formatValue(data.period.end_date, 'date', options?.timezone), 'Value')]));
     }
     if (data.metadata?.length) {
-        rows.push(blankRow(), row([cell('Informasi Laporan', 'Section')]), ...metricRows(data.metadata));
+        rows.push(blankRow(), row([cell('Informasi Laporan', 'Section')]), ...metricRows(data.metadata, options?.timezone));
     }
     if (data.summaries?.length) {
-        rows.push(blankRow(), row([cell('Ringkasan', 'Section')]), ...metricRows(data.summaries));
+        rows.push(blankRow(), row([cell('Ringkasan', 'Section')]), ...metricRows(data.summaries, options?.timezone));
     }
     data.tables?.forEach((table) => {
-        rows.push(blankRow(), ...tableRows(table));
+        rows.push(blankRow(), ...tableRows(table, options?.timezone));
     });
     data.sections?.forEach((section) => {
         rows.push(blankRow(), row([cell(section.title, 'Section')]));
         if (section.summaries?.length) {
-            rows.push(...metricRows(section.summaries));
+            rows.push(...metricRows(section.summaries, options?.timezone));
         }
         section.notes?.forEach((note) => {
             rows.push(row([cell(note, 'Muted')]));
         });
         section.tables?.forEach((table) => {
-            rows.push(blankRow(), ...tableRows(table));
+            rows.push(blankRow(), ...tableRows(table, options?.timezone));
         });
     });
     return rows;

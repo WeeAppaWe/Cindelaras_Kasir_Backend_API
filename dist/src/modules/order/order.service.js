@@ -346,6 +346,7 @@ const getReceipt = async (req) => {
         const storeInfo = await getReceiptStoreInfo();
         // Build receipt data
         const orderDate = new Date(order.created_at);
+        const timezone = req.user?.timezone || 'Asia/Jakarta';
         const receiptData = {
             store_name: storeInfo.store_name,
             store_address: storeInfo.store_address,
@@ -355,8 +356,8 @@ const getReceipt = async (req) => {
             receipt_footer: storeInfo.receipt_footer,
             order_id: order.order_id,
             receipt: order.receipt,
-            order_date: orderDate.toLocaleDateString('id-ID'),
-            order_time: orderDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            order_date: orderDate.toLocaleDateString('id-ID', { timeZone: timezone }),
+            order_time: orderDate.toLocaleTimeString('id-ID', { timeZone: timezone, hour: '2-digit', minute: '2-digit' }),
             cashier_name: order.user.name,
             customer_name: order.customer_name,
             customer_phone: order.customer_phone,

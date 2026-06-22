@@ -46,19 +46,21 @@ const escapeXml = (value: string | number | boolean | null | undefined): string 
     });
 };
 
-const formatDate = (value: string | Date, withTime = false): string => {
+const formatDate = (value: string | Date, withTime = false, timezone?: string): string => {
     const date = value instanceof Date ? value : new Date(value);
 
     if (Number.isNaN(date.getTime())) {
         return String(value);
     }
 
+    const options: Intl.DateTimeFormatOptions = timezone ? { timeZone: timezone } : {};
+
     return withTime
-        ? date.toLocaleString('id-ID')
-        : date.toLocaleDateString('id-ID');
+        ? date.toLocaleString('id-ID', options)
+        : date.toLocaleDateString('id-ID', options);
 };
 
-const formatValue = (value: ReportExportPrimitive, format = 'text'): string => {
+const formatValue = (value: ReportExportPrimitive, format = 'text', timezone?: string): string => {
     if (value === null || value === undefined || value === '') {
         return '-';
     }
@@ -76,11 +78,11 @@ const formatValue = (value: ReportExportPrimitive, format = 'text'): string => {
     }
 
     if (format === 'date') {
-        return formatDate(value as string | Date);
+        return formatDate(value as string | Date, false, timezone);
     }
 
     if (format === 'datetime') {
-        return formatDate(value as string | Date, true);
+        return formatDate(value as string | Date, true, timezone);
     }
 
     if (format === 'boolean') {
@@ -96,8 +98,8 @@ const getFileName = (data: ReportExportData, options?: ReportExcelOptions): stri
     return ensureExtension(baseName, '.xls');
 };
 
-const getGeneratedAt = (data: ReportExportData): string => {
-    return formatDate(data.generated_at || new Date(), true);
+const getGeneratedAt = (data: ReportExportData, options?: ReportExcelOptions): string => {
+    return formatDate(data.generated_at || new Date(), true, options?.timezone);
 };
 
 const row = (cells: string[]): string => {
@@ -110,14 +112,14 @@ const cell = (value: ReportExportPrimitive, styleId = 'Default'): string => {
 
 const blankRow = (): string => '<Row/>';
 
-const metricRows = (metrics: ReportExportMetric[] = []): string[] => {
+const metricRows = (metrics: ReportExportMetric[] = [], timezone?: string): string[] => {
     return metrics.map((metric) => row([
         cell(metric.label, 'Label'),
-        cell(formatValue(metric.value, metric.format), 'Value'),
+        cell(formatValue(metric.value, metric.format, timezone), 'Value'),
     ]));
 };
 
-const tableRows = (table: ReportExportTable): string[] => {
+const tableRows = (table: ReportExportTable, timezone?: string): string[] => {
     const rows: string[] = [];
 
     if (table.title) {
@@ -133,7 +135,7 @@ const tableRows = (table: ReportExportTable): string[] => {
 
     table.rows.forEach((item) => {
         rows.push(row(table.columns.map((column) => {
-            return cell(formatValue(item[column.key], column.format), 'TableCell');
+            return cell(formatValue(item[column.key], column.format, timezone), 'TableCell');
         })));
     });
 
@@ -156,32 +158,32 @@ const worksheetRows = (
         rows.push(row([cell('Nama Toko', 'Label'), cell(options.store_name, 'Value')]));
     }
 
-    rows.push(row([cell('Dibuat', 'Label'), cell(getGeneratedAt(data), 'Value')]));
+    rows.push(row([cell('Dibuat', 'Label'), cell(getGeneratedAt(data, options), 'Value')]));
 
     if (data.period) {
         rows.push(
-            row([cell('Periode Mulai', 'Label'), cell(formatValue(data.period.start_date, 'date'), 'Value')]),
-            row([cell('Periode Selesai', 'Label'), cell(formatValue(data.period.end_date, 'date'), 'Value')])
+            row([cell('Periode Mulai', 'Label'), cell(formatValue(data.period.start_date, 'date', options?.timezone), 'Value')]),
+            row([cell('Periode Selesai', 'Label'), cell(formatValue(data.period.end_date, 'date', options?.timezone), 'Value')])
         );
     }
 
     if (data.metadata?.length) {
-        rows.push(blankRow(), row([cell('Informasi Laporan', 'Section')]), ...metricRows(data.metadata));
+        rows.push(blankRow(), row([cell('Informasi Laporan', 'Section')]), ...metricRows(data.metadata, options?.timezone));
     }
 
     if (data.summaries?.length) {
-        rows.push(blankRow(), row([cell('Ringkasan', 'Section')]), ...metricRows(data.summaries));
+        rows.push(blankRow(), row([cell('Ringkasan', 'Section')]), ...metricRows(data.summaries, options?.timezone));
     }
 
     data.tables?.forEach((table) => {
-        rows.push(blankRow(), ...tableRows(table));
+        rows.push(blankRow(), ...tableRows(table, options?.timezone));
     });
 
     data.sections?.forEach((section) => {
         rows.push(blankRow(), row([cell(section.title, 'Section')]));
 
         if (section.summaries?.length) {
-            rows.push(...metricRows(section.summaries));
+            rows.push(...metricRows(section.summaries, options?.timezone));
         }
 
         section.notes?.forEach((note) => {
@@ -189,7 +191,7 @@ const worksheetRows = (
         });
 
         section.tables?.forEach((table) => {
-            rows.push(blankRow(), ...tableRows(table));
+            rows.push(blankRow(), ...tableRows(table, options?.timezone));
         });
     });
 

@@ -75,12 +75,14 @@ export const reportPdfOptionsSchema = z.object({
     store_name: z.string().max(150).optional(),
     page_size: z.enum(['A4', 'LETTER']).optional(),
     orientation: z.enum(['portrait', 'landscape']).optional(),
+    timezone: z.string().optional(),
 });
 
 export const reportExcelOptionsSchema = z.object({
     file_name: z.string().min(1).max(120).optional(),
     sheet_name: z.string().min(1).max(31).optional(),
     store_name: z.string().max(150).optional(),
+    timezone: z.string().optional(),
 });
 
 export const exportReportPdfSchema = z.object({

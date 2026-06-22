@@ -114,11 +114,12 @@ const startShift = async (req) => {
         // Check if there's already an active shift
         const activeShift = await shift_repository_1.default.getActiveShift(metadata.account_id);
         if (activeShift) {
+            const timezone = req.user?.timezone || 'Asia/Jakarta';
             throw new error_validation_exception_1.ErrorValidationException('Masih ada shift aktif yang belum ditutup', [
                 {
                     location: 'system',
                     field: 'shift',
-                    message: `Shift aktif dimulai pada ${activeShift.start_time.toLocaleString('id-ID')}`,
+                    message: `Shift aktif dimulai pada ${activeShift.start_time.toLocaleString('id-ID', { timeZone: timezone })}`,
                 },
             ]);
         }

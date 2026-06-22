@@ -29,19 +29,21 @@ const ensureExtension = (fileName: string, extension: string): string => {
     return fileName.toLowerCase().endsWith(extension) ? fileName : `${fileName}${extension}`;
 };
 
-const formatDate = (value: string | Date, withTime = false): string => {
+const formatDate = (value: string | Date, withTime = false, timezone?: string): string => {
     const date = value instanceof Date ? value : new Date(value);
 
     if (Number.isNaN(date.getTime())) {
         return String(value);
     }
 
+    const options: Intl.DateTimeFormatOptions = timezone ? { timeZone: timezone } : {};
+
     return withTime
-        ? date.toLocaleString('id-ID')
-        : date.toLocaleDateString('id-ID');
+        ? date.toLocaleString('id-ID', options)
+        : date.toLocaleDateString('id-ID', options);
 };
 
-const formatValue = (value: ReportExportPrimitive, format = 'text'): string => {
+const formatValue = (value: ReportExportPrimitive, format = 'text', timezone?: string): string => {
     if (value === null || value === undefined || value === '') {
         return '-';
     }
@@ -59,11 +61,11 @@ const formatValue = (value: ReportExportPrimitive, format = 'text'): string => {
     }
 
     if (format === 'date') {
-        return formatDate(value as string | Date);
+        return formatDate(value as string | Date, false, timezone);
     }
 
     if (format === 'datetime') {
-        return formatDate(value as string | Date, true);
+        return formatDate(value as string | Date, true, timezone);
     }
 
     if (format === 'boolean') {
@@ -79,8 +81,8 @@ const getFileName = (data: ReportExportData, options?: ReportPdfOptions): string
     return ensureExtension(baseName, '.pdf');
 };
 
-const getGeneratedAt = (data: ReportExportData): string => {
-    return formatDate(data.generated_at || new Date(), true);
+const getGeneratedAt = (data: ReportExportData, options?: ReportPdfOptions): string => {
+    return formatDate(data.generated_at || new Date(), true, options?.timezone);
 };
 
 const getTableColumnWidths = (
@@ -176,7 +178,7 @@ export const generateReportPdf = async (
                         width: contentWidth * 0.38,
                         align: 'right',
                     })
-                    .text(`Dibuat: ${getGeneratedAt(data)}`, PAGE_MARGIN + contentWidth * 0.62, 36, {
+                    .text(`Dibuat: ${getGeneratedAt(data, options)}`, PAGE_MARGIN + contentWidth * 0.62, 36, {
                         width: contentWidth * 0.38,
                         align: 'right',
                     });
@@ -216,7 +218,7 @@ export const generateReportPdf = async (
                         .font('Helvetica-Bold')
                         .fontSize(12)
                         .fillColor('#111827')
-                        .text(formatValue(metric.value, metric.format), x + 10, currentY + 26, {
+                        .text(formatValue(metric.value, metric.format, options?.timezone), x + 10, currentY + 26, {
                             width: cardWidth - 20,
                             ellipsis: true,
                         });
@@ -262,7 +264,7 @@ export const generateReportPdf = async (
                         .font('Helvetica-Bold')
                         .fontSize(8)
                         .fillColor('#111827')
-                        .text(formatValue(item.value, item.format), PAGE_MARGIN + 140, rowY, {
+                        .text(formatValue(item.value, item.format, options?.timezone), PAGE_MARGIN + 140, rowY, {
                             width: contentWidth - 140,
                         });
                     doc.y = rowY + 15;
@@ -325,7 +327,7 @@ export const generateReportPdf = async (
                 }
 
                 table.rows.forEach((row, rowIndex) => {
-                    const cells = table.columns.map((column) => formatValue(row[column.key], column.format));
+                    const cells = table.columns.map((column) => formatValue(row[column.key], column.format, options?.timezone));
                     const rowHeight = Math.max(
                         24,
                         ...cells.map((cell, index) => {

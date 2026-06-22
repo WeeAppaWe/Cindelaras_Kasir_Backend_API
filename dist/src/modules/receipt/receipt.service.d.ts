@@ -16,7 +16,7 @@ export declare const sendReceipt: (req: AuthenticatedRequest) => Promise<SendRec
  * Get sample receipt preview data for admin store-setting page.
  * GET /api/receipt/preview-sample
  */
-export declare const getPreviewSample: () => Promise<ReceiptDataForGenerator>;
+export declare const getPreviewSample: (req?: Request) => Promise<ReceiptDataForGenerator>;
 /**
  * Generate sample PDF receipt for admin store-setting page preview.
  * POST /api/receipt/preview-pdf
@@ -30,7 +30,7 @@ export declare const getReceiptPreview: (req: AuthenticatedRequest) => Promise<R
 export declare const receiptService: {
     getPdfReceipt: (req: Request, res: Response) => Promise<void>;
     sendReceipt: (req: AuthenticatedRequest) => Promise<SendReceiptResponse>;
-    getPreviewSample: () => Promise<ReceiptDataForGenerator>;
+    getPreviewSample: (req?: Request) => Promise<ReceiptDataForGenerator>;
     getReceiptPreview: (req: AuthenticatedRequest) => Promise<ReceiptDataForGenerator>;
     getPreviewPdf: (req: Request, res: Response) => Promise<void>;
 };

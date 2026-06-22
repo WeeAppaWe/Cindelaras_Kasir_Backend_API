@@ -226,11 +226,13 @@ export declare const reportPdfOptionsSchema: z.ZodObject<{
         portrait: "portrait";
         landscape: "landscape";
     }>>;
+    timezone: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const reportExcelOptionsSchema: z.ZodObject<{
     file_name: z.ZodOptional<z.ZodString>;
     sheet_name: z.ZodOptional<z.ZodString>;
     store_name: z.ZodOptional<z.ZodString>;
+    timezone: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 export declare const exportReportPdfSchema: z.ZodObject<{
     data: z.ZodObject<{
@@ -344,6 +346,7 @@ export declare const exportReportPdfSchema: z.ZodObject<{
             portrait: "portrait";
             landscape: "landscape";
         }>>;
+        timezone: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
 export declare const exportReportExcelSchema: z.ZodObject<{
@@ -451,6 +454,7 @@ export declare const exportReportExcelSchema: z.ZodObject<{
         file_name: z.ZodOptional<z.ZodString>;
         sheet_name: z.ZodOptional<z.ZodString>;
         store_name: z.ZodOptional<z.ZodString>;
+        timezone: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
 }, z.core.$strip>;
 export type ExportReportPdfInput = z.infer<typeof exportReportPdfSchema>;
@@ -683,11 +687,13 @@ export declare const reportExportSchemas: {
             portrait: "portrait";
             landscape: "landscape";
         }>>;
+        timezone: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
     excelOptions: z.ZodObject<{
         file_name: z.ZodOptional<z.ZodString>;
         sheet_name: z.ZodOptional<z.ZodString>;
         store_name: z.ZodOptional<z.ZodString>;
+        timezone: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>;
     exportPdf: z.ZodObject<{
         data: z.ZodObject<{
@@ -801,6 +807,7 @@ export declare const reportExportSchemas: {
                 portrait: "portrait";
                 landscape: "landscape";
             }>>;
+            timezone: z.ZodOptional<z.ZodString>;
         }, z.core.$strip>>;
     }, z.core.$strip>;
     exportExcel: z.ZodObject<{
@@ -908,6 +915,7 @@ export declare const reportExportSchemas: {
             file_name: z.ZodOptional<z.ZodString>;
             sheet_name: z.ZodOptional<z.ZodString>;
             store_name: z.ZodOptional<z.ZodString>;
+            timezone: z.ZodOptional<z.ZodString>;
         }, z.core.$strip>>;
     }, z.core.$strip>;
 };

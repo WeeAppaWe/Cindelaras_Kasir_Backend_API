@@ -21,16 +21,17 @@ const sanitizeFileName = (value) => {
 const ensureExtension = (fileName, extension) => {
     return fileName.toLowerCase().endsWith(extension) ? fileName : `${fileName}${extension}`;
 };
-const formatDate = (value, withTime = false) => {
+const formatDate = (value, withTime = false, timezone) => {
     const date = value instanceof Date ? value : new Date(value);
     if (Number.isNaN(date.getTime())) {
         return String(value);
     }
+    const options = timezone ? { timeZone: timezone } : {};
     return withTime
-        ? date.toLocaleString('id-ID')
-        : date.toLocaleDateString('id-ID');
+        ? date.toLocaleString('id-ID', options)
+        : date.toLocaleDateString('id-ID', options);
 };
-const formatValue = (value, format = 'text') => {
+const formatValue = (value, format = 'text', timezone) => {
     if (value === null || value === undefined || value === '') {
         return '-';
     }
@@ -44,10 +45,10 @@ const formatValue = (value, format = 'text') => {
         return `${(0, format_money_utility_1.formatNumber)(Number(value))}%`;
     }
     if (format === 'date') {
-        return formatDate(value);
+        return formatDate(value, false, timezone);
     }
     if (format === 'datetime') {
-        return formatDate(value, true);
+        return formatDate(value, true, timezone);
     }
     if (format === 'boolean') {
         return value ? 'Ya' : 'Tidak';
@@ -58,8 +59,8 @@ const getFileName = (data, options) => {
     const baseName = options?.file_name || sanitizeFileName(data.title);
     return ensureExtension(baseName, '.pdf');
 };
-const getGeneratedAt = (data) => {
-    return formatDate(data.generated_at || new Date(), true);
+const getGeneratedAt = (data, options) => {
+    return formatDate(data.generated_at || new Date(), true, options?.timezone);
 };
 const getTableColumnWidths = (columns, availableWidth) => {
     const configuredTotal = columns.reduce((sum, column) => sum + (column.width || 0), 0);
@@ -133,7 +134,7 @@ const generateReportPdf = async (data, options) => {
                     width: contentWidth * 0.38,
                     align: 'right',
                 })
-                    .text(`Dibuat: ${getGeneratedAt(data)}`, PAGE_MARGIN + contentWidth * 0.62, 36, {
+                    .text(`Dibuat: ${getGeneratedAt(data, options)}`, PAGE_MARGIN + contentWidth * 0.62, 36, {
                     width: contentWidth * 0.38,
                     align: 'right',
                 });
@@ -167,7 +168,7 @@ const generateReportPdf = async (data, options) => {
                         .font('Helvetica-Bold')
                         .fontSize(12)
                         .fillColor('#111827')
-                        .text(formatValue(metric.value, metric.format), x + 10, currentY + 26, {
+                        .text(formatValue(metric.value, metric.format, options?.timezone), x + 10, currentY + 26, {
                         width: cardWidth - 20,
                         ellipsis: true,
                     });
@@ -202,7 +203,7 @@ const generateReportPdf = async (data, options) => {
                         .font('Helvetica-Bold')
                         .fontSize(8)
                         .fillColor('#111827')
-                        .text(formatValue(item.value, item.format), PAGE_MARGIN + 140, rowY, {
+                        .text(formatValue(item.value, item.format, options?.timezone), PAGE_MARGIN + 140, rowY, {
                         width: contentWidth - 140,
                     });
                     doc.y = rowY + 15;
@@ -256,7 +257,7 @@ const generateReportPdf = async (data, options) => {
                     return;
                 }
                 table.rows.forEach((row, rowIndex) => {
-                    const cells = table.columns.map((column) => formatValue(row[column.key], column.format));
+                    const cells = table.columns.map((column) => formatValue(row[column.key], column.format, options?.timezone));
                     const rowHeight = Math.max(24, ...cells.map((cell, index) => {
                         return doc.heightOfString(cell, {
                             width: columnWidths[index] - 10,

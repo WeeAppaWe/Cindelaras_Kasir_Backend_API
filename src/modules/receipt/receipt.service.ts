@@ -56,7 +56,7 @@ const getApiBaseUrl = (): string => {
 /**
  * Transform order data to receipt data format
  */
-const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoForReceipt): ReceiptDataForGenerator => {
+const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoForReceipt, timezone: string = 'Asia/Jakarta'): ReceiptDataForGenerator => {
   const orderDate = new Date(order.created_at);
 
   return {
@@ -69,11 +69,13 @@ const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoFor
     order_id: order.order_id,
     receipt: order.receipt,
     order_date: orderDate.toLocaleDateString('id-ID', {
+      timeZone: timezone,
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     }),
     order_time: orderDate.toLocaleTimeString('id-ID', {
+      timeZone: timezone,
       hour: '2-digit',
       minute: '2-digit',
     }),
@@ -94,7 +96,7 @@ const transformToReceiptData = (order: ReceiptOrderData, storeInfo: StoreInfoFor
   };
 };
 
-const buildSampleReceiptData = (storeInfo: StoreInfoForReceipt): ReceiptDataForGenerator => {
+const buildSampleReceiptData = (storeInfo: StoreInfoForReceipt, timezone: string = 'Asia/Jakarta'): ReceiptDataForGenerator => {
   const now = new Date();
   const items = [
     {
@@ -123,11 +125,13 @@ const buildSampleReceiptData = (storeInfo: StoreInfoForReceipt): ReceiptDataForG
     order_id: '00000000-0000-0000-0000-000000000000',
     receipt: 'PREVIEW-SAMPLE',
     order_date: now.toLocaleDateString('id-ID', {
+      timeZone: timezone,
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     }),
     order_time: now.toLocaleTimeString('id-ID', {
+      timeZone: timezone,
       hour: '2-digit',
       minute: '2-digit',
     }),
@@ -162,7 +166,8 @@ export const getPdfReceipt = async (req: Request, res: Response): Promise<void> 
     const storeInfo = await getStoreInfo();
 
     // Transform to receipt data format
-    const receiptData = transformToReceiptData(order, storeInfo);
+    const timezone = req.get('timezone') || 'Asia/Jakarta';
+    const receiptData = transformToReceiptData(order, storeInfo, timezone);
     const fileReceiptNumber = (receiptData.receipt || receiptData.order_id).replace(/[^a-zA-Z0-9-]/g, '');
 
     // Generate PDF
@@ -256,11 +261,12 @@ Terima kasih! 🙏`;
  * Get sample receipt preview data for admin store-setting page.
  * GET /api/receipt/preview-sample
  */
-export const getPreviewSample = async (): Promise<ReceiptDataForGenerator> => {
+export const getPreviewSample = async (req?: Request): Promise<ReceiptDataForGenerator> => {
   try {
     const storeInfo = await getStoreInfo();
+    const timezone = req?.get('timezone') || 'Asia/Jakarta';
 
-    return buildSampleReceiptData(storeInfo);
+    return buildSampleReceiptData(storeInfo, timezone);
   } catch (error) {
     console.error(`--- Receipt Service Error: ${(error as Error).message}`);
     throw error;
@@ -285,7 +291,8 @@ export const getPreviewPdf = async (req: Request, res: Response): Promise<void> 
       receipt_footer: payload.receipt_footer || '',
     };
 
-    const receiptData = buildSampleReceiptData(storeInfo);
+    const timezone = req.get('timezone') || 'Asia/Jakarta';
+    const receiptData = buildSampleReceiptData(storeInfo, timezone);
     
     // Generate PDF
     const pdfBase64 = await generatePdfReceipt(receiptData);
@@ -321,9 +328,10 @@ export const getReceiptPreview = async (req: AuthenticatedRequest): Promise<Rece
 
     // Get store info
     const storeInfo = await getStoreInfo();
+    const timezone = req.user?.timezone || 'Asia/Jakarta';
 
     // Transform to receipt data format
-    return transformToReceiptData(order, storeInfo);
+    return transformToReceiptData(order, storeInfo, timezone);
   } catch (error) {
     console.error(`--- Receipt Service Error: ${(error as Error).message}`);
     throw error;
