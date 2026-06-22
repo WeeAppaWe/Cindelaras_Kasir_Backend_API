@@ -451,7 +451,7 @@ export const produce = async (req: AuthenticatedRequest): Promise<ProduceSemiIng
                 },
             });
 
-            // c. Recalculate avg_cost bahan semi dengan target_yield = qty (jumlah unit yang diproduksi)
+            // c. Recalculate avg_cost bahan semi
             const recipeItems = ingredient.child_compositions.map((c: any) => ({
                 ingredient_id: c.child_id,
                 qty_needed: Number(c.qty_needed),
@@ -459,7 +459,7 @@ export const produce = async (req: AuthenticatedRequest): Promise<ProduceSemiIng
             }));
 
             const totalHPP = calculateHPP(recipeItems);
-            const newAvgCost = roundCurrency(totalHPP / body.qty);
+            const newAvgCost = roundCurrency(totalHPP);
 
             await semiIngredientRepository.updateAvgCost(ingredientId, newAvgCost, transaction);
         });
@@ -673,7 +673,7 @@ export const createAndProduce = async (req: AuthenticatedRequest): Promise<Creat
                 },
             });
 
-            // e. Hitung HPP: totalHPP = sum(qty_needed * avg_cost), newAvgCost = roundCurrency(totalHPP / qty)
+            // e. Hitung HPP: totalHPP = sum(qty_needed * avg_cost)
             const recipeItems = body.compositions.map((comp) => {
                 const ingredientData = ingredientMap.get(comp.child_id)!;
                 return {
@@ -684,7 +684,7 @@ export const createAndProduce = async (req: AuthenticatedRequest): Promise<Creat
             });
 
             const totalHPP = calculateHPP(recipeItems);
-            const newAvgCost = roundCurrency(totalHPP / body.qty);
+            const newAvgCost = roundCurrency(totalHPP);
 
             // f. Update avg_cost bahan semi
             await semiIngredientRepository.updateAvgCost(newIngredientId, newAvgCost, transaction);

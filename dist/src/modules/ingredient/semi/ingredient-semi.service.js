@@ -388,14 +388,14 @@ const produce = async (req) => {
                     notes: `[Hasil Produksi] ${body.notes || ''}`.trim(),
                 },
             });
-            // c. Recalculate avg_cost bahan semi dengan target_yield = qty (jumlah unit yang diproduksi)
+            // c. Recalculate avg_cost bahan semi
             const recipeItems = ingredient.child_compositions.map((c) => ({
                 ingredient_id: c.child_id,
                 qty_needed: Number(c.qty_needed),
                 avg_cost: Number(c.child_ingredient.avg_cost),
             }));
             const totalHPP = (0, cost_calculation_utility_1.calculateHPP)(recipeItems);
-            const newAvgCost = (0, cost_calculation_utility_1.roundCurrency)(totalHPP / body.qty);
+            const newAvgCost = (0, cost_calculation_utility_1.roundCurrency)(totalHPP);
             await ingredient_semi_repository_1.default.updateAvgCost(ingredientId, newAvgCost, transaction);
         });
         // Webhook: notify stock changed for menu availability check
@@ -577,7 +577,7 @@ const createAndProduce = async (req) => {
                     notes: `[Hasil Produksi] ${body.notes || ''}`.trim(),
                 },
             });
-            // e. Hitung HPP: totalHPP = sum(qty_needed * avg_cost), newAvgCost = roundCurrency(totalHPP / qty)
+            // e. Hitung HPP: totalHPP = sum(qty_needed * avg_cost)
             const recipeItems = body.compositions.map((comp) => {
                 const ingredientData = ingredientMap.get(comp.child_id);
                 return {
@@ -587,7 +587,7 @@ const createAndProduce = async (req) => {
                 };
             });
             const totalHPP = (0, cost_calculation_utility_1.calculateHPP)(recipeItems);
-            const newAvgCost = (0, cost_calculation_utility_1.roundCurrency)(totalHPP / body.qty);
+            const newAvgCost = (0, cost_calculation_utility_1.roundCurrency)(totalHPP);
             // f. Update avg_cost bahan semi
             await ingredient_semi_repository_1.default.updateAvgCost(newIngredientId, newAvgCost, transaction);
         });
